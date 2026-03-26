@@ -4,7 +4,6 @@ namespace CoyoteStudio.Core;
 
 public class AppCore : IDisposable
 {
-    private readonly WebSocketServer _server = new();
     private readonly CancellationTokenSource _tokenSource = new();
 
     public event Action<string>? ErrorOccurred;
@@ -24,7 +23,7 @@ public class AppCore : IDisposable
         {
             try
             {
-                await _server.RunAsync(port, _tokenSource.Token);
+                await WebSocketServer.Instance.RunAsync(port, _tokenSource.Token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
@@ -37,8 +36,7 @@ public class AppCore : IDisposable
     public void Dispose()
     {
         _tokenSource.Cancel();
-
-        _server.Dispose();
         _tokenSource.Dispose();
+        WebSocketServer.Instance.Dispose();
     }
 }

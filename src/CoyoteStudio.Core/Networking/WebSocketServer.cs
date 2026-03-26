@@ -12,6 +12,11 @@ internal static class ServerConstants
 
 internal class WebSocketServer
 {
+    private static WebSocketServer? _instance;
+
+    public static WebSocketServer Instance => _instance ??= new WebSocketServer();
+    private WebSocketServer() { }
+
     private HttpListener? _listener;
 
     public async Task RunAsync(int port, CancellationToken cts)
@@ -50,7 +55,7 @@ internal class WebSocketServer
         using var ws = wsContext.WebSocket;
         var buffer = new byte[ServerConstants.BufferSize];
 
-        while (ws.State == System.Net.WebSockets.WebSocketState.Open)
+        while (ws.State == WebSocketState.Open)
         {
             var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts);
 
