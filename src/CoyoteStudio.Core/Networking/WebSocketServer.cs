@@ -12,10 +12,9 @@ internal static class ServerConstants
 
 internal class WebSocketServer
 {
-    private static WebSocketServer? _instance;
-
-    public static WebSocketServer Instance => _instance ??= new WebSocketServer();
-    private WebSocketServer() { }
+    public WebSocketServer()
+    {
+    }
 
     private HttpListener? _listener;
 
@@ -34,7 +33,7 @@ internal class WebSocketServer
 
                 if (context.Request.IsWebSocketRequest)
                 {
-                    _ = HandleConnection(context, cts);
+                    _ = HandleConnectionAync(context, cts);
                 }
                 else
                 {
@@ -49,7 +48,7 @@ internal class WebSocketServer
         }
     }
 
-    private async Task HandleConnection(HttpListenerContext context, CancellationToken cts)
+    private async Task HandleConnectionAync(HttpListenerContext context, CancellationToken cts)
     {
         var wsContext = await context.AcceptWebSocketAsync(null);
         using var ws = wsContext.WebSocket;
@@ -65,9 +64,7 @@ internal class WebSocketServer
             }
 
             string received = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
         }
-
     }
 
     public void Dispose()

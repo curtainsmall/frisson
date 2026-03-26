@@ -11,6 +11,7 @@ public enum NavPage
 {
     // Top
     Home,
+
     Waves,
     Settings,
 

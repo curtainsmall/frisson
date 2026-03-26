@@ -1,4 +1,3 @@
-
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CoyoteStudio.App.ViewModels"
@@ -16,97 +15,95 @@
 
     <Window.Styles>
         <Style Selector="Button.nav-btn">
-            <Setter Property="Width" Value ="48"/>
-            <Setter Property="Height" Value="48"/>
-            <!--<Setter Property="CornerRadius" Value="12"/>-->
-            <Setter Property="Margin" Value="0.5"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value ="48" />
+            <Setter Property="Height" Value="48" />
+            <!--<Setter Property="CornerRadius" Value="12" />-->
+            <Setter Property="Margin" Value="0.5" />
+            <Setter Property="Padding" Value="0" />
 
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
 
-            <Setter Property="Background" Value="{DynamicResource Black}"/>
+            <Setter Property="Background" Value="{DynamicResource Black}" />
         </Style>
 
         <Style Selector="Button.nav-btn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource GoldBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource Black}"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="{DynamicResource GoldBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource Black}" />
+            <Setter Property="CornerRadius" Value="12" />
         </Style>
 
         <Style Selector="Button.nav-btn.selected /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource GoldBrush}"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource GoldBrush}" />
+            <Setter Property="CornerRadius" Value="12" />
         </Style>
     </Window.Styles>
-    
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
     </Design.DataContext>
-   
+
     <Border BorderThickness="4" Background="Transparent">
         <Grid RowDefinitions="Auto, *" Background="Transparent">
-            <Border 
-                Grid.Row="0" 
-                Height="32" 
-                Background="Transparent" 
-                PointerPressed="OnTitleBarPointerPressed"
-                >
-                <TextBlock Text="Coyote Studio" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0"/>
+            <Border
+            Grid.Row="0"
+            Height="32"
+            Background="Transparent"
+            PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="Coyote Studio" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0" />
             </Border>
 
             <Grid Grid.Row="1" ColumnDefinitions="Auto, *, 250"  Background="Transparent">
                 <StackPanel Grid.Column="0" Spacing="10" Margin="5">
-                    <Button Classes="nav-btn" 
+                    <Button Classes="nav-btn"
                             Classes.selected="{Binding IsHomeSelected}"
                             ToolTip.Tip="Control Panel"
                             Command="{Binding SelectPageCommand}"
                             CommandParameter="{x:Static vm:NavPage.Home}">
-                        <i:Icon Value="fa-solid fa-sliders"/>
+                        <i:Icon Value="fa-solid fa-sliders" />
                     </Button>
-                    <Button Classes="nav-btn" 
+                    <Button Classes="nav-btn"
                             Classes.selected="{Binding IsWavesSelected}"
                             ToolTip.Tip="Wave Generator"
                             Command="{Binding SelectPageCommand}"
                             CommandParameter="{x:Static vm:NavPage.Waves}">
-                        <i:Icon Value="fa-solid fa-wave-square"/>
+                        <i:Icon Value="fa-solid fa-wave-square" />
                     </Button>
                 </StackPanel>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Bottom" Spacing="5">
-                    <Button Classes="nav-btn" 
+                    <Button Classes="nav-btn"
                             Classes.selected="{Binding IsSettingsSelected}"
                             ToolTip.Tip="Settings"
                             Command="{Binding SelectPageCommand}"
                             CommandParameter="{x:Static vm:NavPage.Settings}">
-                        <i:Icon Value="fa-solid fa-gear"/>
+                        <i:Icon Value="fa-solid fa-gear" />
                     </Button>
                 </StackPanel>
 
                 <Border Grid.Column="1" Padding="20">
                     <StackPanel>
-                        <TextBlock Text="System Status" FontSize="24" 
-                                   Foreground="{DynamicResource GoldBrush}" FontWeight="SemiBold"/>
-                        <Separator Background="{DynamicResource GoldLow}" Margin="0,10" Height="1"/>
-                        <TextBlock Text="Backend core running..." Foreground="{DynamicResource SecondaryText}"/>
+                        <TextBlock Text="System Status" FontSize="24"
+                                   Foreground="{DynamicResource GoldBrush}" FontWeight="SemiBold" />
+                        <Separator Background="{DynamicResource GoldLow}" Margin="0,10" Height="1" />
+                        <TextBlock Text="Backend core running..." Foreground="{DynamicResource SecondaryText}" />
                     </StackPanel>
                 </Border>
 
                 <Grid Grid.Column="2" Background="Transparent" RowDefinitions="Auto, *">
                     <Border Grid.Row="0" Padding="15" BorderBrush="{DynamicResource GoldLow}" BorderThickness="0,0,0,1">
-                        <TextBlock Text="ACTIVE CLIENTS" Foreground="{DynamicResource GoldBrush}" 
-                                   FontSize="10" FontWeight="Bold"/>
+                        <TextBlock Text="ACTIVE CLIENTS" Foreground="{DynamicResource GoldBrush}"
+                                   FontSize="10" FontWeight="Bold" />
                     </Border>
 
                     <ListBox Grid.Row="1" ItemsSource="{Binding ConnectedClients}" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="12" Margin="5">
-                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource GoldBrush}"/> 
-                                    <TextBlock Text="{Binding ClientName}" Foreground="{DynamicResource PrimaryText}"/>
+                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource GoldBrush}" />
+                                    <TextBlock Text="{Binding ClientName}" Foreground="{DynamicResource PrimaryText}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -115,5 +112,4 @@
             </Grid>
         </Grid>
     </Border>
-
 </Window>
