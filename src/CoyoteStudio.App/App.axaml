@@ -16,9 +16,8 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="MainBg" Color="#1a1a1a" />
-                    <SolidColorBrush x:Key="SideBg" Color="#111111" />
-                    <SolidColorBrush x:Key="PanelBorder" Color="#333333" />
+                    <SolidColorBrush x:Key="Grey" Color="#1a1a1a" />
+                    <SolidColorBrush x:Key="Black" Color="#111111" />
                     
                     <SolidColorBrush x:Key="GoldBrush" Color="#d4af37" />
                     <SolidColorBrush x:Key="GoldLow" Color="#4d3d12" />
