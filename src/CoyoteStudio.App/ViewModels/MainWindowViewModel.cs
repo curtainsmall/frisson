@@ -21,8 +21,12 @@ public enum NavPage
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public ObservableCollection<ClientDto> ConnectedClients { get; } = new();
-    public string Greeting { get; } = "Welcome to Avalonia!";
+    public ObservableCollection<string> PlaceholderItems { get; } = new ObservableCollection<string>
+    {
+        "Item 1",
+        "Item 2",
+        "Item 3"
+    };
 
     [ObservableProperty]
     private NavPage _currentPage = NavPage.Home;
@@ -30,7 +34,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsHomeSelected => CurrentPage == NavPage.Home;
     public bool IsWavesSelected => CurrentPage == NavPage.Waves;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
-
     public bool IsHelpSelected => CurrentPage == NavPage.Help;
 
     partial void OnCurrentPageChanged(NavPage value)
@@ -49,6 +52,5 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        ConnectedClients.Add(new ClientDto { ClientName = "localhost" });
     }
 }

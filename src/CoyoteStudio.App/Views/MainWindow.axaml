@@ -98,12 +98,12 @@
                                    FontSize="10" FontWeight="Bold" />
                     </Border>
 
-                    <ListBox Grid.Row="1" ItemsSource="{Binding ConnectedClients}" Background="Transparent">
+                    <ListBox Grid.Row="1" ItemsSource="{Binding PlaceholderItems}" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="12" Margin="5">
                                     <Ellipse Width="8" Height="8" Fill="{DynamicResource GoldBrush}" />
-                                    <TextBlock Text="{Binding ClientName}" Foreground="{DynamicResource PrimaryText}" />
+                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource PrimaryText}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

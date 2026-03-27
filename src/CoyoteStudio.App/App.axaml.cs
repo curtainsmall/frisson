@@ -10,13 +10,11 @@ using Avalonia.Threading;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using CoyoteStudio.App.Message;
 using CoyoteStudio.App.ViewModels;
 using CoyoteStudio.App.Views;
 using CoyoteStudio.Core;
 using CoyoteStudio.Shared;
 using CoyoteStudio.Shared.Error;
-using CoyoteStudio.Shared.Message;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,42 +22,26 @@ namespace CoyoteStudio.App;
 
 public partial class App : Application
 {
-    public IServiceProvider? ServiceProvider { get; private set; }
+    private AppCore? _appCore;
 
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void AddAppServices(IServiceCollection services)
-    {
-        services.AddSingleton<MainWindowViewModel>();
-        services.AddSingleton<IMessager, Messager>();
-    }
-
-    private IAppCore InitApp()
-    {
-        var services = new ServiceCollection();
-        services.AddCoreServices();
-        AddAppServices(services);
-
-        ServiceProvider = services.BuildServiceProvider();
-        return ServiceProvider.GetRequiredService<IAppCore>();
-    }
-
     public override void OnFrameworkInitializationCompleted()
     {
-        var appCore = InitApp();
+        _appCore = new AppCore();
 
-        WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
+        _appCore.Messager.Listen<ErrorMessage>(msg =>
         {
             Dispatcher.UIThread.Post(() =>
             {
-                Debug.WriteLine($"Error ${m.Code}: ${m.Message}");
+                Debug.WriteLine($"Error ${msg.Code}: ${msg.Message}");
             });
         });
 
-        appCore.StartServerAsync(6969);
+        _appCore.StartServerAsync(6969);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -68,12 +50,12 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = ServiceProvider?.GetRequiredService<MainWindowViewModel>(),
+                DataContext = new MainWindowViewModel()
             };
 
             desktop.Exit += (s, e) =>
             {
-                (ServiceProvider as IDisposable)?.Dispose();
+                _appCore.Dispose();
             };
         }
 

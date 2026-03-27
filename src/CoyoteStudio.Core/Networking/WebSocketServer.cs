@@ -10,7 +10,7 @@ internal static class ServerConstants
     public const int BufferSize = 4096;
 }
 
-internal class WebSocketServer
+internal class WebSocketServer : IDisposable
 {
     public WebSocketServer()
     {
@@ -18,7 +18,7 @@ internal class WebSocketServer
 
     private HttpListener? _listener;
 
-    public async Task RunAsync(int port, CancellationToken cts)
+    public async Task RunAsync(int port, CancellationToken token, IProgress<string> progress)
     {
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{port}/");
@@ -27,13 +27,13 @@ internal class WebSocketServer
 
         try
         {
-            while (!cts.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
                 var context = await _listener.GetContextAsync();
 
                 if (context.Request.IsWebSocketRequest)
                 {
-                    _ = HandleConnectionAync(context, cts);
+                    _ = HandleConnectionAync(progress, context, token);
                 }
                 else
                 {
@@ -48,7 +48,7 @@ internal class WebSocketServer
         }
     }
 
-    private async Task HandleConnectionAync(HttpListenerContext context, CancellationToken cts)
+    private async Task HandleConnectionAync(IProgress<string> progress, HttpListenerContext context, CancellationToken token)
     {
         var wsContext = await context.AcceptWebSocketAsync(null);
         using var ws = wsContext.WebSocket;
@@ -56,7 +56,7 @@ internal class WebSocketServer
 
         while (ws.State == WebSocketState.Open)
         {
-            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts);
+            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
 
             if (result.MessageType == WebSocketMessageType.Close)
             {
@@ -64,6 +64,7 @@ internal class WebSocketServer
             }
 
             string received = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            progress.Report(received);
         }
     }
 

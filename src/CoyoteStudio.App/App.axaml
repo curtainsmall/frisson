@@ -7,7 +7,7 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
@@ -17,11 +17,11 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="Grey" Color="#1a1a1a" />
-                    <SolidColorBrush x:Key="Black" Color="#111111" />
-                    
+                    <SolidColorBrush x:Key="Black" Color="#161616" />
+
                     <SolidColorBrush x:Key="GoldBrush" Color="#d4af37" />
                     <SolidColorBrush x:Key="GoldLow" Color="#4d3d12" />
-                    
+
                     <SolidColorBrush x:Key="PrimaryText" Color="#e5e5e5" />
                     <SolidColorBrush x:Key="SecondaryText" Color="#888888" />
                 </ResourceDictionary>

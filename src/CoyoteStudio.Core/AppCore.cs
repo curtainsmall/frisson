@@ -1,28 +1,28 @@
 ﻿using System.Runtime.CompilerServices;
 
+using CoyoteStudio.Core.Control;
 using CoyoteStudio.Core.Network;
 using CoyoteStudio.Shared;
 using CoyoteStudio.Shared.Error;
-using CoyoteStudio.Shared.Message;
 
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoyoteStudio.Core;
 
-internal class AppCore : IAppCore, IDisposable
+public class AppCore : IDisposable
 {
-    private readonly IMessager _messager;
 
-    private readonly WebSocketServer _server;
+    private readonly WebSocketServer _server = new();
+    private readonly Controller _controller = new();
 
     private readonly CancellationTokenSource _tokenSource = new();
 
     public event Action<string>? ErrorOccurred;
 
-    public AppCore(IMessager messager, WebSocketServer server)
+    public Messager Messager { get; private init; } = new();
+
+    public AppCore()
     {
-        _messager = messager;
-        _server = server;
     }
 
     public void StartServerAsync(int port)
@@ -31,11 +31,16 @@ internal class AppCore : IAppCore, IDisposable
         {
             try
             {
-                await _server.RunAsync(port, _tokenSource.Token);
+                await _server.RunAsync(
+                    port,
+                    _tokenSource.Token,
+                    new Progress<string>(value =>
+                        _controller.Receive(value))
+                    );
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                _messager.Send(new ErrorMessage(ErrorCode.Unknown, e.Message));
+                Messager.Send(new ErrorMessage(ErrorCode.Unknown, e.Message));
             }
         });
     }
@@ -44,5 +49,9 @@ internal class AppCore : IAppCore, IDisposable
     {
         _tokenSource.Cancel();
         _tokenSource.Dispose();
+
+        Messager.Dispose();
+        _server.Dispose();
+        _controller.Dispose();
     }
 }
