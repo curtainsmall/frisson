@@ -1,24 +1,26 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Net.Mime;
 using System.Net.WebSockets;
 using System.Text;
 
-namespace CoyoteStudio.Core.Network;
+using CoyoteStudio.Core.Networking;
 
-internal static class ServerConstants
-{
-    public const int BufferSize = 4096;
-}
+namespace CoyoteStudio.Core.Network;
 
 internal class WebSocketServer : IDisposable
 {
-    public WebSocketServer()
+    private const int _bufferSize = 4096;
+    private readonly WebSocketConnectionManager _connectionManager;
+
+    public WebSocketServer(WebSocketConnectionManager connectionManager)
     {
+        _connectionManager = connectionManager;
     }
 
     private HttpListener? _listener;
 
-    public async Task RunAsync(int port, CancellationToken token, IProgress<string> progress)
+    public async Task RunAsync(int port, CancellationToken token, IProgress<WebSocketConnectionData> progress)
     {
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{port}/");
@@ -48,24 +50,34 @@ internal class WebSocketServer : IDisposable
         }
     }
 
-    private async Task HandleConnectionAync(IProgress<string> progress, HttpListenerContext context, CancellationToken token)
+    private async Task HandleConnectionAync(IProgress<WebSocketConnectionData> progress, HttpListenerContext context, CancellationToken token)
     {
+        Guid id = Guid.NewGuid();
+        _connectionManager.Register(id);
+
         var wsContext = await context.AcceptWebSocketAsync(null);
         using var ws = wsContext.WebSocket;
-        var buffer = new byte[ServerConstants.BufferSize];
+        var buffer = new byte[_bufferSize];
 
-        while (ws.State == WebSocketState.Open)
+        try
         {
-            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-
-            if (result.MessageType == WebSocketMessageType.Close)
+            while (ws.State == WebSocketState.Open)
             {
-                break;
-            }
+                var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
 
-            string received = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            progress.Report(received);
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    break;
+                }
+
+                progress.Report(new WebSocketConnectionData(id, Encoding.UTF8.GetString(buffer, 0, result.Count)));
+            }
         }
+        finally
+        {
+            _connectionManager.Unregister(id);
+        }
+
     }
 
     public void Dispose()

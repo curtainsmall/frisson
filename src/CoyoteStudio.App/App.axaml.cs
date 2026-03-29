@@ -8,15 +8,10 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
-using CommunityToolkit.Mvvm.Messaging;
-
 using CoyoteStudio.App.ViewModels;
 using CoyoteStudio.App.Views;
 using CoyoteStudio.Core;
-using CoyoteStudio.Shared;
 using CoyoteStudio.Shared.Error;
-
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CoyoteStudio.App;
 
