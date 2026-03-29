@@ -1,7 +1,5 @@
-﻿using CoyoteStudio.Core.Control;
-using CoyoteStudio.Core.Network;
+﻿using CoyoteStudio.Core.Network;
 using CoyoteStudio.Core.Networking;
-using CoyoteStudio.Core.Protocol;
 using CoyoteStudio.Shared;
 using CoyoteStudio.Shared.Error;
 
@@ -37,7 +35,7 @@ public class AppCore : IDisposable
                     new Progress<WebSocketConnectionData>(connectionData =>
                     {
                         _connectionManager.TryGetClient(connectionData.Id, out var client);
-                        client?.Setup(new ProtocolScheme(connectionData));
+                        client?.Setup(ProtocolScheme.Create(client.Kind, connectionData));
                     }
                     ));
             }
