@@ -30,6 +30,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoyoteStudio.Core\CoyoteStudio.Core.csproj" />
-    <ProjectReference Include="..\CoyoteStudio.Shared\CoyoteStudio.Shared.csproj" />
   </ItemGroup>
 </Project>

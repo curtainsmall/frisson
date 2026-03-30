@@ -1,10 +1,12 @@
-﻿namespace CoyoteStudio.Shared.Error;
+﻿namespace CoyoteStudio.Core.Error;
 
 public enum ErrorCode
 {
     None,
     ConnectionFailed,
     Disconnected,
+
+    InvalidJson,
 
     Unknown,
 }

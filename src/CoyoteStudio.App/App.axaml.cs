@@ -11,7 +11,7 @@ using Avalonia.Threading;
 using CoyoteStudio.App.ViewModels;
 using CoyoteStudio.App.Views;
 using CoyoteStudio.Core;
-using CoyoteStudio.Shared.Error;
+using CoyoteStudio.Core.Error;
 
 namespace CoyoteStudio.App;
 

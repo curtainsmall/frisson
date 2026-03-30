@@ -1,7 +1,6 @@
-﻿using CoyoteStudio.Core.Network;
+﻿using CoyoteStudio.Core.Error;
+using CoyoteStudio.Core.Network;
 using CoyoteStudio.Core.Networking;
-using CoyoteStudio.Shared;
-using CoyoteStudio.Shared.Error;
 
 namespace CoyoteStudio.Core;
 
@@ -16,7 +15,7 @@ public class AppCore : IDisposable
 
     public event Action<string>? ErrorOccurred;
 
-    public Messager Messager { get; private init; } = new();
+    public ErrorMessager Messager { get; private init; } = new();
 
     public AppCore()
     {
@@ -38,6 +37,10 @@ public class AppCore : IDisposable
                         client?.Setup(ProtocolScheme.Create(client.Kind, connectionData));
                     }
                     ));
+            }
+            catch (ProtocolSchemeException e)
+            {
+                Messager.Send(new ErrorMessage(ErrorCode.InvalidJson, e.Message));
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {

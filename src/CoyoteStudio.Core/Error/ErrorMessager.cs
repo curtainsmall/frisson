@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace CoyoteStudio.Core.Error;
 
-namespace CoyoteStudio.Shared;
-
-public class Messager : IDisposable
+public class ErrorMessager : IDisposable
 {
     private readonly Dictionary<Type, List<Action<object>>> _subcribers = new();
 

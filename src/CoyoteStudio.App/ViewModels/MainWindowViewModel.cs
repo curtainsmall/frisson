@@ -3,8 +3,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using CoyoteStudio.Shared;
-
 namespace CoyoteStudio.App.ViewModels;
 
 public enum NavPage
