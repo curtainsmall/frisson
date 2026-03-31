@@ -1,13 +1,13 @@
 ﻿using CoyoteStudio.Core.Error;
-using CoyoteStudio.Core.Network;
-using CoyoteStudio.Core.Networking;
+using CoyoteStudio.Core.Networking.Client.Scheme;
+using CoyoteStudio.Core.Networking.Server;
 
 namespace CoyoteStudio.Core;
 
 public class AppCore : IDisposable
 {
 
-    private readonly WebSocketConnectionManager _connectionManager = new();
+    private readonly ConnectionManager _connectionManager = new();
 
     private readonly CancellationTokenSource _tokenSource = new();
 
@@ -31,12 +31,7 @@ public class AppCore : IDisposable
                 await _server.RunAsync(
                     port,
                     _tokenSource.Token,
-                    new Progress<WebSocketConnectionData>(connectionData =>
-                    {
-                        _connectionManager.TryGetClient(connectionData.Id, out var client);
-                        client?.Setup(ProtocolScheme.Create(client.Kind, connectionData));
-                    }
-                    ));
+                    new Progress<ConnectionData>(connectionData => _connectionManager.SetupClient(connectionData)));
             }
             catch (ProtocolSchemeException e)
             {

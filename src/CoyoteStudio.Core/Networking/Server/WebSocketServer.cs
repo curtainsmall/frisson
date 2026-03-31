@@ -1,26 +1,23 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Net.Mime;
 using System.Net.WebSockets;
 using System.Text;
 
-using CoyoteStudio.Core.Networking;
-
-namespace CoyoteStudio.Core.Network;
+namespace CoyoteStudio.Core.Networking.Server;
 
 internal class WebSocketServer : IDisposable
 {
     private const int _bufferSize = 4096;
-    private readonly WebSocketConnectionManager _connectionManager;
+    private readonly ConnectionManager _connectionManager;
 
-    public WebSocketServer(WebSocketConnectionManager connectionManager)
+    public WebSocketServer(ConnectionManager connectionManager)
     {
         _connectionManager = connectionManager;
     }
 
     private HttpListener? _listener;
 
-    public async Task RunAsync(int port, CancellationToken token, IProgress<WebSocketConnectionData> progress)
+    public async Task RunAsync(int port, CancellationToken token, IProgress<ConnectionData> progress)
     {
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{port}/");
@@ -50,14 +47,18 @@ internal class WebSocketServer : IDisposable
         }
     }
 
-    private async Task HandleConnectionAync(IProgress<WebSocketConnectionData> progress, HttpListenerContext context, CancellationToken token)
+    private async Task HandleConnectionAync(IProgress<ConnectionData> progress, HttpListenerContext context, CancellationToken token)
     {
         Guid id = Guid.NewGuid();
-        _connectionManager.Register(id);
 
         var wsContext = await context.AcceptWebSocketAsync(null);
         using var ws = wsContext.WebSocket;
         var buffer = new byte[_bufferSize];
+
+        _connectionManager.Register(id, () =>
+        {
+            _ = CloseClientConnection(ws);
+        });
 
         try
         {
@@ -70,14 +71,27 @@ internal class WebSocketServer : IDisposable
                     break;
                 }
 
-                progress.Report(new WebSocketConnectionData(id, Encoding.UTF8.GetString(buffer, 0, result.Count)));
+                progress.Report(new ConnectionData(id, Encoding.UTF8.GetString(buffer, 0, result.Count)));
             }
         }
         finally
         {
-            _connectionManager.Unregister(id);
+            _connectionManager.TryUnregister(id);
         }
 
+    }
+
+    private async Task CloseClientConnection(WebSocket ws, string reason = "Server closing")
+    {
+        if (ws.State == WebSocketState.Open)
+        {
+            await ws.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure,
+                    reason,
+                    CancellationToken.None
+                );
+        }
+        ws.Dispose();
     }
 
     public void Dispose()
