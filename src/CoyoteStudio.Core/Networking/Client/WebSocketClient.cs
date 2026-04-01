@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 
 using CoyoteStudio.Core.Networking.Client.Scheme;
 using CoyoteStudio.Core.Networking.Server;
@@ -42,6 +43,33 @@ internal class WebSocketClient : IDisposable
             case WebSocketClientKind.Device:
             {
                 var scheme = new DeviceProtocolScheme(jsonDoc);
+                var deviceData = new DeviceClientData();
+                if (scheme.Strength is not null)
+                {
+                    deviceData.ChannelA.Strength = scheme.Strength.StrengthA;
+                    deviceData.ChannelB.Strength = scheme.Strength.StrengthB;
+                    deviceData.ChannelA.Limit = scheme.Strength.limitA;
+                    deviceData.ChannelB.Limit = scheme.Strength.limitB;
+                    Data = deviceData;
+                }
+                else if (scheme.Feedback is not null)
+                {
+                    switch (scheme.Feedback)
+                    {
+                        case >= 0 and <= 4:
+                        {
+                            deviceData.ChannelA.FeedbackKind = (DeviceFeedbackKind)(scheme.Feedback + 1);
+                            break;
+                        }
+                        case >= 5 and <= 9:
+                        {
+                            deviceData.ChannelB.FeedbackKind = (DeviceFeedbackKind)scheme.Feedback - 5 + 1;
+                            break;
+                        }
+                        default:
+                            throw new UnreachableException($"Invalid feedback property of device scheme: {scheme.Feedback}");
+                    }
+                }
                 break;
             }
             case WebSocketClientKind.Remote:

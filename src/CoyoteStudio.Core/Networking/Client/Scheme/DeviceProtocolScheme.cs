@@ -4,21 +4,19 @@ namespace CoyoteStudio.Core.Networking.Client.Scheme;
 
 internal sealed class DeviceProtocolScheme : ProtocolScheme
 {
-    private readonly JsonDocument _jsonDocument;
-
     public record DeviceStrength(int StrengthA, int StrengthB, int limitA, int limitB);
 
     public Guid? DeviceId { get; init; }
     public Guid? RemoteId { get; init; }
-    public DeviceStrength Strength { get; init; }
-    public int CornerMark { get; init; }
+    public DeviceStrength? Strength { get; init; }
+    public int? Feedback { get; init; }
 
     public DeviceProtocolScheme(JsonDocument jsonDoc)
     {
-        _jsonDocument = jsonDoc;
-        DeviceId = ParseDeviceId();
-        RemoteId = ParseRemoteId();
-        var list = ParseMessage();
+        var rootElement = jsonDoc.RootElement;
+        DeviceId = ParseDeviceId(rootElement);
+        RemoteId = ParseRemoteId(rootElement);
+        var list = ParseMessage(rootElement);
         switch (list?.Count)
         {
             case 4:
@@ -28,7 +26,7 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
             }
             case 1:
             {
-                CornerMark = list[0];
+                Feedback = list[0];
                 break;
             }
             case null:
@@ -40,9 +38,8 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         }
     }
 
-    private Guid? ParseDeviceId()
+    private Guid? ParseDeviceId(JsonElement rootElement)
     {
-        var rootElement = _jsonDocument.RootElement;
         if (!rootElement.TryGetProperty("targetId", out var deviceIdElement))
             return null;
 
@@ -55,9 +52,8 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         return deviceId;
     }
 
-    private Guid? ParseRemoteId()
+    private Guid? ParseRemoteId(JsonElement rootElement)
     {
-        var rootElement = _jsonDocument.RootElement;
         if (!rootElement.TryGetProperty("targetId", out var deviceIdElement))
             return null;
 
@@ -70,9 +66,8 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         return remoteId;
     }
 
-    private List<int> ParseMessage()
+    private List<int> ParseMessage(JsonElement rootElement)
     {
-        var rootElement = _jsonDocument.RootElement;
         if (!rootElement.TryGetProperty("message", out var messageElement))
             return [];
 
