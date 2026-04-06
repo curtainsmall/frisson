@@ -105,7 +105,7 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
                 return [num];
             }
             default:
-                throw new ProtocolSchemeException(ProtocolSchemeException.ErrorKind.InvalidFieldValue, $"Unknown messager leader: {typeString}");
+                throw new ProtocolSchemeException(ProtocolSchemeException.ErrorKind.InvalidFieldValue, $"Unknown message leader: {typeString}");
         }
     }
 

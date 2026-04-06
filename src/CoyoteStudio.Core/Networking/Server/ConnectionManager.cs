@@ -24,6 +24,28 @@ internal class ConnectionManager
         return _connections.TryGetValue(id, out client);
     }
 
+    public bool TryGetDeviceClient(Guid id, out DeviceWebSocketClient? client)
+    {
+        if (_connections.TryGetValue(id, out var baseClient) && baseClient is DeviceWebSocketClient deviceClient)
+        {
+            client = deviceClient;
+            return true;
+        }
+        client = null;
+        return false;
+    }
+
+    public bool TryGetRemoteClient(Guid id, out RemoteWebSocketClient? client)
+    {
+        if (_connections.TryGetValue(id, out var baseClient) && baseClient is RemoteWebSocketClient remoteClient)
+        {
+            client = remoteClient;
+            return true;
+        }
+        client = null;
+        return false;
+    }
+
     public void SetupClient(ConnectionData data)
     {
         if (!TryGetClient(data.Id, out var client))
