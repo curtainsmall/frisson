@@ -28,7 +28,7 @@ public partial class App : Application
     {
         _appCore = new AppCore();
 
-        _appCore.Messager.Listen<ErrorMessage>(msg =>
+        _appCore.ErrorMessager.Listen<ErrorMessage>(msg =>
         {
             Dispatcher.UIThread.Post(() =>
             {
@@ -36,7 +36,7 @@ public partial class App : Application
             });
         });
 
-        _appCore.StartServerAsync(6969);
+        _appCore.Startup(6969);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

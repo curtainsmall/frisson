@@ -7,17 +7,43 @@ namespace CoyoteStudio.Core.Networking.Server;
 
 internal class WebSocketServer : IDisposable
 {
-    private const int _bufferSize = 4096;
-    private readonly ConnectionManager _connectionManager;
-
-    public WebSocketServer(ConnectionManager connectionManager)
+    internal class ClientConnectedEventArgs : EventArgs
     {
-        _connectionManager = connectionManager;
+        public Guid ClientId { get; init; }
+        public Action? OnDisposing { get; init; }
+
+        public ClientConnectedEventArgs(Guid clientId, Action? onDisposing)
+        {
+            ClientId = clientId;
+            OnDisposing = onDisposing;
+        }
     }
 
-    private HttpListener? _listener;
+    internal class ClientDisconnectedEventArgs(Guid clientId) : EventArgs
+    {
+        public Guid ClientId { get; init; } = clientId;
+    }
 
-    public async Task RunAsync(int port, CancellationToken token, IProgress<ConnectionData> progress)
+    internal class ClientMessageReceivedEventArgs(Guid clientId, string message) : EventArgs
+    {
+        public Guid ClientId { get; init; } = clientId;
+        public string Message { get; init; } = message;
+    }
+
+    private const int _bufferSize = 4096;
+
+    private HttpListener? _listener;
+    private readonly CancellationTokenSource _serverCts = new();
+
+    public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
+    public event EventHandler<ClientDisconnectedEventArgs>? ClientDisconnected;
+    public event EventHandler<ClientMessageReceivedEventArgs>? ClientMessageReceived;
+
+    public WebSocketServer()
+    {
+    }
+
+    public async Task RunAsync(int port)
     {
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{port}/");
@@ -26,13 +52,14 @@ internal class WebSocketServer : IDisposable
 
         try
         {
-            while (!token.IsCancellationRequested)
+            while (!_serverCts.IsCancellationRequested)
             {
                 var context = await _listener.GetContextAsync();
 
                 if (context.Request.IsWebSocketRequest)
                 {
-                    _ = HandleConnectionAync(progress, context, token);
+                    var clientCts = CancellationTokenSource.CreateLinkedTokenSource(_serverCts.Token);
+                    _ = HandleConnectionAync(context, clientCts);
                 }
                 else
                 {
@@ -47,36 +74,36 @@ internal class WebSocketServer : IDisposable
         }
     }
 
-    private async Task HandleConnectionAync(IProgress<ConnectionData> progress, HttpListenerContext context, CancellationToken token)
+    private async Task HandleConnectionAync(HttpListenerContext context, CancellationTokenSource clientCts)
     {
-        Guid id = Guid.NewGuid();
-
-        var wsContext = await context.AcceptWebSocketAsync(null);
-        using var ws = wsContext.WebSocket;
-        var buffer = new byte[_bufferSize];
-
-        _connectionManager.Register(id, () =>
+        using (clientCts)
         {
-            _ = CloseClientConnection(ws);
-        });
+            Guid id = Guid.NewGuid();
 
-        try
-        {
-            while (ws.State == WebSocketState.Open)
+            var wsContext = await context.AcceptWebSocketAsync(null);
+            using var ws = wsContext.WebSocket;
+            var buffer = new byte[_bufferSize];
+
+            ClientConnected?.Invoke(this, new ClientConnectedEventArgs(id, () => clientCts.Cancel()));
+
+            try
             {
-                var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-
-                if (result.MessageType == WebSocketMessageType.Close)
+                while (ws.State == WebSocketState.Open)
                 {
-                    break;
-                }
+                    var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), clientCts.Token);
 
-                progress.Report(new ConnectionData(id, Encoding.UTF8.GetString(buffer, 0, result.Count)));
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        break;
+                    }
+
+                    ClientMessageReceived?.Invoke(this, new ClientMessageReceivedEventArgs(id, Encoding.UTF8.GetString(buffer, 0, result.Count)));
+                }
             }
-        }
-        finally
-        {
-            _connectionManager.TryUnregister(id);
+            finally
+            {
+                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(id));
+            }
         }
 
     }
@@ -96,6 +123,8 @@ internal class WebSocketServer : IDisposable
 
     public void Dispose()
     {
+        _serverCts.Cancel();
+        _serverCts.Dispose();
         _listener?.Stop();
         _listener?.Close();
     }

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Text.Json;
 
 using CoyoteStudio.Core.Networking.Client.Scheme;
-using CoyoteStudio.Core.Networking.Server;
 
 namespace CoyoteStudio.Core.Networking.Client;
 
 internal enum DeviceFeedbackKind
 {
-    None,
     Circle,
     Triangle,
     Square,
@@ -19,39 +14,66 @@ internal enum DeviceFeedbackKind
     Hexagon,
 }
 
+internal enum DeviceChannelKind
+{
+    A,
+    B,
+}
+
 internal class FeedbackTriggeredEventArgs : EventArgs
 {
+    public DeviceChannelKind ChannelKind { get; init; }
     public DeviceFeedbackKind FeedbackKind { get; init; }
 
-    public FeedbackTriggeredEventArgs(DeviceFeedbackKind feedbackKind)
+    public FeedbackTriggeredEventArgs(DeviceChannelKind channelKind, DeviceFeedbackKind feedbackKind)
     {
+        ChannelKind = channelKind;
         FeedbackKind = feedbackKind;
     }
+
+    public FeedbackTriggeredEventArgs(int feedbackRaw)
+    {
+        switch (feedbackRaw)
+        {
+            case >= 0 and <= 4:
+            {
+                ChannelKind = DeviceChannelKind.A;
+                FeedbackKind = (DeviceFeedbackKind)feedbackRaw;
+                break;
+            }
+            case >= 5 and <= 9:
+            {
+                ChannelKind = DeviceChannelKind.B;
+                FeedbackKind = (DeviceFeedbackKind)feedbackRaw - 5;
+                break;
+            }
+            default:
+                throw new UnreachableException($"Invalid feedback property of device scheme: {feedbackRaw}");
+        }
+    }
+}
+internal sealed class DeviceChannelData
+{
+    public int Strength { get; set; } = 0;
+    public int Limit { get; set; } = 100;
 }
 
 internal class DeviceWebSocketClient : WebSocketClient
 {
-    public event EventHandler? FeedbackTriggered;
+    public event EventHandler<FeedbackTriggeredEventArgs>? FeedbackTriggered;
 
-    internal sealed class ChannelData
-    {
-        public int Strength { get; set; } = 0;
-        public int Limit { get; set; } = 100;
-        public DeviceFeedbackKind FeedbackKind { get; set; } = DeviceFeedbackKind.None;
-    }
-
-    public ChannelData ChannelA { get; set; } = new();
-    public ChannelData ChannelB { get; set; } = new();
+    public DeviceChannelData ChannelA { get; private set; } = new();
+    public DeviceChannelData ChannelB { get; private set; } = new();
 
     public DeviceWebSocketClient(Guid id, Action? onDisposing) : base(id, onDisposing)
     {
     }
 
-    public override void Setup(ConnectionData data)
+    public override void Setup(string jsonString)
     {
-        base.Setup(data);
+        base.Setup(jsonString);
 
-        var jsonDoc = JsonDocument.Parse(data.Message);
+        var jsonDoc = JsonDocument.Parse(jsonString);
         if (jsonDoc is null)
             return;
 
@@ -65,23 +87,7 @@ internal class DeviceWebSocketClient : WebSocketClient
         }
         else if (scheme.Feedback is not null)
         {
-            switch (scheme.Feedback)
-            {
-                case >= 0 and <= 4:
-                {
-                    ChannelA.FeedbackKind = (DeviceFeedbackKind)(scheme.Feedback + 1);
-                    FeedbackTriggered?.Invoke(this, new FeedbackTriggeredEventArgs(ChannelA.FeedbackKind));
-                    break;
-                }
-                case >= 5 and <= 9:
-                {
-                    ChannelB.FeedbackKind = (DeviceFeedbackKind)(scheme.Feedback - 5 + 1);
-                    FeedbackTriggered?.Invoke(this, new FeedbackTriggeredEventArgs(ChannelB.FeedbackKind));
-                    break;
-                }
-                default:
-                    throw new UnreachableException($"Invalid feedback property of device scheme: {scheme.Feedback}");
-            }
+            FeedbackTriggered?.Invoke(this, new FeedbackTriggeredEventArgs(scheme.Feedback.Value));
         }
     }
 
