@@ -71,8 +71,6 @@ internal class DeviceWebSocketClient : WebSocketClient
 
     public override void Setup(string jsonString)
     {
-        base.Setup(jsonString);
-
         var jsonDoc = JsonDocument.Parse(jsonString);
         if (jsonDoc is null)
             return;

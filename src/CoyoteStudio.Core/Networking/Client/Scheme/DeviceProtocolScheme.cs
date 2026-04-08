@@ -46,7 +46,7 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         if (deviceIdElement.ValueKind != JsonValueKind.String)
             return null;
 
-        if (!Guid.TryParse(deviceIdElement.GetString(), out var deviceId))
+        if (!deviceIdElement.TryGetGuid(out var deviceId))
             return null;
 
         return deviceId;
@@ -54,13 +54,13 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
 
     private Guid? ParseRemoteId(JsonElement rootElement)
     {
-        if (!rootElement.TryGetProperty("targetId", out var deviceIdElement))
+        if (!rootElement.TryGetProperty("clientId", out var deviceIdElement))
             return null;
 
         if (deviceIdElement.ValueKind != JsonValueKind.String)
             return null;
 
-        if (!Guid.TryParse(deviceIdElement.GetString(), out var remoteId))
+        if (!deviceIdElement.TryGetGuid(out var remoteId))
             return null;
 
         return remoteId;

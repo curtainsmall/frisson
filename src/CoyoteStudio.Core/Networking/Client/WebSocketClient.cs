@@ -1,4 +1,8 @@
-﻿namespace CoyoteStudio.Core.Networking.Client;
+﻿using System.Text.Json;
+
+using CoyoteStudio.Core.Networking.Client.Scheme;
+
+namespace CoyoteStudio.Core.Networking.Client;
 
 internal enum WebSocketClientKind
 {
@@ -17,7 +21,11 @@ internal class WebSocketClient : IDisposable
     public Action? OnDisposing { get; init; }
 
     public Guid Id { get; init; }
-    public ClientData? Data { get; private set; }
+
+    /// <summary>
+    /// Event raised when a valid bind message is received with matching GUID.
+    /// </summary>
+    public event EventHandler? BindRequested;
 
     public WebSocketClient(Guid id, Action? onDisposing)
     {
@@ -27,6 +35,24 @@ internal class WebSocketClient : IDisposable
 
     public virtual void Setup(string jsonString)
     {
+        using var jsonDoc = JsonDocument.Parse(jsonString);
+        Setup(jsonDoc);
+    }
+
+    public virtual void Setup(JsonDocument jsonDoc)
+    {
+        var scheme = new ClientProtocolScheme(jsonDoc);
+
+        // Check if this is a valid bind message with matching GUID
+        if (scheme.BindId == Id)
+        {
+            OnBindRequested();
+        }
+    }
+
+    protected virtual void OnBindRequested()
+    {
+        BindRequested?.Invoke(this, EventArgs.Empty);
     }
 
     public void Dispose()

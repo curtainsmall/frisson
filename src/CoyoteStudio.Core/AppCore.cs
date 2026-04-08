@@ -7,7 +7,7 @@ namespace CoyoteStudio.Core;
 public class AppCore : IDisposable
 {
 
-    private readonly WebSocketManager _manager = new();
+    private readonly WebSocketManager _wsManager = new();
 
     public event Action<string>? ErrorOccurred;
 
@@ -23,7 +23,7 @@ public class AppCore : IDisposable
         {
             try
             {
-                await _manager.StartupAsync(port);
+                await _wsManager.RunAsync(port);
             }
             catch (ProtocolSchemeException e)
             {
@@ -39,6 +39,6 @@ public class AppCore : IDisposable
     public void Dispose()
     {
         ErrorMessager.Dispose();
-        _manager.Dispose();
+        _wsManager.Dispose();
     }
 }
