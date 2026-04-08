@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -34,6 +35,7 @@ internal class WebSocketServer : IDisposable
 
     private HttpListener? _listener;
     private readonly CancellationTokenSource _serverCts = new();
+    private readonly ConcurrentDictionary<Guid, WebSocket> _clients = new();
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
     public event EventHandler<ClientDisconnectedEventArgs>? ClientDisconnected;
@@ -84,6 +86,9 @@ internal class WebSocketServer : IDisposable
             using var ws = wsContext.WebSocket;
             var buffer = new byte[_bufferSize];
 
+            // Register client
+            _clients.TryAdd(id, ws);
+
             ClientConnected?.Invoke(this, new ClientConnectedEventArgs(id, () => clientCts.Cancel()));
 
             try
@@ -102,10 +107,43 @@ internal class WebSocketServer : IDisposable
             }
             finally
             {
+                // Unregister client
+                _clients.TryRemove(id, out _);
                 ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(id));
             }
         }
 
+    }
+
+    /// <summary>
+    /// Sends a message to a specific client.
+    /// </summary>
+    /// <param name="clientId">The target client ID.</param>
+    /// <param name="message">The message to send.</param>
+    /// <returns>True if the message was sent successfully.</returns>
+    public async Task<bool> SendAsync(Guid clientId, string message)
+    {
+        if (!_clients.TryGetValue(clientId, out var ws))
+            return false;
+
+        if (ws.State != WebSocketState.Open)
+            return false;
+
+        try
+        {
+            var buffer = Encoding.UTF8.GetBytes(message);
+            await ws.SendAsync(
+                new ArraySegment<byte>(buffer),
+                WebSocketMessageType.Text,
+                endOfMessage: true,
+                CancellationToken.None);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to send message to client {clientId}: {ex.Message}");
+            return false;
+        }
     }
 
     private async Task CloseClientConnection(WebSocket ws, string reason = "Server closing")
@@ -124,6 +162,14 @@ internal class WebSocketServer : IDisposable
     public void Dispose()
     {
         _serverCts.Cancel();
+
+        // Close all client connections
+        foreach (var ws in _clients.Values)
+        {
+            _ = CloseClientConnection(ws);
+        }
+        _clients.Clear();
+
         _serverCts.Dispose();
         _listener?.Stop();
         _listener?.Close();

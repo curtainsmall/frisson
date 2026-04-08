@@ -71,11 +71,10 @@ internal class DeviceWebSocketClient : WebSocketClient
 
     public override void Setup(string jsonString)
     {
-        var jsonDoc = JsonDocument.Parse(jsonString);
-        if (jsonDoc is null)
-            return;
+        using var jsonDoc = JsonDocument.Parse(jsonString);
 
-        var scheme = new DeviceProtocolScheme(jsonDoc);
+        var scheme = new DeviceInputProtocolScheme(jsonDoc);
+
         if (scheme.Strength is not null)
         {
             ChannelA.Strength = scheme.Strength.StrengthA;

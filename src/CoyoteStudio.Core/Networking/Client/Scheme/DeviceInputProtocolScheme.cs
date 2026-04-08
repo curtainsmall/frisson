@@ -2,7 +2,7 @@
 
 namespace CoyoteStudio.Core.Networking.Client.Scheme;
 
-internal sealed class DeviceProtocolScheme : ProtocolScheme
+internal sealed class DeviceInputProtocolScheme : ProtocolScheme
 {
     public record DeviceStrength(int StrengthA, int StrengthB, int limitA, int limitB);
 
@@ -11,9 +11,14 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
     public DeviceStrength? Strength { get; init; }
     public int? Feedback { get; init; }
 
-    public DeviceProtocolScheme(JsonDocument jsonDoc)
+    public DeviceInputProtocolScheme(JsonDocument jsonDoc)
     {
         var rootElement = jsonDoc.RootElement;
+
+        // Validate message type
+        if (!ValidateMessageType(rootElement))
+            throw new ProtocolSchemeException(ProtocolSchemeException.ErrorKind.InvalidFieldValue, "Invalid or missing 'type' field, expected 'msg'");
+
         DeviceId = ParseDeviceId(rootElement);
         RemoteId = ParseRemoteId(rootElement);
         var list = ParseMessage(rootElement);
@@ -38,7 +43,18 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         }
     }
 
-    private Guid? ParseDeviceId(JsonElement rootElement)
+    private static bool ValidateMessageType(JsonElement rootElement)
+    {
+        if (!rootElement.TryGetProperty("type", out var typeElement))
+            return false;
+
+        if (typeElement.ValueKind != JsonValueKind.String)
+            return false;
+
+        return typeElement.GetString() == "msg";
+    }
+
+    private static Guid? ParseDeviceId(JsonElement rootElement)
     {
         if (!rootElement.TryGetProperty("targetId", out var deviceIdElement))
             return null;
@@ -52,21 +68,21 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         return deviceId;
     }
 
-    private Guid? ParseRemoteId(JsonElement rootElement)
+    private static Guid? ParseRemoteId(JsonElement rootElement)
     {
-        if (!rootElement.TryGetProperty("clientId", out var deviceIdElement))
+        if (!rootElement.TryGetProperty("clientId", out var remoteIdElement))
             return null;
 
-        if (deviceIdElement.ValueKind != JsonValueKind.String)
+        if (remoteIdElement.ValueKind != JsonValueKind.String)
             return null;
 
-        if (!deviceIdElement.TryGetGuid(out var remoteId))
+        if (!remoteIdElement.TryGetGuid(out var remoteId))
             return null;
 
         return remoteId;
     }
 
-    private List<int> ParseMessage(JsonElement rootElement)
+    private static List<int> ParseMessage(JsonElement rootElement)
     {
         if (!rootElement.TryGetProperty("message", out var messageElement))
             return [];
@@ -83,7 +99,9 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
         {
             case "strength":
             {
-                string[] numStrings = typeString[9..].Split('+');
+                // Format: "strength+A+B+limitA+limitB" (e.g., "strength+10+20+100+100")
+                var payload = messageString.Length > 9 ? messageString[9..] : "";
+                string[] numStrings = payload.Split('+');
                 if (numStrings.Length != 4)
                     return [];
 
@@ -98,10 +116,11 @@ internal sealed class DeviceProtocolScheme : ProtocolScheme
             }
             case "feedback":
             {
-                string numString = typeString[9..];
+                // Format: "feedback+N" (e.g., "feedback+5")
+                var payload = messageString.Length > 9 ? messageString[9..] : "";
 
-                if (!int.TryParse(numString, default, out var num))
-                    throw new ProtocolSchemeException(ProtocolSchemeException.ErrorKind.InvalidFieldValue, $"Invalid strength value: {numString}");
+                if (!int.TryParse(payload, default, out var num))
+                    throw new ProtocolSchemeException(ProtocolSchemeException.ErrorKind.InvalidFieldValue, $"Invalid feedback value: {payload}");
                 return [num];
             }
             default:

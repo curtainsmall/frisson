@@ -72,6 +72,17 @@ internal class WebSocketManager : IDisposable
         await _server.RunAsync(port);
     }
 
+    /// <summary>
+    /// Sends a message to a specific client.
+    /// </summary>
+    /// <param name="clientId">The target client ID.</param>
+    /// <param name="message">The message to send.</param>
+    /// <returns>True if the message was sent successfully.</returns>
+    public async Task<bool> SendAsync(Guid clientId, string message)
+    {
+        return await _server.SendAsync(clientId, message);
+    }
+
     public void Dispose()
     {
         RemoveEventHandlers();
