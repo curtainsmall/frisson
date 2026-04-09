@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 
 using Avalonia;
@@ -8,6 +9,7 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
+using CoyoteStudio.App.Services;
 using CoyoteStudio.App.ViewModels;
 using CoyoteStudio.App.Views;
 using CoyoteStudio.Core;

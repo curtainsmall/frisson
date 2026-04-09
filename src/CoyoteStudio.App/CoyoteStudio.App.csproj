@@ -5,11 +5,15 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <EnableDefaultEmbeddedResourceItems>true</EnableDefaultEmbeddedResourceItems>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
-    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Assets\*.ico" />
+    <AvaloniaResource Include="Assets\*.png" />
+    <AvaloniaResource Include="Assets\*.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,4 +35,5 @@
   <ItemGroup>
     <ProjectReference Include="..\CoyoteStudio.Core\CoyoteStudio.Core.csproj" />
   </ItemGroup>
+
 </Project>
