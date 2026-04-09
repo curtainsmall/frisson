@@ -54,60 +54,133 @@
                 <TextBlock Text="Coyote Studio" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0" />
             </Border>
 
-            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, 250"  Background="Transparent">
-                <StackPanel Grid.Column="0" Spacing="10" Margin="5">
-                    <Button Classes="nav-btn"
-                            Classes.selected="{Binding IsHomeSelected}"
-                            ToolTip.Tip="Control Panel"
-                            Command="{Binding SelectPageCommand}"
-                            CommandParameter="{x:Static vm:NavPage.Home}">
-                        <i:Icon Value="fa-solid fa-sliders" />
-                    </Button>
-                    <Button Classes="nav-btn"
-                            Classes.selected="{Binding IsWavesSelected}"
-                            ToolTip.Tip="Wave Generator"
-                            Command="{Binding SelectPageCommand}"
-                            CommandParameter="{x:Static vm:NavPage.Waves}">
-                        <i:Icon Value="fa-solid fa-wave-square" />
-                    </Button>
-                </StackPanel>
-
-                <StackPanel Grid.Column="0" VerticalAlignment="Bottom" Spacing="5">
-                    <Button Classes="nav-btn"
-                            Classes.selected="{Binding IsSettingsSelected}"
-                            ToolTip.Tip="Settings"
-                            Command="{Binding SelectPageCommand}"
-                            CommandParameter="{x:Static vm:NavPage.Settings}">
-                        <i:Icon Value="fa-solid fa-gear" />
-                    </Button>
-                </StackPanel>
-
-                <Border Grid.Column="1" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="System Status" FontSize="24"
-                                   Foreground="{DynamicResource GoldBrush}" FontWeight="SemiBold" />
-                        <Separator Background="{DynamicResource GoldLow}" Margin="0,10" Height="1" />
-                        <TextBlock Text="Backend core running..." Foreground="{DynamicResource SecondaryText}" />
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Background="Transparent">
+                <!-- Left Navigation Panel -->
+                <Grid Grid.Column="0" Width="60" Background="Transparent">
+                    <StackPanel Spacing="10" Margin="5">
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsMixerSelected}"
+                                ToolTip.Tip="Mixer"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Mixer}">
+                            <i:Icon Value="fa-solid fa-sliders" />
+                        </Button>
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsWavesSelected}"
+                                ToolTip.Tip="Wave Generator"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Waves}">
+                            <i:Icon Value="fa-solid fa-wave-square" />
+                        </Button>
                     </StackPanel>
-                </Border>
 
-                <Grid Grid.Column="2" Background="Transparent" RowDefinitions="Auto, *">
-                    <Border Grid.Row="0" Padding="15" BorderBrush="{DynamicResource GoldLow}" BorderThickness="0,0,0,1">
-                        <TextBlock Text="ACTIVE CLIENTS" Foreground="{DynamicResource GoldBrush}"
-                                   FontSize="10" FontWeight="Bold" />
-                    </Border>
-
-                    <ListBox Grid.Row="1" ItemsSource="{Binding PlaceholderItems}" Background="Transparent">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="12" Margin="5">
-                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource GoldBrush}" />
-                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource PrimaryText}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <StackPanel VerticalAlignment="Bottom" Spacing="5" Margin="5">
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsSettingsSelected}"
+                                ToolTip.Tip="Settings"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Settings}">
+                            <i:Icon Value="fa-solid fa-gear" />
+                        </Button>
+                    </StackPanel>
                 </Grid>
+
+                <!-- Right Content Area -->
+                <Border Grid.Column="1" Padding="20" Background="Transparent">
+                    <Panel>
+                    <!-- Mixer Page -->
+                    <Grid IsVisible="{Binding IsMixerSelected}" ColumnDefinitions="*, 300">
+                        <!-- Left: Placeholder -->
+                        <Border Grid.Column="0" Padding="20" Background="Transparent">
+                            <TextBlock Text="Mixer Controls (Placeholder)" 
+                                       Foreground="{DynamicResource SecondaryText}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        
+                        <!-- Right: Connected Clients -->
+                        <Border Grid.Column="1" Background="Transparent" BorderBrush="{DynamicResource GoldLow}" BorderThickness="1,0,0,0">
+                            <Grid RowDefinitions="Auto, *, Auto">
+                                <Border Grid.Row="0" Padding="15" BorderBrush="{DynamicResource GoldLow}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="CONNECTED CLIENTS" Foreground="{DynamicResource GoldBrush}"
+                                               FontSize="10" FontWeight="Bold" />
+                                </Border>
+                                
+                                <ScrollViewer Grid.Row="1">
+                                    <ItemsControl ItemsSource="{Binding ConnectedClients}" Margin="10">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource Black}" 
+                                                        BorderBrush="{DynamicResource GoldLow}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="8" 
+                                                        Padding="12" 
+                                                        Margin="0,0,0,10">
+                                                    <Grid RowDefinitions="Auto, Auto, Auto, Auto">
+                                                        <TextBlock Grid.Row="0" 
+                                                                   Text="{Binding ClientType}" 
+                                                                   Foreground="{DynamicResource GoldBrush}"
+                                                                   FontWeight="SemiBold" FontSize="12"/>
+                                                        <TextBlock Grid.Row="1" 
+                                                                   Text="{Binding ClientId}" 
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
+                                                            <Ellipse Width="6" Height="6" 
+                                                                     Fill="{Binding StatusColor}" />
+                                                            <TextBlock Text="{Binding Status}" 
+                                                                       Foreground="{DynamicResource SecondaryText}"
+                                                                       FontSize="10"/>
+                                                        </StackPanel>
+                                                        <!-- Client Panel Buttons -->
+                                                        <Grid Grid.Row="3" ColumnDefinitions="*, Auto" Margin="0,8,0,0">
+                                                            <Button Grid.Column="0" 
+                                                                    HorizontalAlignment="Left"
+                                                                    Background="Transparent"
+                                                                    Padding="4">
+                                                                <i:Icon Value="fa-solid fa-ellipsis" FontSize="14" Foreground="{DynamicResource SecondaryText}"/>
+                                                            </Button>
+                                                            <Button Grid.Column="1" 
+                                                                    HorizontalAlignment="Right"
+                                                                    Background="Transparent"
+                                                                    Padding="4">
+                                                                <i:Icon Value="fa-solid fa-stop" FontSize="14" Foreground="#FF4444"/>
+                                                            </Button>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Waves Page -->
+                    <Grid IsVisible="{Binding IsWavesSelected}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <i:Icon Value="fa-solid fa-wave-square" FontSize="48" Foreground="{DynamicResource GoldBrush}" Margin="0,0,0,20"/>
+                            <TextBlock Text="Wave Generator" FontSize="24"
+                                       Foreground="{DynamicResource GoldBrush}" FontWeight="SemiBold" />
+                            <Separator Background="{DynamicResource GoldLow}" Margin="0,10" Width="200" Height="1" />
+                            <TextBlock Text="Waveform visualization placeholder..." 
+                                       Foreground="{DynamicResource SecondaryText}" />
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Settings Page -->
+                    <Grid IsVisible="{Binding IsSettingsSelected}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <i:Icon Value="fa-solid fa-gear" FontSize="48" Foreground="{DynamicResource GoldBrush}" Margin="0,0,0,20"/>
+                            <TextBlock Text="Settings" FontSize="24"
+                                       Foreground="{DynamicResource GoldBrush}" FontWeight="SemiBold" />
+                            <Separator Background="{DynamicResource GoldLow}" Margin="0,10" Width="200" Height="1" />
+                            <TextBlock Text="Application settings placeholder..." 
+                                       Foreground="{DynamicResource SecondaryText}" />
+                        </StackPanel>
+                    </Grid>
+                    </Panel>
+                </Border>
             </Grid>
         </Grid>
     </Border>
