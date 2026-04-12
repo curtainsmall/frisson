@@ -72,6 +72,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
+    [ObservableProperty]
+    private bool _isClientPanelExpanded = true;
+
     public bool IsMixerSelected => CurrentPage == NavPage.Mixer;
     public bool IsWavesSelected => CurrentPage == NavPage.Waves;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
@@ -87,6 +90,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SelectPage(NavPage page)
     {
         CurrentPage = page;
+    }
+
+    [RelayCommand]
+    private void ToggleClientPanel()
+    {
+        IsClientPanelExpanded = !IsClientPanelExpanded;
     }
 
     public MainWindowViewModel()
