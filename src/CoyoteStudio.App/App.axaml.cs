@@ -28,7 +28,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        _appCore = new AppCore();
+        _appCore = AppCore.Instance;
 
         _appCore.ErrorMessager.Listen<ErrorMessage>(msg =>
         {

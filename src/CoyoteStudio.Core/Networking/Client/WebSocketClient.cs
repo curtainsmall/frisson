@@ -11,13 +11,18 @@ internal enum WebSocketClientKind
     Device
 }
 
+internal class BindRequestedEventArgs : EventArgs
+{
+    public JsonDocument JsonDocument { get; init; }
+
+    public BindRequestedEventArgs(JsonDocument jsonDocument)
+    {
+        JsonDocument = jsonDocument;
+    }
+}
+
 internal class WebSocketClient : IDisposable
 {
-    internal record ChannelState
-    {
-        public int Strength { get; private set; }
-    }
-
     public Action? OnDisposing { get; init; }
 
     public Guid Id { get; init; }
@@ -25,7 +30,7 @@ internal class WebSocketClient : IDisposable
     /// <summary>
     /// Event raised when a valid bind message is received with matching GUID.
     /// </summary>
-    public event EventHandler? BindRequested;
+    public event EventHandler<BindRequestedEventArgs>? BindRequested;
 
     public WebSocketClient(Guid id, Action? onDisposing)
     {
@@ -46,13 +51,13 @@ internal class WebSocketClient : IDisposable
         // Check if this is a valid bind message with matching GUID
         if (scheme.BindId == Id)
         {
-            OnBindRequested();
+            OnBindRequested(jsonDoc);
         }
     }
 
-    protected virtual void OnBindRequested()
+    protected virtual void OnBindRequested(JsonDocument jsonDoc)
     {
-        BindRequested?.Invoke(this, EventArgs.Empty);
+        BindRequested?.Invoke(this, new BindRequestedEventArgs(jsonDoc));
     }
 
     public void Dispose()

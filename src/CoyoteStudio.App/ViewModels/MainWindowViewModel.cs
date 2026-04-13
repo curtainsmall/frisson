@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 
@@ -6,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using CoyoteStudio.App.Services;
+using CoyoteStudio.Core;
 
 namespace CoyoteStudio.App.ViewModels;
 
@@ -75,6 +77,32 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isClientPanelExpanded = true;
 
+    /// <summary>
+    /// Currently selected device client ID for Channel control.
+    /// </summary>
+    [ObservableProperty]
+    private Guid? _selectedDeviceClientId;
+
+    /// <summary>
+    /// Channel A strength value from the selected device.
+    /// </summary>
+    public int ChannelAStrength => AppCore.Instance.GetDeviceChannelStrength(SelectedDeviceClientId, 'A');
+
+    /// <summary>
+    /// Channel A limit value from the selected device.
+    /// </summary>
+    public int ChannelALimit => AppCore.Instance.GetDeviceChannelLimit(SelectedDeviceClientId, 'A');
+
+    /// <summary>
+    /// Channel B strength value from the selected device.
+    /// </summary>
+    public int ChannelBStrength => AppCore.Instance.GetDeviceChannelStrength(SelectedDeviceClientId, 'B');
+
+    /// <summary>
+    /// Channel B limit value from the selected device.
+    /// </summary>
+    public int ChannelBLimit => AppCore.Instance.GetDeviceChannelLimit(SelectedDeviceClientId, 'B');
+
     public bool IsMixerSelected => CurrentPage == NavPage.Mixer;
     public bool IsWavesSelected => CurrentPage == NavPage.Waves;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
@@ -84,6 +112,14 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsMixerSelected));
         OnPropertyChanged(nameof(IsWavesSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
+    }
+
+    partial void OnSelectedDeviceClientIdChanged(Guid? value)
+    {
+        OnPropertyChanged(nameof(ChannelAStrength));
+        OnPropertyChanged(nameof(ChannelALimit));
+        OnPropertyChanged(nameof(ChannelBStrength));
+        OnPropertyChanged(nameof(ChannelBLimit));
     }
 
     [RelayCommand]

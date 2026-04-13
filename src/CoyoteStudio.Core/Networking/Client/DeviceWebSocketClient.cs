@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using CoyoteStudio.Core.Networking.Client.Scheme;
 
 namespace CoyoteStudio.Core.Networking.Client;
@@ -52,10 +54,22 @@ internal class FeedbackTriggeredEventArgs : EventArgs
         }
     }
 }
-internal sealed class DeviceChannelData
+internal sealed class DeviceChannelData : ObservableObject
 {
-    public int Strength { get; set; } = 0;
-    public int Limit { get; set; } = 100;
+    private int _strength = 0;
+    private int _limit = 100;
+
+    public int Strength
+    {
+        get => _strength;
+        set => SetProperty(ref _strength, value);
+    }
+
+    public int Limit
+    {
+        get => _limit;
+        set => SetProperty(ref _limit, value);
+    }
 }
 
 internal class DeviceWebSocketClient : WebSocketClient
@@ -72,7 +86,11 @@ internal class DeviceWebSocketClient : WebSocketClient
     public override void Setup(string jsonString)
     {
         using var jsonDoc = JsonDocument.Parse(jsonString);
+        Setup(jsonDoc);
+    }
 
+    public override void Setup(JsonDocument jsonDoc)
+    {
         var scheme = new DeviceInputProtocolScheme(jsonDoc);
 
         if (scheme.Strength is not null)
