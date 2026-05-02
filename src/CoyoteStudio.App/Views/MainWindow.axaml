@@ -10,10 +10,11 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CoyoteStudio.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/CoyoteStudio.ico"
         Title="{loc:Loc AppTitle}"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
+        
         Background="{DynamicResource Black}"
         MinWidth="900"
         MinHeight="600">
@@ -41,6 +42,7 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
             <Setter Property="CornerRadius" Value="12" />
         </Style>
+
     </Window.Styles>
 
     <Design.DataContext>
@@ -52,11 +54,10 @@
     <Border BorderThickness="4" Background="Transparent">
         <Grid RowDefinitions="Auto, *" Background="Transparent">
             <Border
-            Grid.Row="0"
-            Height="32"
-            Background="Transparent"
-            PointerPressed="OnTitleBarPointerPressed">
-                <TextBlock Text="{loc:Loc AppTitle}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0" />
+                Grid.Row="0"
+                Background="{DynamicResource Black}"
+                PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14"/>
             </Border>
 
             <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
@@ -295,7 +296,7 @@
                 
                 <!-- Right: Collapsible Connected Clients Panel -->
                 <Grid Grid.Column="2" Width="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToWidthConverter.Instance}, ConverterParameter=300}">
-                    <Grid RowDefinitions="Auto, *">
+                    <Grid RowDefinitions="Auto, Auto, *">
                         <!-- Toggle Button Header -->
                         <Border Grid.Row="0" Padding="10" BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,0,1">
                             <Button Background="Transparent" 
@@ -303,23 +304,54 @@
                                     Padding="5"
                                     HorizontalAlignment="Stretch"
                                     Command="{Binding ToggleClientPanelCommand}">
-                                <Grid ColumnDefinitions="*, Auto">
-                                    <TextBlock Grid.Column="0" 
-                                               Text="{loc:Loc ConnectedClients}" 
-                                               Foreground="{DynamicResource AccentBrush}"
-                                               FontSize="10" 
-                                               FontWeight="Bold"
-                                               IsVisible="{Binding IsClientPanelExpanded}"/>
-                                    <i:Icon Grid.Column="1" 
+                                <Panel>
+                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsClientPanelExpanded}">
+                                        <TextBlock Grid.Column="0" 
+                                                   Text="{loc:Loc ConnectedClients}" 
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="10" 
+                                                   FontWeight="Bold"/>
+                                        <i:Icon Grid.Column="1" 
+                                                Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}" 
+                                                FontSize="12" 
+                                                Foreground="{DynamicResource AccentBrush}"/>
+                                    </Grid>
+                                    <i:Icon IsVisible="{Binding IsClientPanelCollapsed}"
                                             Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}" 
                                             FontSize="12" 
-                                            Foreground="{DynamicResource AccentBrush}"/>
-                                </Grid>
+                                            Foreground="{DynamicResource AccentBrush}"
+                                            HorizontalAlignment="Center"/>
+                                </Panel>
                             </Button>
                         </Border>
                         
+                        <!-- Collapsed Client Counts -->
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Vertical" 
+                                    Spacing="4"
+                                    IsVisible="{Binding IsClientPanelCollapsed}"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,8,0,0">
+                            <TextBlock Text="{Binding ActiveClientCount}" 
+                                       Foreground="#00CC00" 
+                                       FontWeight="Bold" 
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"/>
+                            <Rectangle Height="1" 
+                                       Width="20"
+                                       Fill="{DynamicResource AccentMuted}" 
+                                       Margin="0,2"
+                                       IsVisible="{Binding HasUnknownClients}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding UnknownClientCount}" 
+                                       Foreground="#888888" 
+                                       FontSize="12"
+                                       IsVisible="{Binding HasUnknownClients}"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        
                         <!-- Client List -->
-                        <ScrollViewer Grid.Row="1" IsVisible="{Binding IsClientPanelExpanded}">
+                        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsClientPanelExpanded}">
                             <ItemsControl ItemsSource="{Binding ConnectedClients}" Margin="10">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>

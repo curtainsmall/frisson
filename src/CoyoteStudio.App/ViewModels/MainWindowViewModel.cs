@@ -60,6 +60,21 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<ConnectedClientInfo> ConnectedClients { get; } = new();
 
     /// <summary>
+    /// Count of active clients (Device + Remote).
+    /// </summary>
+    public int ActiveClientCount => ConnectedClients.Count(c => c.ClientTypeKey is "ClientTypeDevice" or "ClientTypeRemote");
+
+    /// <summary>
+    /// Count of unknown clients.
+    /// </summary>
+    public int UnknownClientCount => ConnectedClients.Count(c => c.ClientTypeKey == "ClientTypeUnknown");
+
+    /// <summary>
+    /// Whether there are any unknown clients (for visibility binding).
+    /// </summary>
+    public bool HasUnknownClients => UnknownClientCount > 0;
+
+    /// <summary>
     /// Available languages for selection.
     /// </summary>
     public ObservableCollection<LanguageOption> AvailableLanguages { get; } = new()
@@ -76,6 +91,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isClientPanelExpanded = true;
+
+    public bool IsClientPanelCollapsed => !IsClientPanelExpanded;
 
     /// <summary>
     /// Currently selected device client ID for Channel control.
@@ -122,6 +139,11 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ChannelBLimit));
     }
 
+    partial void OnIsClientPanelExpandedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsClientPanelCollapsed));
+    }
+
     [RelayCommand]
     private void SelectPage(NavPage page)
     {
@@ -139,6 +161,13 @@ public partial class MainWindowViewModel : ViewModelBase
         // Set default language to en-US
         _selectedLanguage = AvailableLanguages.First(l => l.Code == "en-US");
         LocalizationService.Instance.SetLanguage("en-US");
+
+        ConnectedClients.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(ActiveClientCount));
+            OnPropertyChanged(nameof(UnknownClientCount));
+            OnPropertyChanged(nameof(HasUnknownClients));
+        };
 
         AddPlaceholderClients();
     }
@@ -167,8 +196,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ClientId = "550e8400-e29b-41d4-a716-446655440002",
             ClientTypeKey = "ClientTypeRemote",
-            StatusKey = "StatusBound",
-            StatusColor = "#FFD700"
+            StatusKey = "StatusConnected",
+            StatusColor = "#00FF00"
         });
         ConnectedClients.Add(new ConnectedClientInfo
         {
