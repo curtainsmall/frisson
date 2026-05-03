@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 
@@ -31,7 +32,7 @@ public class LanguageOption
 /// Represents a connected client information for UI display.
 /// Uses localization keys for ClientType and Status to support dynamic language switching.
 /// </summary>
-public class ConnectedClientInfo
+public class ConnectedClientInfo : INotifyPropertyChanged
 {
     public required string ClientId { get; init; }
     /// <summary>
@@ -43,6 +44,22 @@ public class ConnectedClientInfo
     /// </summary>
     public required string StatusKey { get; init; }
     public required string StatusColor { get; init; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected != value)
+            {
+                _isSelected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -60,6 +77,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<ConnectedClientInfo> ConnectedClients { get; } = new();
 
     /// <summary>
+    /// List of device-type clients for selection.
+    /// </summary>
+    public ObservableCollection<ConnectedClientInfo> DeviceClients => new(
+        ConnectedClients.Where(c => c.ClientTypeKey == "ClientTypeDevice"));
+
+    /// <summary>
     /// Count of active clients (Device + Remote).
     /// </summary>
     public int ActiveClientCount => ConnectedClients.Count(c => c.ClientTypeKey is "ClientTypeDevice" or "ClientTypeRemote");
@@ -73,6 +96,26 @@ public partial class MainWindowViewModel : ViewModelBase
     /// Whether there are any unknown clients (for visibility binding).
     /// </summary>
     public bool HasUnknownClients => UnknownClientCount > 0;
+
+    /// <summary>
+    /// Whether there are any device clients connected.
+    /// </summary>
+    public bool HasDeviceClients => ConnectedClients.Any(c => c.ClientTypeKey == "ClientTypeDevice");
+
+    /// <summary>
+    /// Whether a device is currently selected for control.
+    /// </summary>
+    public bool HasSelectedDevice => SelectedDeviceClientId.HasValue;
+
+    /// <summary>
+    /// Show 'No Device Selected' panel when no device is selected.
+    /// </summary>
+    public bool ShowNoDevicePanel => !HasSelectedDevice;
+
+    /// <summary>
+    /// Show channel controls when a device is selected.
+    /// </summary>
+    public bool ShowChannelControls => HasSelectedDevice;
 
     /// <summary>
     /// Available languages for selection.
@@ -133,10 +176,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnSelectedDeviceClientIdChanged(Guid? value)
     {
+        // Update selection highlight on client cards
+        var selectedId = value?.ToString() ?? string.Empty;
+        foreach (var client in ConnectedClients)
+        {
+            client.IsSelected = client.ClientId == selectedId;
+        }
+
         OnPropertyChanged(nameof(ChannelAStrength));
         OnPropertyChanged(nameof(ChannelALimit));
         OnPropertyChanged(nameof(ChannelBStrength));
         OnPropertyChanged(nameof(ChannelBLimit));
+        OnPropertyChanged(nameof(HasSelectedDevice));
+        OnPropertyChanged(nameof(ShowNoDevicePanel));
+        OnPropertyChanged(nameof(ShowChannelControls));
     }
 
     partial void OnIsClientPanelExpandedChanged(bool value)
@@ -156,6 +209,20 @@ public partial class MainWindowViewModel : ViewModelBase
         IsClientPanelExpanded = !IsClientPanelExpanded;
     }
 
+    [RelayCommand]
+    private void SelectDevice(string clientId)
+    {
+        // Only allow selecting Device-type clients
+        var client = ConnectedClients.FirstOrDefault(c => c.ClientId == clientId);
+        if (client?.ClientTypeKey != "ClientTypeDevice")
+            return;
+
+        if (Guid.TryParse(clientId, out var id))
+        {
+            SelectedDeviceClientId = id;
+        }
+    }
+
     public MainWindowViewModel()
     {
         // Set default language to en-US
@@ -167,6 +234,10 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(ActiveClientCount));
             OnPropertyChanged(nameof(UnknownClientCount));
             OnPropertyChanged(nameof(HasUnknownClients));
+            OnPropertyChanged(nameof(HasDeviceClients));
+            OnPropertyChanged(nameof(DeviceClients));
+            OnPropertyChanged(nameof(ShowNoDevicePanel));
+            OnPropertyChanged(nameof(ShowChannelControls));
         };
 
         AddPlaceholderClients();

@@ -129,6 +129,10 @@
   <data name="MenuItem3" xml:space="preserve">
     <value>占位选项 3</value>
   </data>
+  <!-- 设备选择 -->
+  <data name="NoDeviceSelected" xml:space="preserve">
+    <value>未选择设备</value>
+  </data>
   <!-- 设置页面 -->
   <data name="Language" xml:space="preserve">
     <value>语言</value>

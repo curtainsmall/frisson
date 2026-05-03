@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 
+using CoyoteStudio.App.ViewModels;
+
 namespace CoyoteStudio.App.Views;
 
 public partial class MainWindow : Window
@@ -18,6 +20,17 @@ public partial class MainWindow : Window
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
             this.BeginMoveDrag(e);
+        }
+    }
+
+    private void OnClientCardPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border border || border.Tag is not string clientId)
+            return;
+
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.SelectDeviceCommand.Execute(clientId);
         }
     }
 }
