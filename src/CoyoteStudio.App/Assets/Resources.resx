@@ -64,15 +64,15 @@
   </data>
   <!-- Navigation -->
   <data name="NavMixer" xml:space="preserve">
-    <value>Mixer</value>
+    <value>Control Panel</value>
   </data>
   <data name="NavWaveGenerator" xml:space="preserve">
-    <value>Wave Generator</value>
+    <value>Wave</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <!-- Mixer Page -->
+  <!-- Control Panel Page -->
   <data name="ChannelA" xml:space="preserve">
     <value>Channel A</value>
   </data>

@@ -40,6 +40,7 @@
 
         <Style Selector="Button.nav-btn.selected /template/ ContentPresenter">
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
             <Setter Property="CornerRadius" Value="12" />
         </Style>
 
@@ -51,11 +52,12 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Border BorderThickness="4" Background="Transparent">
+    <Border BorderThickness="4" Background="Transparent" Padding="8,0,8,8">
         <Grid RowDefinitions="Auto, *" Background="Transparent">
             <Border
                 Grid.Row="0"
                 Background="{DynamicResource Black}"
+                Padding="10,8,140,0"
                 PointerPressed="OnTitleBarPointerPressed">
                 <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14"/>
             </Border>
@@ -94,8 +96,8 @@
                 <!-- Center Content Area -->
                 <Border Grid.Column="1" Padding="20" Background="Transparent">
                     <Panel>
-                    <!-- Mixer Page -->
-                    <Grid IsVisible="{Binding IsMixerSelected}" RowDefinitions="Auto,Auto,Auto,*" Margin="10">
+                    <!-- Control Panel Page -->
+                    <Grid IsVisible="{Binding IsMixerSelected}" RowDefinitions="Auto" Margin="10">
                         <!-- Channel A & B Controls -->
                         <Grid Grid.Row="0" ColumnDefinitions="*,*" Margin="0,0,0,20">
                             <!-- Channel A -->
@@ -144,101 +146,6 @@
                             </Border>
                         </Grid>
                         
-                        <!-- Play Button & Settings -->
-                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,15">
-                            <Button Grid.Column="0" Width="50" Height="50" Background="{DynamicResource SurfaceLight}" CornerRadius="10" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                <i:Icon Value="fa-solid fa-play" FontSize="20" Foreground="{DynamicResource AccentBrush}"/>
-                            </Button>
-                            <Button Grid.Column="1" Height="50" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="10,0" Padding="15,0" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                <TextBlock Text="{loc:Loc SetAccessoryMode}" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
-                            </Button>
-                            <Button Grid.Column="2" Width="50" Height="50" Background="{DynamicResource SurfaceLight}" CornerRadius="10" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                <i:Icon Value="fa-solid fa-rotate-right" FontSize="20" Foreground="{DynamicResource AccentBrush}"/>
-                            </Button>
-                        </Grid>
-                        
-                        <!-- AB Sync Label -->
-                        <Button Grid.Row="2" Height="50" Background="{DynamicResource AccentBrush}" CornerRadius="8" Padding="12,0" Margin="0,0,0,15" HorizontalAlignment="Stretch" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                            <TextBlock Text="{loc:Loc ABChannelSync}" Foreground="{DynamicResource Black}" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
-                        </Button>
-                        
-                        <!-- Waveform Selection Area -->
-                        <Grid Grid.Row="3" RowDefinitions="Auto,*,Auto">
-                            <!-- Section Header -->
-                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="☰" Foreground="{DynamicResource AccentBrush}" FontSize="16"/>
-                                    <TextBlock Text="{loc:Loc CustomCombination}" Foreground="{DynamicResource AccentBrush}" FontSize="16" FontWeight="SemiBold"/>
-                                </StackPanel>
-                                
-                            </Grid>
-                            
-                            <!-- Waveform Grid -->
-                            <ScrollViewer Grid.Row="1">
-                                <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto,Auto">
-                                    <!-- Row 1 -->
-                                    <Button Grid.Row="0" Grid.Column="0" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="0" Grid.Column="1" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="0" Grid.Column="2" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="0" Grid.Column="3" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    
-                                    <!-- Row 2 -->
-                                    <Button Grid.Row="1" Grid.Column="0" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="1" Grid.Column="1" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="1" Grid.Column="2" Background="{DynamicResource AccentBrush}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource Black}"/>
-                                    </Button>
-                                    <Button Grid.Row="1" Grid.Column="3" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    
-                                    <!-- Row 3 -->
-                                    <Button Grid.Row="2" Grid.Column="0" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="2" Grid.Column="1" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                    </Button>
-                                    <Button Grid.Row="2" Grid.Column="2" Background="{DynamicResource AccentBrush}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource Black}"/>
-                                    </Button>
-                                    <Button Grid.Row="2" Grid.Column="3" Background="{DynamicResource AccentBrush}" CornerRadius="10" Width="70" Height="70" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                        <i:Icon Value="fa-solid fa-wave-square" FontSize="24" Foreground="{DynamicResource Black}"/>
-                                    </Button>
-                                </Grid>
-                            </ScrollViewer>
-                            
-                            <!-- Bottom Control Bar -->
-                            <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" Margin="0,15,0,0">
-                                <Button Grid.Column="0" Width="70" Height="70" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <i:Icon Value="fa-solid fa-repeat" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                </Button>
-                                <Button Grid.Column="1" Width="70" Height="70" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <i:Icon Value="fa-solid fa-pause" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                </Button>
-                                <Button Grid.Column="2" Width="70" Height="70" Background="{DynamicResource AccentBrush}" CornerRadius="10" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <i:Icon Value="fa-solid fa-play" FontSize="24" Foreground="{DynamicResource Black}"/>
-                                </Button>
-                                <Button Grid.Column="3" Width="70" Height="70" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <i:Icon Value="fa-solid fa-stopwatch" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                </Button>
-                                <Button Grid.Column="4" Width="70" Height="70" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="4" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <i:Icon Value="fa-solid fa-list" FontSize="24" Foreground="{DynamicResource AccentBrush}"/>
-                                </Button>
-                            </Grid>
-                        </Grid>
                     </Grid>
                     
                     <!-- Waves Page -->

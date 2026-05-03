@@ -55,7 +55,7 @@ public partial class MainWindowViewModel : ViewModelBase
     };
 
     /// <summary>
-    /// List of all connected clients for display in Mixer page.
+    /// List of all connected clients for display in Control Panel page.
     /// </summary>
     public ObservableCollection<ConnectedClientInfo> ConnectedClients { get; } = new();
 

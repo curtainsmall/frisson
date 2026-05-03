@@ -64,10 +64,10 @@
   </data>
   <!-- 导航 -->
   <data name="NavMixer" xml:space="preserve">
-    <value>混音器</value>
+    <value>控制面板</value>
   </data>
   <data name="NavWaveGenerator" xml:space="preserve">
-    <value>波形生成器</value>
+    <value>波形</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>设置</value>
