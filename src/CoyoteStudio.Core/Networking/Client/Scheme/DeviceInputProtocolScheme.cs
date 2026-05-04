@@ -99,7 +99,7 @@ internal sealed class DeviceInputProtocolScheme : ProtocolScheme
         {
             case "strength":
             {
-                // Format: "strength+A+B+limitA+limitB" (e.g., "strength+10+20+100+100")
+                // Format: "strength-A+B+limitA+limitB" (e.g., "strength-10+20+100+100")
                 var payload = messageString.Length > 9 ? messageString[9..] : "";
                 string[] numStrings = payload.Split('+');
                 if (numStrings.Length != 4)
@@ -116,7 +116,7 @@ internal sealed class DeviceInputProtocolScheme : ProtocolScheme
             }
             case "feedback":
             {
-                // Format: "feedback+N" (e.g., "feedback+5")
+                // Format: "feedback-N" (e.g., "feedback-5")
                 var payload = messageString.Length > 9 ? messageString[9..] : "";
 
                 if (!int.TryParse(payload, default, out var num))

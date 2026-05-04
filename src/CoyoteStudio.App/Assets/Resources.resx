@@ -110,13 +110,13 @@
     <value>Pending</value>
   </data>
   <!-- Client Types -->
-  <data name="ClientTypeDevice" xml:space="preserve">
+  <data name="WebSocketClientKindDevice" xml:space="preserve">
     <value>Device</value>
   </data>
-  <data name="ClientTypeRemote" xml:space="preserve">
+  <data name="WebSocketClientKindRemote" xml:space="preserve">
     <value>Remote</value>
   </data>
-  <data name="ClientTypeUnknown" xml:space="preserve">
+  <data name="WebSocketClientKindUnknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
   <!-- Menu Items -->

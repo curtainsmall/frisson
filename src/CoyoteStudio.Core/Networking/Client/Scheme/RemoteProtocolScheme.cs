@@ -87,23 +87,66 @@ internal sealed class RemoteProtocolScheme : ProtocolScheme
 
     private RemoteMessage? ParseMessage(JsonElement rootElement)
     {
-        if (rootElement.TryGetProperty("heartbeat", out var heartbeatElement))
+        if (rootElement.TryGetProperty("heartbeat", out _))
         {
             return new RemoteConnectionMessage(RemoteConnectionMessageKind.Heartbeat);
         }
-        else if (rootElement.TryGetProperty("error", out var errorElement))
+        else if (rootElement.TryGetProperty("error", out _))
         {
             return new RemoteConnectionMessage(RemoteConnectionMessageKind.Error);
         }
-        else if (rootElement.TryGetProperty("bind", out var bindElement))
+        else if (rootElement.TryGetProperty("bind", out _))
         {
             return new RemoteConnectionMessage(RemoteConnectionMessageKind.Bind);
         }
-        else if (rootElement.TryGetProperty("break", out var breakElement))
+        else if (rootElement.TryGetProperty("break", out _))
         {
             return new RemoteConnectionMessage(RemoteConnectionMessageKind.Break);
         }
+        else if (rootElement.TryGetProperty("strength", out var strengthElement))
+        {
+            return ParseStrengthMessage(strengthElement);
+        }
         else
             return null;
+    }
+
+    private static RemoteStrengthMessage? ParseStrengthMessage(JsonElement strengthElement)
+    {
+        if (strengthElement.ValueKind != JsonValueKind.Object)
+            return null;
+
+        if (!strengthElement.TryGetProperty("channel", out var channelElement))
+            return null;
+
+        var channelKind = channelElement.GetString() switch
+        {
+            "A" => DeviceChannelKind.A,
+            "B" => DeviceChannelKind.B,
+            _ => (DeviceChannelKind?)null
+        };
+        if (channelKind is null)
+            return null;
+
+        if (!strengthElement.TryGetProperty("operation", out var operationElement))
+            return null;
+
+        var operationKind = operationElement.GetString() switch
+        {
+            "vary" => RemoteStrengthOperationKind.VaryValue,
+            "set" => RemoteStrengthOperationKind.SetValue,
+            "limit" => RemoteStrengthOperationKind.SetLimit,
+            _ => (RemoteStrengthOperationKind?)null
+        };
+        if (operationKind is null)
+            return null;
+
+        if (!strengthElement.TryGetProperty("value", out var valueElement))
+            return null;
+
+        if (!valueElement.TryGetInt32(out var value))
+            return null;
+
+        return new RemoteStrengthMessage(channelKind.Value, operationKind.Value, value);
     }
 }

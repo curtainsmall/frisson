@@ -75,6 +75,7 @@ internal sealed class DeviceChannelData : ObservableObject
 internal class DeviceWebSocketClient : WebSocketClient
 {
     public event EventHandler<FeedbackTriggeredEventArgs>? FeedbackTriggered;
+    public event EventHandler? StateChanged;
 
     public DeviceChannelData ChannelA { get; private set; } = new();
     public DeviceChannelData ChannelB { get; private set; } = new();
@@ -99,6 +100,7 @@ internal class DeviceWebSocketClient : WebSocketClient
             ChannelB.Strength = scheme.Strength.StrengthB;
             ChannelA.Limit = scheme.Strength.limitA;
             ChannelB.Limit = scheme.Strength.limitB;
+            StateChanged?.Invoke(this, EventArgs.Empty);
         }
         else if (scheme.Feedback is not null)
         {

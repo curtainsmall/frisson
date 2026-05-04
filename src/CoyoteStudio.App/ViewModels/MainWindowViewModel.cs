@@ -3,12 +3,15 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using CoyoteStudio.App.Services;
 using CoyoteStudio.Core;
+using CoyoteStudio.Core.Networking.Client;
+using CoyoteStudio.Core.Networking.Server;
 
 namespace CoyoteStudio.App.ViewModels;
 
@@ -30,19 +33,19 @@ public class LanguageOption
 
 /// <summary>
 /// Represents a connected client information for UI display.
-/// Uses localization keys for ClientType and Status to support dynamic language switching.
+/// Uses localization keys for ClientType to support dynamic language switching.
 /// </summary>
 public class ConnectedClientInfo : INotifyPropertyChanged
 {
-    public required string ClientId { get; init; }
+    public required Guid ClientId { get; init; }
     /// <summary>
-    /// Localization key for client type (e.g., "ClientTypeDevice", "ClientTypeRemote", "ClientTypeUnknown").
+    /// Type of the connected client.
     /// </summary>
-    public required string ClientTypeKey { get; init; }
+    public required WebSocketClientKind ClientType { get; init; }
     /// <summary>
-    /// Localization key for status (e.g., "StatusConnected", "StatusBound", "StatusPending").
+    /// Connection status of the client.
     /// </summary>
-    public required string StatusKey { get; init; }
+    public required WebClientConnectionStatus Status { get; init; }
     public required string StatusColor { get; init; }
 
     private bool _isSelected;
@@ -80,17 +83,17 @@ public partial class MainWindowViewModel : ViewModelBase
     /// List of device-type clients for selection.
     /// </summary>
     public ObservableCollection<ConnectedClientInfo> DeviceClients => new(
-        ConnectedClients.Where(c => c.ClientTypeKey == "ClientTypeDevice"));
+        ConnectedClients.Where(c => c.ClientType == WebSocketClientKind.Device));
 
     /// <summary>
     /// Count of active clients (Device + Remote).
     /// </summary>
-    public int ActiveClientCount => ConnectedClients.Count(c => c.ClientTypeKey is "ClientTypeDevice" or "ClientTypeRemote");
+    public int ActiveClientCount => ConnectedClients.Count(c => c.ClientType is WebSocketClientKind.Device or WebSocketClientKind.Remote);
 
     /// <summary>
     /// Count of unknown clients.
     /// </summary>
-    public int UnknownClientCount => ConnectedClients.Count(c => c.ClientTypeKey == "ClientTypeUnknown");
+    public int UnknownClientCount => ConnectedClients.Count(c => c.ClientType == WebSocketClientKind.Unknown);
 
     /// <summary>
     /// Whether there are any unknown clients (for visibility binding).
@@ -100,7 +103,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Whether there are any device clients connected.
     /// </summary>
-    public bool HasDeviceClients => ConnectedClients.Any(c => c.ClientTypeKey == "ClientTypeDevice");
+    public bool HasDeviceClients => ConnectedClients.Any(c => c.ClientType == WebSocketClientKind.Device);
 
     /// <summary>
     /// Whether a device is currently selected for control.
@@ -177,10 +180,9 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedDeviceClientIdChanged(Guid? value)
     {
         // Update selection highlight on client cards
-        var selectedId = value?.ToString() ?? string.Empty;
         foreach (var client in ConnectedClients)
         {
-            client.IsSelected = client.ClientId == selectedId;
+            client.IsSelected = client.ClientId == value;
         }
 
         OnPropertyChanged(nameof(ChannelAStrength));
@@ -210,17 +212,51 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SelectDevice(string clientId)
+    private void SelectDevice(Guid clientId)
     {
         // Only allow selecting Device-type clients
         var client = ConnectedClients.FirstOrDefault(c => c.ClientId == clientId);
-        if (client?.ClientTypeKey != "ClientTypeDevice")
+        if (client?.ClientType != WebSocketClientKind.Device)
             return;
 
-        if (Guid.TryParse(clientId, out var id))
-        {
-            SelectedDeviceClientId = id;
-        }
+        SelectedDeviceClientId = clientId;
+    }
+
+    [RelayCommand]
+    private async Task IncreaseChannelA()
+    {
+        if (SelectedDeviceClientId.HasValue)
+            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 1, 5);
+    }
+
+    [RelayCommand]
+    private async Task DecreaseChannelA()
+    {
+        if (SelectedDeviceClientId.HasValue)
+            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 1, -5);
+    }
+
+    [RelayCommand]
+    private async Task IncreaseChannelB()
+    {
+        if (SelectedDeviceClientId.HasValue)
+            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 2, 5);
+    }
+
+    [RelayCommand]
+    private async Task DecreaseChannelB()
+    {
+        if (SelectedDeviceClientId.HasValue)
+            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 2, -5);
+    }
+
+    /// <summary>
+    /// Direct-set strength for Remote forwarding. Channel 1=A, 2=B.
+    /// </summary>
+    public async Task SetChannelStrengthAsync(int channel, int value)
+    {
+        if (SelectedDeviceClientId.HasValue)
+            await AppCore.Instance.SendStrengthSetAsync(SelectedDeviceClientId.Value, channel, value);
     }
 
     public MainWindowViewModel()
@@ -240,7 +276,61 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(ShowChannelControls));
         };
 
+        AppCore.Instance.DeviceStateChanged += OnDeviceStateChanged;
+        AppCore.Instance.ClientConnected += OnClientConnected;
+        AppCore.Instance.ClientDisconnected += OnClientDisconnected;
+
+#if DEBUG
         AddPlaceholderClients();
+#endif
+    }
+
+    private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
+    {
+        if (e.DeviceId == SelectedDeviceClientId)
+        {
+            OnPropertyChanged(nameof(ChannelAStrength));
+            OnPropertyChanged(nameof(ChannelALimit));
+            OnPropertyChanged(nameof(ChannelBStrength));
+            OnPropertyChanged(nameof(ChannelBLimit));
+        }
+    }
+
+    private void OnClientConnected(object? sender, ClientConnectionEventArgs e)
+    {
+        var statusColor = e.Status switch
+        {
+            WebClientConnectionStatus.Connected => "#00FF00",
+            _ => "#888888"
+        };
+
+        // Remove existing entry if present (e.g., reconnection)
+        var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+        if (existing is not null)
+            ConnectedClients.Remove(existing);
+
+        ConnectedClients.Add(new ConnectedClientInfo
+        {
+            ClientId = e.ClientId,
+            ClientType = e.Kind,
+            Status = e.Status,
+            StatusColor = statusColor
+        });
+    }
+
+    private void OnClientDisconnected(object? sender, ClientConnectionEventArgs e)
+    {
+        var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+        if (existing is not null)
+        {
+            ConnectedClients.Remove(existing);
+
+            // Clear selected device if it was the disconnected one
+            if (SelectedDeviceClientId == e.ClientId)
+            {
+                SelectedDeviceClientId = null;
+            }
+        }
     }
 
     partial void OnSelectedLanguageChanged(LanguageOption value)
@@ -258,23 +348,23 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         ConnectedClients.Add(new ConnectedClientInfo
         {
-            ClientId = "550e8400-e29b-41d4-a716-446655440001",
-            ClientTypeKey = "ClientTypeDevice",
-            StatusKey = "StatusConnected",
+            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
+            ClientType = WebSocketClientKind.Device,
+            Status = WebClientConnectionStatus.Connected,
             StatusColor = "#00FF00"
         });
         ConnectedClients.Add(new ConnectedClientInfo
         {
-            ClientId = "550e8400-e29b-41d4-a716-446655440002",
-            ClientTypeKey = "ClientTypeRemote",
-            StatusKey = "StatusConnected",
+            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
+            ClientType = WebSocketClientKind.Remote,
+            Status = WebClientConnectionStatus.Connected,
             StatusColor = "#00FF00"
         });
         ConnectedClients.Add(new ConnectedClientInfo
         {
-            ClientId = "550e8400-e29b-41d4-a716-446655440003",
-            ClientTypeKey = "ClientTypeUnknown",
-            StatusKey = "StatusPending",
+            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"),
+            ClientType = WebSocketClientKind.Unknown,
+            Status = WebClientConnectionStatus.Pending,
             StatusColor = "#888888"
         });
     }

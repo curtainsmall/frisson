@@ -1,3 +1,5 @@
+using System;
+
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -25,7 +27,7 @@ public partial class MainWindow : Window
 
     private void OnClientCardPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is not Border border || border.Tag is not string clientId)
+        if (sender is not Border border || border.Tag is not Guid clientId)
             return;
 
         if (DataContext is MainWindowViewModel vm)

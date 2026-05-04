@@ -2,8 +2,33 @@
 using System.Text.Json;
 
 using CoyoteStudio.Core.Networking.Client;
+using CoyoteStudio.Core.Networking.Client.Scheme;
 
 namespace CoyoteStudio.Core.Networking.Server;
+
+public sealed class DeviceStateChangedEventArgs : EventArgs
+{
+    public Guid DeviceId { get; }
+
+    public DeviceStateChangedEventArgs(Guid deviceId)
+    {
+        DeviceId = deviceId;
+    }
+}
+
+public sealed class ClientConnectionEventArgs : EventArgs
+{
+    public Guid ClientId { get; }
+    public WebSocketClientKind Kind { get; }
+    public WebClientConnectionStatus Status { get; }
+
+    public ClientConnectionEventArgs(Guid clientId, WebSocketClientKind kind, WebClientConnectionStatus status)
+    {
+        ClientId = clientId;
+        Kind = kind;
+        Status = status;
+    }
+}
 
 internal class WebSocketManager : IDisposable
 {
@@ -14,11 +39,28 @@ internal class WebSocketManager : IDisposable
 
     private readonly WebSocketServer _server = new();
     private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
+    private readonly CancellationTokenSource _heartbeatCts = new();
+    private Task? _heartbeatTask;
 
     public WebSocketManager()
     {
         AddEventHandlers();
     }
+
+    /// <summary>
+    /// Raised when a connected device's channel state (strength/limit) has changed.
+    /// </summary>
+    public event EventHandler<DeviceStateChangedEventArgs>? DeviceStateChanged;
+
+    /// <summary>
+    /// Raised when a client has successfully bound (identified as Device or Remote).
+    /// </summary>
+    public event EventHandler<ClientConnectionEventArgs>? ClientConnected;
+
+    /// <summary>
+    /// Raised when a client has disconnected.
+    /// </summary>
+    public event EventHandler<ClientConnectionEventArgs>? ClientDisconnected;
 
     /// <summary>
     /// Gets a client by its ID.
@@ -41,7 +83,7 @@ internal class WebSocketManager : IDisposable
         await SendAsync(client.Id, bindMessage);
     }
 
-    private void OnClientBindRequested(object? sender, BindRequestedEventArgs e)
+    private async void OnClientBindRequested(object? sender, BindRequestedEventArgs e)
     {
         if (sender is WebSocketClient client && _clients.ContainsKey(client.Id))
         {
@@ -50,6 +92,10 @@ internal class WebSocketManager : IDisposable
             if (IsDeviceBindReply(e.JsonDocument, client.Id))
             {
                 UpliftToDeviceClient(client.Id, client);
+
+                // Send bind success confirmation to device
+                var ackMessage = CreateBindAckMessage(client.Id);
+                await SendAsync(client.Id, ackMessage);
             }
             else
             {
@@ -57,32 +103,32 @@ internal class WebSocketManager : IDisposable
             }
         }
     }
-    
+
     private bool IsDeviceBindReply(JsonDocument jsonDoc, Guid expectedClientId)
     {
         var root = jsonDoc.RootElement;
-        
+
         // Check if it has the expected fields for a device bind reply
         if (!root.TryGetProperty("type", out var typeElement) || typeElement.GetString() != "bind")
             return false;
-        
+
         if (!root.TryGetProperty("clientId", out var clientIdElement))
             return false;
-        
+
         // clientId should be the dummy client ID
         if (!clientIdElement.TryGetGuid(out var clientId) || clientId != DummyClientId)
             return false;
-        
+
         if (!root.TryGetProperty("targetId", out var targetIdElement))
             return false;
-        
+
         // targetId should match the client ID we sent the bind message to
         if (!targetIdElement.TryGetGuid(out var targetId) || targetId != expectedClientId)
             return false;
-        
+
         if (!root.TryGetProperty("message", out _))
             return false;
-        
+
         // message field can be anything, just need to exist
         return true;
     }
@@ -91,7 +137,7 @@ internal class WebSocketManager : IDisposable
     {
         using var stream = new System.IO.MemoryStream();
         using var writer = new Utf8JsonWriter(stream);
-            
+
         writer.WriteStartObject();
         writer.WriteString("type", "bind");
         writer.WriteString("clientId", DummyClientId.ToString());
@@ -99,7 +145,39 @@ internal class WebSocketManager : IDisposable
         writer.WriteString("message", "targetId");
         writer.WriteEndObject();
         writer.Flush();
-            
+
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static string CreateBindAckMessage(Guid deviceId)
+    {
+        using var stream = new System.IO.MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartObject();
+        writer.WriteString("type", "msg");
+        writer.WriteString("clientId", DummyClientId.ToString());
+        writer.WriteString("targetId", deviceId.ToString());
+        writer.WriteString("message", "200");
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static string CreateHeartbeatMessage(Guid deviceId)
+    {
+        using var stream = new System.IO.MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartObject();
+        writer.WriteString("type", "heartbeat");
+        writer.WriteString("clientId", DummyClientId.ToString());
+        writer.WriteString("targetId", deviceId.ToString());
+        writer.WriteString("message", "heartbeat");
+        writer.WriteEndObject();
+        writer.Flush();
+
         return System.Text.Encoding.UTF8.GetString(stream.ToArray());
     }
 
@@ -134,11 +212,58 @@ internal class WebSocketManager : IDisposable
 
         // Create new RemoteWebSocketClient preserving the original OnDisposing action
         var remoteClient = new RemoteWebSocketClient(clientId, existingClient.OnDisposing);
+        remoteClient.RemoteMessageReceived += OnRemoteMessageReceived;
 
         // Replace the client in the dictionary
         _clients[clientId] = remoteClient;
+
+        ClientConnected?.Invoke(this, new ClientConnectionEventArgs(clientId, WebSocketClientKind.Remote, WebClientConnectionStatus.Connected));
     }
-    
+
+    private async void OnRemoteMessageReceived(object? sender, RemoteMessageReceivedEventArgs e)
+    {
+        if (sender is not RemoteWebSocketClient remoteClient)
+            return;
+
+        switch (e.Scheme.Message)
+        {
+            case RemoteStrengthMessage strengthMsg:
+                await ForwardRemoteStrengthAsync(remoteClient, e.Scheme.DeviceIds, strengthMsg);
+                break;
+            case RemoteConnectionMessage { MessageKind: RemoteConnectionMessageKind.Heartbeat }:
+                await SendAsync(remoteClient.Id, "{\"type\":\"heartbeat\",\"message\":\"200\"}");
+                break;
+        }
+    }
+
+    private async Task ForwardRemoteStrengthAsync(RemoteWebSocketClient remoteClient, List<Guid> deviceIds, RemoteStrengthMessage msg)
+    {
+        int channel = msg.ChannelKind switch
+        {
+            DeviceChannelKind.A => 1,
+            DeviceChannelKind.B => 2,
+            _ => 1
+        };
+
+        foreach (var deviceId in deviceIds)
+        {
+            if (!_clients.TryGetValue(deviceId, out var client) || client is not DeviceWebSocketClient)
+                continue;
+
+            string? payload = msg.OperationKind switch
+            {
+                RemoteStrengthOperationKind.VaryValue => DeviceOutputProtocolScheme.CreateStrengthStep(deviceId, DummyClientId, channel, msg.Value),
+                RemoteStrengthOperationKind.SetValue => DeviceOutputProtocolScheme.CreateStrengthSet(deviceId, DummyClientId, channel, msg.Value),
+                _ => null
+            };
+
+            if (payload is not null)
+            {
+                await SendAsync(deviceId, payload);
+            }
+        }
+    }
+
     private void UpliftToDeviceClient(Guid clientId, WebSocketClient existingClient)
     {
         // Unsubscribe from old client's events
@@ -146,14 +271,48 @@ internal class WebSocketManager : IDisposable
 
         // Create new DeviceWebSocketClient preserving the original OnDisposing action
         var deviceClient = new DeviceWebSocketClient(clientId, existingClient.OnDisposing);
+        deviceClient.StateChanged += OnDeviceStateChanged;
 
         // Replace the client in the dictionary
         _clients[clientId] = deviceClient;
+
+        ClientConnected?.Invoke(this, new ClientConnectionEventArgs(clientId, WebSocketClientKind.Device, WebClientConnectionStatus.Connected));
+    }
+
+    private void OnDeviceStateChanged(object? sender, EventArgs e)
+    {
+        if (sender is DeviceWebSocketClient deviceClient)
+        {
+            DeviceStateChanged?.Invoke(this, new DeviceStateChangedEventArgs(deviceClient.Id));
+        }
     }
 
     public async Task RunAsync(int port)
     {
+        _heartbeatTask = HeartbeatLoopAsync(_heartbeatCts.Token);
         await _server.RunAsync(port);
+    }
+
+    private async Task HeartbeatLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(60));
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                await timer.WaitForNextTickAsync(ct);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            foreach (var client in _clients.Values.OfType<DeviceWebSocketClient>())
+            {
+                var heartbeatMessage = CreateHeartbeatMessage(client.Id);
+                await SendAsync(client.Id, heartbeatMessage);
+            }
+        }
     }
 
     /// <summary>
@@ -169,6 +328,10 @@ internal class WebSocketManager : IDisposable
 
     public void Dispose()
     {
+        _heartbeatCts.Cancel();
+        _heartbeatTask?.Wait(TimeSpan.FromSeconds(5));
+        _heartbeatCts.Dispose();
+
         RemoveEventHandlers();
 
         foreach (var client in _clients.Values)
@@ -192,6 +355,13 @@ internal class WebSocketManager : IDisposable
     {
         if (_clients.TryRemove(id, out var client))
         {
+            var kind = client switch
+            {
+                DeviceWebSocketClient => WebSocketClientKind.Device,
+                RemoteWebSocketClient => WebSocketClientKind.Remote,
+                _ => WebSocketClientKind.Unknown
+            };
+            ClientDisconnected?.Invoke(this, new ClientConnectionEventArgs(id, kind, WebClientConnectionStatus.Disconnected));
             client.Dispose();
         }
     }

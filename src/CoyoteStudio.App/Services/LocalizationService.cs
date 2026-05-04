@@ -102,9 +102,18 @@ public class LocMultiConverter : IMultiValueConverter
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values.Count >= 1 && values[0] is string key)
+        if (values.Count >= 1)
         {
-            return LocalizationService.Instance[key];
+            var key = values[0] switch
+            {
+                string s => s,
+                Enum e => e.GetType().Name + e.ToString(),
+                _ => values[0]?.ToString()
+            };
+            if (key is not null)
+            {
+                return LocalizationService.Instance[key];
+            }
         }
         return values[0]?.ToString();
     }

@@ -4,11 +4,21 @@ using CoyoteStudio.Core.Networking.Client.Scheme;
 
 namespace CoyoteStudio.Core.Networking.Client;
 
-internal enum WebSocketClientKind
+public enum WebSocketClientKind
 {
     Unknown = 0,
     Remote,
     Device
+}
+
+/// <summary>
+/// Connection status of a client for UI display.
+/// </summary>
+public enum WebClientConnectionStatus
+{
+    Connected,
+    Disconnected,
+    Pending
 }
 
 internal class BindRequestedEventArgs : EventArgs

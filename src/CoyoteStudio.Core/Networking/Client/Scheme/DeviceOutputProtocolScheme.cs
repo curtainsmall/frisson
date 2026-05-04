@@ -7,13 +7,36 @@ namespace CoyoteStudio.Core.Networking.Client.Scheme;
 /// </summary>
 internal static class DeviceOutputProtocolScheme
 {
-    /// <summary>
-    /// Creates a strength message JSON string.
-    /// Format: "strength-N+N+N+N" where N is a number.
-    /// </summary>
+    [Obsolete("Legacy 4-value strength format is deprecated. Use CreateStrengthStep or CreateStrengthSet instead.")]
     public static string CreateStrength(Guid deviceId, Guid remoteId, int strengthA, int strengthB, int limitA, int limitB)
     {
         var message = $"strength-{strengthA}+{strengthB}+{limitA}+{limitB}";
+        return SerializeToJson(deviceId, remoteId, message);
+    }
+
+    /// <summary>
+    /// Creates a step-mode strength message JSON string.
+    /// Format: "strength-channel+1+delta" where channel is 1 (A) or 2 (B).
+    /// </summary>
+    public static string CreateStrengthStep(Guid deviceId, Guid remoteId, int channel, int delta)
+    {
+        if (channel is not 1 and not 2)
+            throw new ArgumentOutOfRangeException(nameof(channel), "Channel must be 1 (A) or 2 (B).");
+
+        var message = $"strength-{channel}+1+{delta}";
+        return SerializeToJson(deviceId, remoteId, message);
+    }
+
+    /// <summary>
+    /// Creates a direct-set strength message JSON string.
+    /// Format: "strength-channel+2+value" where channel is 1 (A) or 2 (B).
+    /// </summary>
+    public static string CreateStrengthSet(Guid deviceId, Guid remoteId, int channel, int value)
+    {
+        if (channel is not 1 and not 2)
+            throw new ArgumentOutOfRangeException(nameof(channel), "Channel must be 1 (A) or 2 (B).");
+
+        var message = $"strength-{channel}+2+{value}";
         return SerializeToJson(deviceId, remoteId, message);
     }
 
@@ -36,6 +59,22 @@ internal static class DeviceOutputProtocolScheme
 
         var hexList = string.Join(",", hexValues);
         var message = $"pulse-{channel}:[{hexList}]";
+        return SerializeToJson(deviceId, remoteId, message);
+    }
+
+    /// <summary>
+    /// Creates a clear channel message JSON string.
+    /// Format: "clear-N" where N is 1 (Channel A) or 2 (Channel B).
+    /// </summary>
+    /// <param name="deviceId">Target device ID.</param>
+    /// <param name="remoteId">Source remote ID.</param>
+    /// <param name="channel">Channel number, 1 for A or 2 for B.</param>
+    public static string CreateClear(Guid deviceId, Guid remoteId, int channel)
+    {
+        if (channel is not 1 and not 2)
+            throw new ArgumentOutOfRangeException(nameof(channel), "Channel must be 1 or 2.");
+
+        var message = $"clear-{channel}";
         return SerializeToJson(deviceId, remoteId, message);
     }
 

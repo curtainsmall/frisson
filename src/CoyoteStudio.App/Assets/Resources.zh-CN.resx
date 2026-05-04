@@ -110,13 +110,13 @@
     <value>等待中</value>
   </data>
   <!-- 客户端类型 -->
-  <data name="ClientTypeDevice" xml:space="preserve">
+  <data name="WebSocketClientKindDevice" xml:space="preserve">
     <value>设备端</value>
   </data>
-  <data name="ClientTypeRemote" xml:space="preserve">
+  <data name="WebSocketClientKindRemote" xml:space="preserve">
     <value>遥控端</value>
   </data>
-  <data name="ClientTypeUnknown" xml:space="preserve">
+  <data name="WebSocketClientKindUnknown" xml:space="preserve">
     <value>未知</value>
   </data>
   <!-- 菜单项 -->

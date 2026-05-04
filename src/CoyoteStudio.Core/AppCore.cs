@@ -13,11 +13,17 @@ public class AppCore : IDisposable
     private readonly WebSocketManager _wsManager = new();
 
     public event Action<string>? ErrorOccurred;
+    public event EventHandler<DeviceStateChangedEventArgs>? DeviceStateChanged;
+    public event EventHandler<ClientConnectionEventArgs>? ClientConnected;
+    public event EventHandler<ClientConnectionEventArgs>? ClientDisconnected;
 
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
     private AppCore()
     {
+        _wsManager.DeviceStateChanged += (s, e) => DeviceStateChanged?.Invoke(s, e);
+        _wsManager.ClientConnected += (s, e) => ClientConnected?.Invoke(s, e);
+        _wsManager.ClientDisconnected += (s, e) => ClientDisconnected?.Invoke(s, e);
     }
 
     public void Startup(int port)
@@ -89,5 +95,25 @@ public class AppCore : IDisposable
             'B' => deviceClient.ChannelB.Limit,
             _ => 100
         };
+    }
+
+    /// <summary>
+    /// Sends a step-mode strength adjustment to the device.
+    /// Format: strength-channel+1+delta
+    /// </summary>
+    public async Task SendStrengthStepAsync(Guid deviceId, int channel, int delta)
+    {
+        var message = DeviceOutputProtocolScheme.CreateStrengthStep(deviceId, WebSocketManager.DummyClientId, channel, delta);
+        await _wsManager.SendAsync(deviceId, message);
+    }
+
+    /// <summary>
+    /// Sends a direct-set strength command to the device.
+    /// Format: strength-channel+2+value
+    /// </summary>
+    public async Task SendStrengthSetAsync(Guid deviceId, int channel, int value)
+    {
+        var message = DeviceOutputProtocolScheme.CreateStrengthSet(deviceId, WebSocketManager.DummyClientId, channel, value);
+        await _wsManager.SendAsync(deviceId, message);
     }
 }
