@@ -92,6 +92,11 @@ internal class DeviceWebSocketClient : WebSocketClient
 
     public override void Setup(JsonDocument jsonDoc)
     {
+        var root = jsonDoc.RootElement;
+        // Dummy arm: only process type:"msg" messages from Device
+        if (!root.TryGetProperty("type", out var typeElement) || typeElement.GetString() != "msg")
+            return;
+
         var scheme = new DeviceInputProtocolScheme(jsonDoc);
 
         if (scheme.Strength is not null)

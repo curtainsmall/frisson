@@ -25,6 +25,11 @@ internal class WebSocketServer : IDisposable
         public Guid ClientId { get; init; } = clientId;
     }
 
+    internal class ClientDisconnectingEventArgs(Guid clientId) : EventArgs
+    {
+        public Guid ClientId { get; init; } = clientId;
+    }
+
     internal class ClientMessageReceivedEventArgs(Guid clientId, string message) : EventArgs
     {
         public Guid ClientId { get; init; } = clientId;
@@ -32,12 +37,14 @@ internal class WebSocketServer : IDisposable
     }
 
     private const int _bufferSize = 4096;
+    private const int _maxMessageLength = 1950;
 
     private HttpListener? _listener;
     private readonly CancellationTokenSource _serverCts = new();
     private readonly ConcurrentDictionary<Guid, WebSocket> _clients = new();
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
+    public event EventHandler<ClientDisconnectingEventArgs>? ClientDisconnecting;
     public event EventHandler<ClientDisconnectedEventArgs>? ClientDisconnected;
     public event EventHandler<ClientMessageReceivedEventArgs>? ClientMessageReceived;
 
@@ -48,7 +55,7 @@ internal class WebSocketServer : IDisposable
     public async Task RunAsync(int port)
     {
         _listener = new HttpListener();
-        _listener.Prefixes.Add($"http://localhost:{port}/");
+        _listener.Prefixes.Add($"http://+:{port}/");
         _listener.Start();
         Debug.WriteLine("Server started");
 
@@ -107,6 +114,8 @@ internal class WebSocketServer : IDisposable
             }
             finally
             {
+                // Notify before unregistering so listeners can still send messages
+                ClientDisconnecting?.Invoke(this, new ClientDisconnectingEventArgs(id));
                 // Unregister client
                 _clients.TryRemove(id, out _);
                 ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(id));
@@ -123,6 +132,12 @@ internal class WebSocketServer : IDisposable
     /// <returns>True if the message was sent successfully.</returns>
     public async Task<bool> SendAsync(Guid clientId, string message)
     {
+        if (message.Length > _maxMessageLength)
+        {
+            Debug.WriteLine($"Message too long ({message.Length} chars), max {_maxMessageLength}");
+            return false;
+        }
+
         if (!_clients.TryGetValue(clientId, out var ws))
             return false;
 

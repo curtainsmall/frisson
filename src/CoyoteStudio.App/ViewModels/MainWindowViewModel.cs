@@ -223,6 +223,17 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ShowQrCode()
+    {
+        var qrContent = AppCore.Instance.GetQrCodeContent();
+        var window = new Views.QrCodeWindow(qrContent);
+        if (App.MainWindow is not null)
+        {
+            window.ShowDialog(App.MainWindow);
+        }
+    }
+
+    [RelayCommand]
     private async Task IncreaseChannelA()
     {
         if (SelectedDeviceClientId.HasValue)

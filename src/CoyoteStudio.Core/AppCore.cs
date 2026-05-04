@@ -116,4 +116,9 @@ public class AppCore : IDisposable
         var message = DeviceOutputProtocolScheme.CreateStrengthSet(deviceId, WebSocketManager.DummyClientId, channel, value);
         await _wsManager.SendAsync(deviceId, message);
     }
+
+    /// <summary>
+    /// Generates the QR code content string for APP scanning.
+    /// </summary>
+    public string GetQrCodeContent() => _wsManager.GetQrCodeContent();
 }

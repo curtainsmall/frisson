@@ -41,6 +41,7 @@ internal class WebSocketManager : IDisposable
     private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
     private readonly CancellationTokenSource _heartbeatCts = new();
     private Task? _heartbeatTask;
+    private int _port;
 
     public WebSocketManager()
     {
@@ -99,6 +100,10 @@ internal class WebSocketManager : IDisposable
             }
             else
             {
+                // Send bind failure response before uplifting to remote
+                var errorMessage = CreateBindErrorMessage(client.Id);
+                await SendAsync(client.Id, errorMessage);
+
                 UpliftToRemoteClient(client.Id, client);
             }
         }
@@ -140,8 +145,8 @@ internal class WebSocketManager : IDisposable
 
         writer.WriteStartObject();
         writer.WriteString("type", "bind");
-        writer.WriteString("clientId", DummyClientId.ToString());
-        writer.WriteString("targetId", clientId.ToString());
+        writer.WriteString("clientId", clientId.ToString());
+        writer.WriteString("targetId", "");
         writer.WriteString("message", "targetId");
         writer.WriteEndObject();
         writer.Flush();
@@ -155,7 +160,7 @@ internal class WebSocketManager : IDisposable
         using var writer = new Utf8JsonWriter(stream);
 
         writer.WriteStartObject();
-        writer.WriteString("type", "msg");
+        writer.WriteString("type", "bind");
         writer.WriteString("clientId", DummyClientId.ToString());
         writer.WriteString("targetId", deviceId.ToString());
         writer.WriteString("message", "200");
@@ -172,9 +177,41 @@ internal class WebSocketManager : IDisposable
 
         writer.WriteStartObject();
         writer.WriteString("type", "heartbeat");
+        writer.WriteString("clientId", deviceId.ToString());
+        writer.WriteString("targetId", DummyClientId.ToString());
+        writer.WriteString("message", "200");
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static string CreateBindErrorMessage(Guid clientId)
+    {
+        using var stream = new System.IO.MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartObject();
+        writer.WriteString("type", "bind");
         writer.WriteString("clientId", DummyClientId.ToString());
-        writer.WriteString("targetId", deviceId.ToString());
-        writer.WriteString("message", "heartbeat");
+        writer.WriteString("targetId", clientId.ToString());
+        writer.WriteString("message", "400");
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static string CreateBreakMessage(Guid deviceId)
+    {
+        using var stream = new System.IO.MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartObject();
+        writer.WriteString("type", "break");
+        writer.WriteString("clientId", deviceId.ToString());
+        writer.WriteString("targetId", "");
+        writer.WriteString("message", "209");
         writer.WriteEndObject();
         writer.Flush();
 
@@ -289,8 +326,72 @@ internal class WebSocketManager : IDisposable
 
     public async Task RunAsync(int port)
     {
+        _port = port;
         _heartbeatTask = HeartbeatLoopAsync(_heartbeatCts.Token);
         await _server.RunAsync(port);
+    }
+
+    /// <summary>
+    /// Generates the QR code content string according to DG-LAB protocol.
+    /// Format: https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://{ip}:{port}/{clientId}
+    /// </summary>
+    public string GetQrCodeContent()
+    {
+        var ip = GetLocalIpAddress();
+        return $"https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://{ip}:{_port}/{DummyClientId}";
+    }
+
+    private static string GetLocalIpAddress()
+    {
+        try
+        {
+            foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)
+                    continue;
+                if (ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                    continue;
+                if (ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("VMware", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("VirtualBox", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("Hyper-V", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("TAP", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("Tunnel", StringComparison.OrdinalIgnoreCase) ||
+                    ni.Description.Contains("VPN", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var props = ni.GetIPProperties();
+                foreach (var ip in props.UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        // Prefer interfaces with a default gateway (likely the main LAN adapter)
+                        if (props.GatewayAddresses.Count > 0)
+                            return ip.Address.ToString();
+                    }
+                }
+            }
+
+            // Fallback: any IPv4 address from active non-loopback interfaces
+            foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)
+                    continue;
+                if (ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                    continue;
+
+                foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        return ip.Address.ToString();
+                }
+            }
+        }
+        catch
+        {
+            // Fallback if network lookup fails
+        }
+        return "127.0.0.1";
     }
 
     private async Task HeartbeatLoopAsync(CancellationToken ct)
@@ -371,9 +472,20 @@ internal class WebSocketManager : IDisposable
         return _clients.TryGetValue(id, out client);
     }
 
+    private void OnClientDisconnecting(object? _, WebSocketServer.ClientDisconnectingEventArgs e)
+    {
+        // Notify all connected Remote clients that a Device is disconnecting
+        var breakMessage = CreateBreakMessage(e.ClientId);
+        foreach (var remoteClient in _clients.Values.OfType<RemoteWebSocketClient>())
+        {
+            _ = SendAsync(remoteClient.Id, breakMessage);
+        }
+    }
+
     private void AddEventHandlers()
     {
         _server.ClientConnected += OnClientConnected;
+        _server.ClientDisconnecting += OnClientDisconnecting;
         _server.ClientDisconnected += OnClientDisconnected;
         _server.ClientMessageReceived += OnClientMessageReceived;
     }
@@ -381,6 +493,7 @@ internal class WebSocketManager : IDisposable
     private void RemoveEventHandlers()
     {
         _server.ClientConnected -= OnClientConnected;
+        _server.ClientDisconnecting -= OnClientDisconnecting;
         _server.ClientDisconnected -= OnClientDisconnected;
         _server.ClientMessageReceived -= OnClientMessageReceived;
     }

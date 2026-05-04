@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -20,6 +21,7 @@ namespace CoyoteStudio.App;
 public partial class App : Application
 {
     private AppCore? _appCore;
+    public static Window? MainWindow { get; private set; }
 
     public override void Initialize()
     {
@@ -45,10 +47,11 @@ public partial class App : Application
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
+            MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel()
             };
+            desktop.MainWindow = MainWindow;
 
             desktop.Exit += (s, e) =>
             {
