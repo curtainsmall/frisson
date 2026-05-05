@@ -67,13 +67,6 @@ public class ConnectedClientInfo : INotifyPropertyChanged
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public ObservableCollection<string> PlaceholderItems { get; } = new ObservableCollection<string>
-    {
-        LocalizationService.Instance.GetString("MenuItem1"),
-        LocalizationService.Instance.GetString("MenuItem2"),
-        LocalizationService.Instance.GetString("MenuItem3")
-    };
-
     /// <summary>
     /// List of all connected clients for display in Control Panel page.
     /// </summary>
@@ -300,10 +293,6 @@ public partial class MainWindowViewModel : ViewModelBase
         AppCore.Instance.DeviceStateChanged += OnDeviceStateChanged;
         AppCore.Instance.ClientConnected += OnClientConnected;
         AppCore.Instance.ClientDisconnected += OnClientDisconnected;
-
-#if DEBUG
-        AddPlaceholderClients();
-#endif
     }
 
     private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
@@ -362,31 +351,4 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// Adds placeholder clients for UI testing.
-    /// </summary>
-    private void AddPlaceholderClients()
-    {
-        ConnectedClients.Add(new ConnectedClientInfo
-        {
-            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
-            ClientType = WebSocketClientKind.Device,
-            Status = WebClientConnectionStatus.Connected,
-            StatusColor = "#00FF00"
-        });
-        ConnectedClients.Add(new ConnectedClientInfo
-        {
-            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
-            ClientType = WebSocketClientKind.Remote,
-            Status = WebClientConnectionStatus.Connected,
-            StatusColor = "#00FF00"
-        });
-        ConnectedClients.Add(new ConnectedClientInfo
-        {
-            ClientId = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"),
-            ClientType = WebSocketClientKind.Unknown,
-            Status = WebClientConnectionStatus.Pending,
-            StatusColor = "#888888"
-        });
-    }
 }
