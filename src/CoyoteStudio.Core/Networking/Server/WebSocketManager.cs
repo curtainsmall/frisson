@@ -81,6 +81,7 @@ internal class WebSocketManager : IDisposable
 
         // Send bind message immediately upon connection
         var bindMessage = CreateBindMessage(client.Id);
+        LoggerService.Instance.Log($"[Manager] Sending bind to {client.Id}");
         await SendAsync(client.Id, bindMessage);
     }
 
@@ -88,10 +89,13 @@ internal class WebSocketManager : IDisposable
     {
         if (sender is WebSocketClient client && _clients.ContainsKey(client.Id))
         {
+            LoggerService.Instance.Log($"[Manager] Bind request from {client.Id}: {e.JsonDocument.RootElement}");
+
             // Determine client type based on message content
             // If the reply matches the bind message format (except message field), it's a Device
             if (IsDeviceBindReply(e.JsonDocument, client.Id))
             {
+                LoggerService.Instance.Log($"[Manager] Device bind accepted: {client.Id}");
                 UpliftToDeviceClient(client.Id, client);
 
                 // Send bind success confirmation to device
@@ -100,6 +104,7 @@ internal class WebSocketManager : IDisposable
             }
             else
             {
+                LoggerService.Instance.Log($"[Manager] Remote bind accepted: {client.Id}");
                 // Send bind failure response before uplifting to remote
                 var errorMessage = CreateBindErrorMessage(client.Id);
                 await SendAsync(client.Id, errorMessage);
@@ -202,22 +207,6 @@ internal class WebSocketManager : IDisposable
         return System.Text.Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    private static string CreateBreakMessage(Guid deviceId)
-    {
-        using var stream = new System.IO.MemoryStream();
-        using var writer = new Utf8JsonWriter(stream);
-
-        writer.WriteStartObject();
-        writer.WriteString("type", "break");
-        writer.WriteString("clientId", deviceId.ToString());
-        writer.WriteString("targetId", "");
-        writer.WriteString("message", "209");
-        writer.WriteEndObject();
-        writer.Flush();
-
-        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
-    }
-
     private void OnClientDisconnected(object? _, WebSocketServer.ClientDisconnectedEventArgs e)
     {
         TryUnregister(e.ClientId);
@@ -225,6 +214,7 @@ internal class WebSocketManager : IDisposable
 
     private void OnClientMessageReceived(object? _, WebSocketServer.ClientMessageReceivedEventArgs e)
     {
+        LoggerService.Instance.Log($"[Manager] Message from {e.ClientId}: {e.Message}");
         if (TryGetClient(e.ClientId, out var client) && client is not null)
         {
             switch (client)
@@ -262,6 +252,8 @@ internal class WebSocketManager : IDisposable
         if (sender is not RemoteWebSocketClient remoteClient)
             return;
 
+        LoggerService.Instance.Log($"[Manager] Remote message from {remoteClient.Id}: {e.Scheme.Message?.GetType().Name ?? "null"}");
+
         switch (e.Scheme.Message)
         {
             case RemoteStrengthMessage strengthMsg:
@@ -281,6 +273,8 @@ internal class WebSocketManager : IDisposable
             DeviceChannelKind.B => 2,
             _ => 1
         };
+
+        LoggerService.Instance.Log($"[Manager] Forward strength from {remoteClient.Id} to [{string.Join(",", deviceIds)}] ch{channel} op={msg.OperationKind} val={msg.Value}");
 
         foreach (var deviceId in deviceIds)
         {
@@ -411,6 +405,7 @@ internal class WebSocketManager : IDisposable
             foreach (var client in _clients.Values.OfType<DeviceWebSocketClient>())
             {
                 var heartbeatMessage = CreateHeartbeatMessage(client.Id);
+                LoggerService.Instance.Log($"[Manager] Sending heartbeat to {client.Id}");
                 await SendAsync(client.Id, heartbeatMessage);
             }
         }
@@ -472,20 +467,9 @@ internal class WebSocketManager : IDisposable
         return _clients.TryGetValue(id, out client);
     }
 
-    private void OnClientDisconnecting(object? _, WebSocketServer.ClientDisconnectingEventArgs e)
-    {
-        // Notify all connected Remote clients that a Device is disconnecting
-        var breakMessage = CreateBreakMessage(e.ClientId);
-        foreach (var remoteClient in _clients.Values.OfType<RemoteWebSocketClient>())
-        {
-            _ = SendAsync(remoteClient.Id, breakMessage);
-        }
-    }
-
     private void AddEventHandlers()
     {
         _server.ClientConnected += OnClientConnected;
-        _server.ClientDisconnecting += OnClientDisconnecting;
         _server.ClientDisconnected += OnClientDisconnected;
         _server.ClientMessageReceived += OnClientMessageReceived;
     }
@@ -493,7 +477,6 @@ internal class WebSocketManager : IDisposable
     private void RemoveEventHandlers()
     {
         _server.ClientConnected -= OnClientConnected;
-        _server.ClientDisconnecting -= OnClientDisconnecting;
         _server.ClientDisconnected -= OnClientDisconnected;
         _server.ClientMessageReceived -= OnClientMessageReceived;
     }

@@ -171,7 +171,7 @@
                         </Grid>
 
                         <!-- Settings Page -->
-                        <Grid IsVisible="{Binding IsSettingsSelected}" RowDefinitions="Auto,*">
+                        <Grid IsVisible="{Binding IsSettingsSelected}" RowDefinitions="Auto,*,Auto">
                             <!-- Settings Header -->
                             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20">
                                 <i:Icon Value="fa-solid fa-gear" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
@@ -181,8 +181,8 @@
                             </StackPanel>
 
                             <!-- Settings Content -->
-                            <Border Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20">
-                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                            <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
                                     <!-- Language Selection -->
                                     <TextBlock Grid.Row="0" Grid.Column="0"
                                                Text="{loc:Loc Language}"
@@ -205,8 +205,26 @@
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
+
+                                    <!-- Log -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0"
+                                               Text="Log"
+                                               Foreground="{DynamicResource PrimaryText}"
+                                               FontSize="14"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,20,0" />
+                                    <Button Grid.Row="1" Grid.Column="1"
+                                            Content="Open"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource SurfaceLight}"
+                                            Foreground="{DynamicResource PrimaryText}"
+                                            BorderBrush="{DynamicResource AccentMuted}"
+                                            Command="{Binding ShowLogWindowCommand}" />
                                 </Grid>
-                            </Border>
+                            </ScrollViewer>
                         </Grid>
                     </Panel>
                 </Border>

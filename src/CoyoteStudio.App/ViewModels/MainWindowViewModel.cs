@@ -234,6 +234,16 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ShowLogWindow()
+    {
+        var window = new Views.LogWindow();
+        if (App.MainWindow is not null)
+        {
+            window.Show(App.MainWindow);
+        }
+    }
+
+    [RelayCommand]
     private async Task IncreaseChannelA()
     {
         if (SelectedDeviceClientId.HasValue)

@@ -56,6 +56,12 @@ public partial class App : Application
             desktop.Exit += (s, e) =>
             {
                 _appCore.Dispose();
+
+                var logDir = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "CoyoteStudio", "logs");
+                var logPath = System.IO.Path.Combine(logDir, $"websocket-{DateTime.Now:yyyyMMdd-HHmmss}.log");
+                LoggerService.Instance.SaveToFile(logPath);
             };
         }
 

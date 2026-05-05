@@ -45,7 +45,7 @@ public partial class QrCodeWindowViewModel : ViewModelBase
     private void GenerateQrCode(string content)
     {
         using var qrGenerator = new QRCodeGenerator();
-        using var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+        using var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q, forceUtf8: true);
         using var pngQrCode = new PngByteQRCode(qrCodeData);
         var pngBytes = pngQrCode.GetGraphic(20);
 
