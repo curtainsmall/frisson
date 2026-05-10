@@ -10,7 +10,10 @@
 # Source code
 !src/
 !src/**
+!setup.iss
+!publish.py
 
 # Build outputs (re-ignore)
 src/**/bin/
 src/**/obj/
+installer/
