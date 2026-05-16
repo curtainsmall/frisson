@@ -16,3 +16,4 @@
 # Build outputs (re-ignore)
 src/**/bin/
 src/**/obj/
+src/**/publish/

@@ -1,15 +1,33 @@
 ; Inno Setup Script for Frisson
 ; This script creates an installer that automatically adds a Windows Firewall
 ; inbound rule during installation and removes it during uninstallation.
+;
+; Build variants (override on command line):
+;   ISCC setup.iss                            -> framework-dependent (default)
+;   ISCC /DBuildKind=selfcontained setup.iss  -> self-contained (bundles .NET runtime)
 
-#define MyAppVersion GetFileVersion("src\Frisson.App\bin\Release\net10.0\Frisson.App.exe")
+#ifndef BuildKind
+  #define BuildKind "framework"
+#endif
+
+#if BuildKind == "selfcontained"
+  #define SourceDir "src\Frisson.App\publish\win-x64-selfcontained"
+  #define OutputName "Frisson-Setup-SelfContained"
+  #define AppSuffix " (Self-Contained)"
+#else
+  #define SourceDir "src\Frisson.App\publish\win-x64-framework"
+  #define OutputName "Frisson-Setup"
+  #define AppSuffix ""
+#endif
+
+#define MyAppVersion GetFileVersion(SourceDir + "\Frisson.App.exe")
 
 [Setup]
-AppName=Frisson
+AppName=Frisson{#AppSuffix}
 AppVersion={#MyAppVersion}
-DefaultDirName={autopf}\Frisson
+DefaultDirName={autopf}\Frisson{#AppSuffix}
 OutputDir=installer
-OutputBaseFilename=Frisson-Setup
+OutputBaseFilename={#OutputName}
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
@@ -23,7 +41,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Type: filesandordirs; Name: "{app}\*"
 
 [Files]
-Source: "src\Frisson.App\bin\Release\net10.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Run]
 ; Add Windows Firewall inbound rule for Frisson on install

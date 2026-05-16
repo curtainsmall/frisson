@@ -75,51 +75,84 @@ def parse_version(tag):
 
 
 def build_windows(tag):
-    """Build and pack for Windows."""
+    """Build and pack for Windows.
+
+    Produces two installers per release:
+      - Frisson-Setup.exe                (framework-dependent, smaller)
+      - Frisson-Setup-SelfContained.exe  (bundles .NET 10 runtime, larger)
+    """
     numeric_ver, semver_ver = parse_version(tag)
     if not numeric_ver:
         print(f"Error: Invalid version tag '{tag}'")
         sys.exit(1)
 
-    # 1. Build Release with version override
-    #    AssemblyVersion/FileVersion: PE format requires numeric only
-    #    Version/InformationalVersion: full SemVer string for display
-    result = subprocess.run([
-        "dotnet", "build",
-        "src/Frisson.App/Frisson.App.csproj",
-        "-c", "Release",
+    csproj = "src/Frisson.App/Frisson.App.csproj"
+    common_props = [
         f"-p:Version={semver_ver}",
         f"-p:AssemblyVersion={numeric_ver}",
         f"-p:FileVersion={numeric_ver}",
-        f"-p:InformationalVersion={semver_ver}"
-    ])
-    if result.returncode != 0:
+        f"-p:InformationalVersion={semver_ver}",
+    ]
+
+    # Two configurations driven by .NET PublishProfiles (the official way):
+    #   src/Frisson.App/Properties/PublishProfiles/win-x64-framework.pubxml
+    #   src/Frisson.App/Properties/PublishProfiles/win-x64-selfcontained.pubxml
+    #
+    # Each profile owns its own PublishDir, so outputs do not collide and
+    # MSBuild keeps separate obj/ folders per RID/Configuration combination.
+    builds = [
+        {
+            "kind": "framework",
+            "profile": "win-x64-framework",
+            "exe_path": "src/Frisson.App/publish/win-x64-framework/Frisson.App.exe",
+            "installer_name": "Frisson-Setup.exe",
+        },
+        {
+            "kind": "selfcontained",
+            "profile": "win-x64-selfcontained",
+            "exe_path": "src/Frisson.App/publish/win-x64-selfcontained/Frisson.App.exe",
+            "installer_name": "Frisson-Setup-SelfContained.exe",
+        },
+    ]
+    
+    iscc = shutil.which("ISCC") or shutil.which("ISCC.exe")
+    if os.name == "nt" and not iscc:
+        print("Error: ISCC.exe not found in PATH.")
+        print("Please add Inno Setup install directory to your system PATH.")
+        print("Install from: https://jrsoftware.org/isdl.php")
         sys.exit(1)
 
-    # 2. Verify the built executable version (Windows only)
-    exe_path = "src/Frisson.App/bin/Release/net10.0/Frisson.App.exe"
-    if os.name == "nt" and os.path.exists(exe_path):
-        try:
-            fv, _ = run([
-                "powershell", "-Command",
-                f'[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{exe_path}").FileVersion'
-            ])
-            print(f"Built executable FileVersion: {fv}")
-        except Exception:
-            pass
-
-    # 3. Compile Inno Setup installer (Windows only)
-    if os.name == "nt":
-        iscc = shutil.which("ISCC") or shutil.which("ISCC.exe")
-        if iscc:
-            print(f"Using ISCC: {iscc}")
-            subprocess.run([iscc, "setup.iss"])
-            print("Installer created at: installer/Frisson-Setup.exe")
-        else:
-            print("Error: ISCC.exe not found in PATH.")
-            print("Please add Inno Setup install directory to your system PATH.")
-            print("Install from: https://jrsoftware.org/isdl.php")
+    for b in builds:
+        print(f"\n=== Publishing {b['kind']} variant (profile: {b['profile']}) ===")
+        # Use 'dotnet publish' with PublishProfile (the official .NET way).
+        result = subprocess.run([
+            "dotnet", "publish", csproj,
+            f"-p:PublishProfile={b['profile']}",
+            *common_props,
+        ])
+        if result.returncode != 0:
             sys.exit(1)
+
+        # Verify built executable version
+        if os.name == "nt" and os.path.exists(b["exe_path"]):
+            try:
+                fv, _ = run([
+                    "powershell", "-Command",
+                    f'[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{b["exe_path"]}").FileVersion'
+                ])
+                print(f"Built {b['kind']} FileVersion: {fv}")
+            except Exception:
+                pass
+
+        # Compile Inno Setup installer (Windows only)
+        if os.name == "nt":
+            print(f"=== Packing {b['kind']} installer ===")
+            print(f"Using ISCC: {iscc}")
+            rc = subprocess.run([iscc, f"/DBuildKind={b['kind']}", "setup.iss"]).returncode
+            if rc != 0:
+                print(f"Error: ISCC failed for {b['kind']} (exit {rc})")
+                sys.exit(1)
+            print(f"Installer created at: installer/{b['installer_name']}")
 
 
 def build_macos(tag):
