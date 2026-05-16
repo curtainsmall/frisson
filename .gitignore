@@ -16,4 +16,3 @@
 # Build outputs (re-ignore)
 src/**/bin/
 src/**/obj/
-installer/

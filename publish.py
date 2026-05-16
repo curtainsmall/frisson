@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """CoyoteStudio Release Publisher
 
-Usage: python publish.py [--platform {windows|macos|linux}]
-Reads version from Git tag, builds Release, and compiles the installer.
+Usage:
+    python publish.py [--platform {windows|macos|linux} ...] [--version VERSION]
+
+Default: reads version from the unique SemVer Git tag on HEAD.
+With --version: skips Git tag check (for test builds, NOT reproducible).
 """
 
 import argparse
 import subprocess
 import re
+import shutil
 import sys
 import os
 
@@ -106,12 +110,16 @@ def build_windows(tag):
 
     # 3. Compile Inno Setup installer (Windows only)
     if os.name == "nt":
-        iscc = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-        if os.path.exists(iscc):
+        iscc = shutil.which("ISCC") or shutil.which("ISCC.exe")
+        if iscc:
+            print(f"Using ISCC: {iscc}")
             subprocess.run([iscc, "setup.iss"])
             print("Installer created at: installer/CoyoteStudio-Setup.exe")
         else:
-            print("Warning: Inno Setup not found. Please install it from https://jrsoftware.org/isdl.php")
+            print("Error: ISCC.exe not found in PATH.")
+            print("Please add Inno Setup install directory to your system PATH.")
+            print("Install from: https://jrsoftware.org/isdl.php")
+            sys.exit(1)
 
 
 def build_macos(tag):
@@ -133,31 +141,54 @@ def main():
         default=["windows"],
         help="Target platform(s) to pack for (default: windows)"
     )
+    parser.add_argument(
+        "--version",
+        metavar="VERSION",
+        help=(
+            "Override version for testing (skip Git tag check). "
+            "Format: SemVer 2.0.0 with or without 'v' prefix "
+            "(e.g. 1.0.0, v1.0.0, 1.0.0-beta, 1.0.0-rc.1+abc123). "
+            "WARNING: Builds with this flag are NOT reproducible from Git history."
+        )
+    )
     args = parser.parse_args()
 
-    # Read version from Git tags pointing at HEAD (strict mode).
-    # Reject if zero or multiple SemVer tags found on the same commit.
-    out, code = run(["git", "tag", "--points-at", "HEAD"])
-    tags_at_head = [t for t in out.splitlines() if t.strip()]
-    semver_tags = [t for t in tags_at_head if parse_version(t)[0] is not None]
+    if args.version:
+        # Test mode: use --version, skip Git tag check.
+        # Accept both 'v1.0.0' and '1.0.0' for convenience.
+        override = args.version if args.version.startswith("v") else f"v{args.version}"
+        numeric_ver, semver_ver = parse_version(override)
+        if not numeric_ver:
+            print(f"Error: --version '{args.version}' is not a valid SemVer 2.0.0 string.")
+            print("Examples: 1.0.0, 1.0.0-beta, 1.0.0-rc.1, 1.0.0+abc123")
+            sys.exit(1)
+        tag = override
+        print("WARNING: --version override active. Skipping Git tag validation.")
+    else:
+        # Strict mode: read version from Git tags pointing at HEAD.
+        # Reject if zero or multiple SemVer tags found on the same commit.
+        out, code = run(["git", "tag", "--points-at", "HEAD"])
+        tags_at_head = [t for t in out.splitlines() if t.strip()]
+        semver_tags = [t for t in tags_at_head if parse_version(t)[0] is not None]
 
-    if len(semver_tags) == 0:
-        print(f"Error: No valid SemVer tag found on HEAD.")
-        if tags_at_head:
-            print(f"Tags on HEAD (none are valid SemVer): {tags_at_head}")
-        print("Examples: v1.0.0, v1.0.0-beta, v1.0.0-rc.1, v1.0.0+abc123")
-        print("To set a version, run: git tag v1.0.0 && git push --tags")
-        sys.exit(1)
+        if len(semver_tags) == 0:
+            print(f"Error: No valid SemVer tag found on HEAD.")
+            if tags_at_head:
+                print(f"Tags on HEAD (none are valid SemVer): {tags_at_head}")
+            print("Examples: v1.0.0, v1.0.0-beta, v1.0.0-rc.1, v1.0.0+abc123")
+            print("To set a version, run: git tag v1.0.0 && git push --tags")
+            print("For test builds, use: python publish.py --version 1.0.0")
+            sys.exit(1)
 
-    if len(semver_tags) > 1:
-        print(f"Error: Multiple SemVer tags found on HEAD: {semver_tags}")
-        print("Please remove redundant tags before publishing.")
-        print("Use 'git tag -d <tag>' to delete a local tag,")
-        print("and 'git push origin :refs/tags/<tag>' to delete a remote tag.")
-        sys.exit(1)
+        if len(semver_tags) > 1:
+            print(f"Error: Multiple SemVer tags found on HEAD: {semver_tags}")
+            print("Please remove redundant tags before publishing.")
+            print("Use 'git tag -d <tag>' to delete a local tag,")
+            print("and 'git push origin :refs/tags/<tag>' to delete a remote tag.")
+            sys.exit(1)
 
-    tag = semver_tags[0]
-    numeric_ver, semver_ver = parse_version(tag)
+        tag = semver_tags[0]
+        numeric_ver, semver_ver = parse_version(tag)
 
     platforms = ", ".join(args.platform)
     print(f"Publishing CoyoteStudio {tag} (SemVer: {semver_ver}) for {platforms}")
