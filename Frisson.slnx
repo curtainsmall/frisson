@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Frisson.App/Frisson.App.csproj" />
+    <Project Path="src/Frisson.Core/Frisson.Core.csproj" />
+  </Folder>
+</Solution>

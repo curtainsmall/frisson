@@ -1,0 +1,372 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Frisson.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:loc="using:Frisson.App.MarkupExtensions"
+        xmlns:services="using:Frisson.App.Services"
+        xmlns:converters="using:Frisson.App.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Frisson.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/Frisson.ico"
+        Title="{loc:Loc AppTitle}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+
+        Background="{DynamicResource Black}"
+        MinWidth="900"
+        MinHeight="600">
+
+    <Window.Styles>
+        <Style Selector="Button.nav-btn">
+            <Setter Property="Width" Value ="48" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Margin" Value="0.5" />
+            <Setter Property="Padding" Value="0" />
+
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+
+            <Setter Property="Background" Value="{DynamicResource Black}" />
+        </Style>
+
+        <Style Selector="Button.nav-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource Black}" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style Selector="Button.nav-btn.selected /template/ ContentPresenter">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style Selector="Border.selected">
+            <Setter Property="BorderThickness" Value="3" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Border BorderThickness="4" Background="Transparent" Padding="8,0,8,8">
+        <Grid RowDefinitions="Auto, *" Background="Transparent">
+            <Border
+                Grid.Row="0"
+                Background="{DynamicResource Black}"
+                Padding="10,8,140,8"
+                PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
+            </Border>
+
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
+                <!-- Left Navigation Panel -->
+                <Grid Grid.Column="0" Width="60" Background="Transparent">
+                    <StackPanel Spacing="10" Margin="5">
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsMixerSelected}"
+                                ToolTip.Tip="{loc:Loc NavMixer}"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Mixer}">
+                            <i:Icon Value="fa-solid fa-sliders" />
+                        </Button>
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsWavesSelected}"
+                                ToolTip.Tip="{loc:Loc NavWaveGenerator}"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Waves}">
+                            <i:Icon Value="fa-solid fa-wave-square" />
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel VerticalAlignment="Bottom" Spacing="5" Margin="5">
+                        <Button Classes="nav-btn"
+                                Classes.selected="{Binding IsSettingsSelected}"
+                                ToolTip.Tip="{loc:Loc NavSettings}"
+                                Command="{Binding SelectPageCommand}"
+                                CommandParameter="{x:Static vm:NavPage.Settings}">
+                            <i:Icon Value="fa-solid fa-gear" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Center Content Area -->
+                <Border Grid.Column="1" Padding="20" Background="Transparent">
+                    <Panel>
+                        <!-- Control Panel Page -->
+                        <Grid IsVisible="{Binding IsMixerSelected}" RowDefinitions="Auto" Margin="10">
+                            <!-- No Device Selected -->
+                            <Grid Grid.Row="0" IsVisible="{Binding ShowNoDevicePanel}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="15">
+                                    <TextBlock Text="{loc:Loc NoDeviceSelected}" FontSize="20" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Channel A & B Controls -->
+                            <Grid Grid.Row="0" IsVisible="{Binding ShowChannelControls}" ColumnDefinitions="*,*" Margin="0,0,0,20">
+                                <!-- Channel A -->
+                                <Border Grid.Column="0" Background="{DynamicResource SurfaceDark}" CornerRadius="12" Padding="15" Margin="0,0,10,0">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                                        <!-- Channel Label -->
+                                        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource AccentBrush}" CornerRadius="6" Padding="10,5" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                            <TextBlock Text="{loc:Loc ChannelA}" Foreground="{DynamicResource Black}" FontSize="12" FontWeight="Bold" />
+                                        </Border>
+                                        <!-- Value Display -->
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding ChannelAStrength, FallbackValue=0}" FontSize="48" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" FontWeight="Light" />
+
+                                        <!-- Minus Button -->
+                                        <Button Grid.Row="2" Grid.Column="0" Width="50" Height="50" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="5" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding DecreaseChannelACommand}">
+                                            <TextBlock Text="−" FontSize="28" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
+                                        <!-- Progress Info -->
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ChannelAStrength, FallbackValue=0}/{Binding ChannelALimit, FallbackValue=100}" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+                                        <!-- Plus Button -->
+                                        <Button Grid.Row="2" Grid.Column="2" Width="50" Height="50" Background="{DynamicResource AccentBrush}" CornerRadius="10" Margin="5" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding IncreaseChannelACommand}">
+                                            <TextBlock Text="+" FontSize="28" Foreground="{DynamicResource Black}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                                <!-- Channel B -->
+                                <Border Grid.Column="1" Background="{DynamicResource SurfaceDark}" CornerRadius="12" Padding="15" Margin="10,0,0,0">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                                        <!-- Channel Label -->
+                                        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource AccentBrush}" CornerRadius="6" Padding="10,5" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                            <TextBlock Text="{loc:Loc ChannelB}" Foreground="{DynamicResource Black}" FontSize="12" FontWeight="Bold" />
+                                        </Border>
+                                        <!-- Value Display -->
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding ChannelBStrength, FallbackValue=0}" FontSize="48" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" FontWeight="Light" />
+
+                                        <!-- Minus Button -->
+                                        <Button Grid.Row="2" Grid.Column="0" Width="50" Height="50" Background="{DynamicResource SurfaceLight}" CornerRadius="10" Margin="5" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding DecreaseChannelBCommand}">
+                                            <TextBlock Text="−" FontSize="28" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
+                                        <!-- Progress Info -->
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ChannelBStrength, FallbackValue=0}/{Binding ChannelBLimit, FallbackValue=100}" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
+                                        <!-- Plus Button -->
+                                        <Button Grid.Row="2" Grid.Column="2" Width="50" Height="50" Background="{DynamicResource AccentBrush}" CornerRadius="10" Margin="5" BorderThickness="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding IncreaseChannelBCommand}">
+                                            <TextBlock Text="+" FontSize="28" Foreground="{DynamicResource Black}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Waves Page -->
+                        <Grid IsVisible="{Binding IsWavesSelected}">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <i:Icon Value="fa-solid fa-wave-square" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
+                                <TextBlock Text="{loc:Loc NavWaveGenerator}" FontSize="24"
+                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                <Separator Background="{DynamicResource AccentMuted}" Margin="0,10" Width="200" Height="1" />
+                                <TextBlock Text="{loc:Loc WaveformPlaceholder}"
+                                           Foreground="{DynamicResource SecondaryText}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Settings Page -->
+                        <Grid IsVisible="{Binding IsSettingsSelected}" RowDefinitions="Auto,*,Auto">
+                            <!-- Settings Header -->
+                            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20">
+                                <i:Icon Value="fa-solid fa-gear" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
+                                <TextBlock Text="{loc:Loc NavSettings}" FontSize="24"
+                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                <Separator Background="{DynamicResource AccentMuted}" Margin="0,10" Width="200" Height="1" />
+                            </StackPanel>
+
+                            <!-- Settings Content -->
+                            <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
+                                    <!-- Language Selection -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                               Text="{loc:Loc Language}"
+                                               Foreground="{DynamicResource PrimaryText}"
+                                               FontSize="14"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,20,0" />
+                                    <ComboBox Grid.Row="0" Grid.Column="1"
+                                              ItemsSource="{Binding AvailableLanguages}"
+                                              SelectedItem="{Binding SelectedLanguage}"
+                                              HorizontalAlignment="Stretch"
+                                              Background="{DynamicResource SurfaceLight}"
+                                              Foreground="{DynamicResource PrimaryText}"
+                                              BorderBrush="{DynamicResource AccentMuted}"
+                                              CornerRadius="8"
+                                              Padding="10,5">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource PrimaryText}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+
+                                    <!-- Log -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0"
+                                               Text="Log"
+                                               Foreground="{DynamicResource PrimaryText}"
+                                               FontSize="14"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,20,0" />
+                                    <Button Grid.Row="1" Grid.Column="1"
+                                            Content="Open"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource SurfaceLight}"
+                                            Foreground="{DynamicResource PrimaryText}"
+                                            BorderBrush="{DynamicResource AccentMuted}"
+                                            Command="{Binding ShowLogWindowCommand}" />
+                                </Grid>
+                            </ScrollViewer>
+                        </Grid>
+                    </Panel>
+                </Border>
+
+                <!-- Right: Collapsible Connected Clients Panel -->
+                <Grid Grid.Column="2" Width="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToWidthConverter.Instance}, ConverterParameter=300}">
+                    <Grid RowDefinitions="Auto, Auto, *">
+                        <!-- Toggle Button Header -->
+                        <Border Grid.Row="0" Padding="10" BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,0,1">
+                            <Button Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="5"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding ToggleClientPanelCommand}">
+                                <Panel>
+                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsClientPanelExpanded}">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{loc:Loc ConnectedClients}"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <i:Icon Grid.Column="1"
+                                                Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
+                                                FontSize="12"
+                                                Foreground="{DynamicResource AccentBrush}" />
+                                    </Grid>
+                                    <i:Icon IsVisible="{Binding IsClientPanelCollapsed}"
+                                            Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
+                                            FontSize="12"
+                                            Foreground="{DynamicResource AccentBrush}"
+                                            HorizontalAlignment="Center" />
+                                </Panel>
+                            </Button>
+                        </Border>
+
+                        <!-- Collapsed Client Counts -->
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Vertical"
+                                    Spacing="4"
+                                    IsVisible="{Binding IsClientPanelCollapsed}"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,8,0,0">
+                            <TextBlock Text="{Binding ActiveClientCount}"
+                                       Foreground="#00CC00"
+                                       FontWeight="Bold"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center" />
+                            <Rectangle Height="1"
+                                       Width="20"
+                                       Fill="{DynamicResource AccentMuted}"
+                                       Margin="0,2"
+                                       IsVisible="{Binding HasUnknownClients}"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding UnknownClientCount}"
+                                       Foreground="#888888"
+                                       FontSize="12"
+                                       IsVisible="{Binding HasUnknownClients}"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Client List -->
+                        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsClientPanelExpanded}">
+                            <StackPanel Margin="10">
+                                <ItemsControl x:Name="ClientList" ItemsSource="{Binding ConnectedClients}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource Black}"
+                                                    BorderBrush="{DynamicResource AccentMuted}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8"
+                                                    Padding="12"
+                                                    Margin="0,0,0,10"
+                                                    Tag="{Binding ClientId}"
+                                                    Classes.selected="{Binding IsSelected}"
+                                                    PointerPressed="OnClientCardPointerPressed">
+                                                <Grid RowDefinitions="Auto, Auto, Auto, Auto">
+                                                    <TextBlock Grid.Row="0"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontWeight="SemiBold" FontSize="12">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{x:Static services:LocMultiConverter.Instance}">
+                                                                <Binding Path="ClientType" />
+                                                                <Binding Source="{x:Static services:LocalizationService.Instance}" Path="CurrentCulture" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock Grid.Row="1"
+                                                               Text="{Binding ClientId, StringFormat='{}{0}'}"
+                                                               Foreground="{DynamicResource SecondaryText}"
+                                                               FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
+                                                        <Ellipse Width="6" Height="6"
+                                                                 Fill="{Binding StatusColor}" />
+                                                        <TextBlock Foreground="{DynamicResource SecondaryText}"
+                                                                   FontSize="10">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding Converter="{x:Static services:LocMultiConverter.Instance}">
+                                                                    <Binding Path="Status" />
+                                                                    <Binding Source="{x:Static services:LocalizationService.Instance}" Path="CurrentCulture" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                    <!-- Client Panel Buttons -->
+                                                    <Grid Grid.Row="3" ColumnDefinitions="*, Auto" Margin="0,8,0,0">
+                                                        <Button Grid.Column="0"
+                                                                HorizontalAlignment="Left"
+                                                                Background="Transparent"
+                                                                Padding="4">
+                                                            <i:Icon Value="fa-solid fa-ellipsis" FontSize="14" Foreground="{DynamicResource SecondaryText}" />
+                                                            <Button.Flyout>
+                                                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                                                    <MenuItem Header="{loc:Loc MenuItem1}" />
+                                                                    <MenuItem Header="{loc:Loc MenuItem2}" />
+                                                                    <MenuItem Header="{loc:Loc MenuItem3}" />
+                                                                </MenuFlyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                        <Button Grid.Column="1"
+                                                                HorizontalAlignment="Right"
+                                                                Background="Transparent"
+                                                                Padding="4">
+                                                            <i:Icon Value="fa-solid fa-stop" FontSize="14" Foreground="#FF4444" />
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button HorizontalAlignment="Center"
+                                        Background="Transparent"
+                                        Padding="8"
+                                        Margin="0,10,0,0"
+                                        Command="{Binding ShowQrCodeCommand}">
+                                    <i:Icon Value="fa-solid fa-plus" FontSize="16" Foreground="{DynamicResource SecondaryText}" />
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

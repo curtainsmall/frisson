@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CoyoteStudio Release Publisher
+"""Frisson Release Publisher
 
 Usage:
     python publish.py [--platform {windows|macos|linux} ...] [--version VERSION]
@@ -86,7 +86,7 @@ def build_windows(tag):
     #    Version/InformationalVersion: full SemVer string for display
     result = subprocess.run([
         "dotnet", "build",
-        "src/CoyoteStudio.App/CoyoteStudio.App.csproj",
+        "src/Frisson.App/Frisson.App.csproj",
         "-c", "Release",
         f"-p:Version={semver_ver}",
         f"-p:AssemblyVersion={numeric_ver}",
@@ -97,7 +97,7 @@ def build_windows(tag):
         sys.exit(1)
 
     # 2. Verify the built executable version (Windows only)
-    exe_path = "src/CoyoteStudio.App/bin/Release/net10.0/CoyoteStudio.App.exe"
+    exe_path = "src/Frisson.App/bin/Release/net10.0/Frisson.App.exe"
     if os.name == "nt" and os.path.exists(exe_path):
         try:
             fv, _ = run([
@@ -114,7 +114,7 @@ def build_windows(tag):
         if iscc:
             print(f"Using ISCC: {iscc}")
             subprocess.run([iscc, "setup.iss"])
-            print("Installer created at: installer/CoyoteStudio-Setup.exe")
+            print("Installer created at: installer/Frisson-Setup.exe")
         else:
             print("Error: ISCC.exe not found in PATH.")
             print("Please add Inno Setup install directory to your system PATH.")
@@ -133,7 +133,7 @@ def build_linux(tag):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CoyoteStudio Release Publisher")
+    parser = argparse.ArgumentParser(description="Frisson Release Publisher")
     parser.add_argument(
         "-p", "--platform",
         nargs="+",
@@ -191,7 +191,7 @@ def main():
         numeric_ver, semver_ver = parse_version(tag)
 
     platforms = ", ".join(args.platform)
-    print(f"Publishing CoyoteStudio {tag} (SemVer: {semver_ver}) for {platforms}")
+    print(f"Publishing Frisson {tag} (SemVer: {semver_ver}) for {platforms}")
 
     for platform in args.platform:
         print(f"\n--- Building for {platform} ---")

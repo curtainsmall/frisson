@@ -1,19 +1,19 @@
-; Inno Setup Script for CoyoteStudio
+; Inno Setup Script for Frisson
 ; This script creates an installer that automatically adds a Windows Firewall
 ; inbound rule during installation and removes it during uninstallation.
 
-#define MyAppVersion GetFileVersion("src\CoyoteStudio.App\bin\Release\net10.0\CoyoteStudio.App.exe")
+#define MyAppVersion GetFileVersion("src\Frisson.App\bin\Release\net10.0\Frisson.App.exe")
 
 [Setup]
-AppName=CoyoteStudio
+AppName=Frisson
 AppVersion={#MyAppVersion}
-DefaultDirName={autopf}\CoyoteStudio
+DefaultDirName={autopf}\Frisson
 OutputDir=installer
-OutputBaseFilename=CoyoteStudio-Setup
+OutputBaseFilename=Frisson-Setup
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
-UninstallDisplayIcon={app}\CoyoteStudio.App.exe
+UninstallDisplayIcon={app}\Frisson.App.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -23,16 +23,16 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Type: filesandordirs; Name: "{app}\*"
 
 [Files]
-Source: "src\CoyoteStudio.App\bin\Release\net10.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "src\Frisson.App\bin\Release\net10.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Run]
-; Add Windows Firewall inbound rule for CoyoteStudio on install
-Filename: "netsh.exe"; Parameters: "advfirewall firewall add rule name=""CoyoteStudio"" dir=in action=allow program=""{app}\CoyoteStudio.App.exe"" enable=yes"; Flags: runhidden;
+; Add Windows Firewall inbound rule for Frisson on install
+Filename: "netsh.exe"; Parameters: "advfirewall firewall add rule name=""Frisson"" dir=in action=allow program=""{app}\Frisson.App.exe"" enable=yes"; Flags: runhidden;
 
 [UninstallRun]
-; Remove Windows Firewall rule for CoyoteStudio on uninstall
-Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""CoyoteStudio"""; Flags: runhidden;
+; Remove Windows Firewall rule for Frisson on uninstall
+Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Frisson"""; Flags: runhidden;
 
 [Icons]
-Name: "{group}\CoyoteStudio"; Filename: "{app}\CoyoteStudio.App.exe"
-Name: "{autodesktop}\CoyoteStudio"; Filename: "{app}\CoyoteStudio.App.exe"
+Name: "{group}\Frisson"; Filename: "{app}\Frisson.App.exe"
+Name: "{autodesktop}\Frisson"; Filename: "{app}\Frisson.App.exe"

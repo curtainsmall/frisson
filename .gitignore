@@ -4,7 +4,7 @@
 # Root project files
 !.editorconfig
 !.gitignore
-!CoyoteStudio.slnx
+!Frisson.slnx
 !nuget.config
 
 # Source code
