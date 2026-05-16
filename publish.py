@@ -18,38 +18,76 @@ def run(cmd, **kwargs):
 
 
 def parse_version(tag):
-    """Parse Git tag into numeric version and optional beta suffix.
-    
-    Supports: v1.0.0, v1.0.0b
-    Returns: (numeric_version, dotnet_version)
-    - numeric: "1.0.0" (for AssemblyVersion/FileVersion)
-    - dotnet:  "1.0.0-b" (for Version/InformationalVersion)
+    """Parse a SemVer-compliant Git tag.
+
+    Tag MUST start with 'v', followed by a SemVer 2.0.0 version string.
+    The 'v' prefix is stripped before being used elsewhere.
+
+    SemVer format: MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD]
+        v1.0.0
+        v1.0.0-beta
+        v1.0.0-beta.1
+        v1.0.0-rc.1+abc123
+        v1.0.0+20260409
+
+    Returns: (numeric_version, semver_version)
+        - numeric: "MAJOR.MINOR.PATCH" (for AssemblyVersion/FileVersion;
+                   PE file version requires pure numeric segments)
+        - semver:  full SemVer string without 'v' prefix
+                   (for Version/InformationalVersion)
+
+    Returns (None, None) if tag is invalid.
     """
-    match = re.match(r'^v(\d+(?:\.\d+){0,3})(b)?$', tag)
+    pattern = (
+        r'^v'
+        r'(?P<major>0|[1-9]\d*)'
+        r'\.(?P<minor>0|[1-9]\d*)'
+        r'\.(?P<patch>0|[1-9]\d*)'
+        r'(?:-(?P<prerelease>'
+            r'(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)'
+            r'(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*'
+        r'))?'
+        r'(?:\+(?P<build>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?'
+        r'$'
+    )
+    match = re.match(pattern, tag)
     if not match:
         return None, None
-    numeric = match.group(1)
-    suffix = match.group(2)
-    if suffix:
-        return numeric, f"{numeric}-{suffix}"
-    return numeric, numeric
+
+    major = match.group("major")
+    minor = match.group("minor")
+    patch = match.group("patch")
+    prerelease = match.group("prerelease")
+    build = match.group("build")
+
+    numeric = f"{major}.{minor}.{patch}"
+    semver = numeric
+    if prerelease:
+        semver += f"-{prerelease}"
+    if build:
+        semver += f"+{build}"
+
+    return numeric, semver
 
 
 def build_windows(tag):
     """Build and pack for Windows."""
-    numeric_ver, dotnet_ver = parse_version(tag)
+    numeric_ver, semver_ver = parse_version(tag)
     if not numeric_ver:
         print(f"Error: Invalid version tag '{tag}'")
         sys.exit(1)
 
     # 1. Build Release with version override
+    #    AssemblyVersion/FileVersion: PE format requires numeric only
+    #    Version/InformationalVersion: full SemVer string for display
     result = subprocess.run([
         "dotnet", "build",
         "src/CoyoteStudio.App/CoyoteStudio.App.csproj",
         "-c", "Release",
-        f"-p:Version={dotnet_ver}",
+        f"-p:Version={semver_ver}",
         f"-p:AssemblyVersion={numeric_ver}",
-        f"-p:FileVersion={numeric_ver}"
+        f"-p:FileVersion={numeric_ver}",
+        f"-p:InformationalVersion={semver_ver}"
     ])
     if result.returncode != 0:
         sys.exit(1)
@@ -97,21 +135,32 @@ def main():
     )
     args = parser.parse_args()
 
-    # Read version from Git tag
-    raw_tag, code = run(["git", "describe", "--tags", "--always"])
-    tag = raw_tag.strip()
+    # Read version from Git tags pointing at HEAD (strict mode).
+    # Reject if zero or multiple SemVer tags found on the same commit.
+    out, code = run(["git", "tag", "--points-at", "HEAD"])
+    tags_at_head = [t for t in out.splitlines() if t.strip()]
+    semver_tags = [t for t in tags_at_head if parse_version(t)[0] is not None]
 
-    # Validate version format (e.g., v1.0.0, v1.0.0b)
-    numeric_ver, dotnet_ver = parse_version(tag)
-    if not numeric_ver:
-        print(f"Error: No valid Git tag found (current: '{tag}').")
-        print("Valid formats: v1.0.0, v1.0.0b")
+    if len(semver_tags) == 0:
+        print(f"Error: No valid SemVer tag found on HEAD.")
+        if tags_at_head:
+            print(f"Tags on HEAD (none are valid SemVer): {tags_at_head}")
+        print("Examples: v1.0.0, v1.0.0-beta, v1.0.0-rc.1, v1.0.0+abc123")
         print("To set a version, run: git tag v1.0.0 && git push --tags")
-        print("For beta: git tag v1.0.0b && git push --tags")
         sys.exit(1)
 
+    if len(semver_tags) > 1:
+        print(f"Error: Multiple SemVer tags found on HEAD: {semver_tags}")
+        print("Please remove redundant tags before publishing.")
+        print("Use 'git tag -d <tag>' to delete a local tag,")
+        print("and 'git push origin :refs/tags/<tag>' to delete a remote tag.")
+        sys.exit(1)
+
+    tag = semver_tags[0]
+    numeric_ver, semver_ver = parse_version(tag)
+
     platforms = ", ".join(args.platform)
-    print(f"Publishing CoyoteStudio {tag} for {platforms}")
+    print(f"Publishing CoyoteStudio {tag} (SemVer: {semver_ver}) for {platforms}")
 
     for platform in args.platform:
         print(f"\n--- Building for {platform} ---")
