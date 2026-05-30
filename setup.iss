@@ -2,6 +2,14 @@
 ; This script creates an installer that automatically adds a Windows Firewall
 ; inbound rule during installation and removes it during uninstallation.
 ;
+; AppId - generated once, never change, identifies Frisson as the same
+; application across all build variants and versions.
+#define FrissonAppId "{{0A85408A-3262-4F58-B11E-D171CA726D20}"
+#define FrissonPublisher "curtainsmall"
+#define FrissonPublisherURL "https://github.com/curtainsmall/frisson"
+#define FrissonSupportURL "https://github.com/curtainsmall/frisson/issues"
+#define FrissonUpdatesURL "https://github.com/curtainsmall/frisson/releases"
+;
 ; Build variants (override on command line):
 ;   ISCC setup.iss                            -> framework-dependent (default)
 ;   ISCC /DBuildKind=selfcontained setup.iss  -> self-contained (bundles .NET runtime)
@@ -20,17 +28,23 @@
   #define AppSuffix ""
 #endif
 
-#define MyAppVersion GetFileVersion(SourceDir + "\Frisson.App.exe")
+#define FrissonVersion GetVersionNumbersString(SourceDir + "\Frisson.App.exe")
 
 [Setup]
 AppName=Frisson{#AppSuffix}
-AppVersion={#MyAppVersion}
+AppVersion={#FrissonVersion}
 DefaultDirName={autopf}\Frisson{#AppSuffix}
 OutputDir=installer
 OutputBaseFilename={#OutputName}
+AppId={#FrissonAppId}
+AppPublisher={#FrissonPublisher}
+AppPublisherURL={#FrissonPublisherURL}
+AppSupportURL={#FrissonSupportURL}
+AppUpdatesURL={#FrissonUpdatesURL}
+LicenseFile=LICENSE
 PrivilegesRequired=admin
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\Frisson.App.exe
 
 [Languages]
@@ -49,7 +63,7 @@ Filename: "netsh.exe"; Parameters: "advfirewall firewall add rule name=""Frisson
 
 [UninstallRun]
 ; Remove Windows Firewall rule for Frisson on uninstall
-Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Frisson"""; Flags: runhidden;
+Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Frisson"""; Flags: runhidden; RunOnceId: "RemoveFrissonFirewallRule"
 
 [Icons]
 Name: "{group}\Frisson"; Filename: "{app}\Frisson.App.exe"

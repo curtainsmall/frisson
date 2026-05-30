@@ -6,6 +6,7 @@
 !.gitignore
 !Frisson.slnx
 !nuget.config
+!LICENSE
 
 # Source code
 !src/
