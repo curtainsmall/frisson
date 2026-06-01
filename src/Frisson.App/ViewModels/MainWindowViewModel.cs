@@ -239,6 +239,12 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ClearLogs()
+    {
+        LoggerService.Instance.Clear();
+    }
+
+    [RelayCommand]
     private void DisconnectClient(Guid clientId)
     {
         AppCore.Instance.DisconnectClient(clientId);

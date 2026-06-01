@@ -183,7 +183,7 @@
 
                             <!-- Settings Content -->
                             <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
-                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
+                                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
                                     <!-- Language Selection -->
                                     <TextBlock Grid.Row="0" Grid.Column="0"
                                                Text="{loc:Loc Language}"
@@ -209,21 +209,33 @@
 
                                     <!-- Log -->
                                     <TextBlock Grid.Row="1" Grid.Column="0"
-                                               Text="Log"
+                                               Text="{loc:Loc LogLabel}"
                                                Foreground="{DynamicResource PrimaryText}"
                                                FontSize="14"
                                                VerticalAlignment="Center"
                                                Margin="0,0,20,0" />
-                                    <Button Grid.Row="1" Grid.Column="1"
-                                            Content="Open"
-                                            HorizontalAlignment="Stretch"
-                                            HorizontalContentAlignment="Center"
-                                            VerticalContentAlignment="Center"
-                                            CornerRadius="10"
-                                            Background="{DynamicResource SurfaceLight}"
-                                            Foreground="{DynamicResource PrimaryText}"
-                                            BorderBrush="{DynamicResource AccentMuted}"
-                                            Command="{Binding ShowLogWindowCommand}" />
+                                    <StackPanel Grid.Row="1" Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                        <Button Content="{loc:Loc LogOpen}"
+                                                Width="80"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                CornerRadius="10"
+                                                Background="{DynamicResource SurfaceLight}"
+                                                Foreground="{DynamicResource PrimaryText}"
+                                                BorderBrush="{DynamicResource AccentMuted}"
+                                                Command="{Binding ShowLogWindowCommand}" />
+                                        <Button Content="{loc:Loc LogClearLogs}"
+                                                Width="100"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                CornerRadius="10"
+                                                Background="{DynamicResource SurfaceLight}"
+                                                Foreground="{DynamicResource PrimaryText}"
+                                                BorderBrush="{DynamicResource AccentMuted}"
+                                                Command="{Binding ClearLogsCommand}" />
+                                    </StackPanel>
                                 </Grid>
                             </ScrollViewer>
                         </Grid>

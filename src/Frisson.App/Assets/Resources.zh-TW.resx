@@ -140,4 +140,13 @@
   <data name="SelectLanguage" xml:space="preserve">
     <value>選擇語言</value>
   </data>
+  <data name="LogOpen" xml:space="preserve">
+    <value>開啟</value>
+  </data>
+  <data name="LogClearLogs" xml:space="preserve">
+    <value>清除日誌</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>日誌</value>
+  </data>
 </root>

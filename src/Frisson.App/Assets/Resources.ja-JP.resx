@@ -140,4 +140,13 @@
   <data name="SelectLanguage" xml:space="preserve">
     <value>言語を選択</value>
   </data>
+  <data name="LogOpen" xml:space="preserve">
+    <value>開く</value>
+  </data>
+  <data name="LogClearLogs" xml:space="preserve">
+    <value>ログをクリア</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>ログ</value>
+  </data>
 </root>

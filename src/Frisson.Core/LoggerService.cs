@@ -25,6 +25,32 @@ public sealed class LoggerService
         Entries.Add(entry);
     }
 
+    public void Clear()
+    {
+        Entries.Clear();
+        
+        // Also clear log files from disk
+        try
+        {
+            var logDir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Frisson", "logs");
+            
+            if (System.IO.Directory.Exists(logDir))
+            {
+                var logFiles = System.IO.Directory.GetFiles(logDir, "*.log");
+                foreach (var file in logFiles)
+                {
+                    System.IO.File.Delete(file);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[Logger] Failed to clear log files: {ex.Message}");
+        }
+    }
+
     public void SaveToFile(string path)
     {
         var directory = System.IO.Path.GetDirectoryName(path);
