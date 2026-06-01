@@ -9,6 +9,7 @@
         xmlns:converters="using:Frisson.App.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Frisson.App.Views.MainWindow"
+        x:Name="ClientWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/Frisson.ico"
         Title="{loc:Loc AppTitle}"
@@ -346,7 +347,9 @@
                                                         <Button Grid.Column="1"
                                                                 HorizontalAlignment="Right"
                                                                 Background="Transparent"
-                                                                Padding="4">
+                                                                Padding="4"
+                                                                Command="{Binding #ClientWindow.DataContext.DisconnectClientCommand}"
+                                                                CommandParameter="{Binding ClientId}">
                                                             <i:Icon Value="fa-solid fa-stop" FontSize="14" Foreground="#FF4444" />
                                                         </Button>
                                                     </Grid>

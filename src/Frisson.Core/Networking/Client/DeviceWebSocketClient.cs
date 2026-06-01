@@ -93,7 +93,16 @@ internal class DeviceWebSocketClient : WebSocketClient
     public override void Setup(JsonDocument jsonDoc)
     {
         var root = jsonDoc.RootElement;
-        // Dummy arm: only process type:"msg" messages from Device
+        
+        // Dummy arm phase: process bind messages first
+        if (root.TryGetProperty("bind", out var bindElement))
+        {
+            // This is a bind message, trigger bind flow
+            base.Setup(jsonDoc);
+            return;
+        }
+        
+        // Only process type:"msg" messages from Device after bind
         if (!root.TryGetProperty("type", out var typeElement) || typeElement.GetString() != "msg")
             return;
 

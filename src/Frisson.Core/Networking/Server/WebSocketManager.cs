@@ -74,6 +74,18 @@ internal class WebSocketManager : IDisposable
         return client;
     }
 
+    /// <summary>
+    /// Disconnects a specific client by ID.
+    /// </summary>
+    /// <param name="clientId">The client GUID to disconnect</param>
+    public void DisconnectClient(Guid clientId)
+    {
+        LoggerService.Instance.Log($"[Manager] Force disconnecting client {clientId}");
+        
+        // Use the same path as natural disconnect - TryUnregister handles everything
+        TryUnregister(clientId);
+    }
+
     private async void OnClientConnected(object? _, WebSocketServer.ClientConnectedEventArgs e)
     {
         var client = Register(e.ClientId, e.OnDisposing);
@@ -83,6 +95,19 @@ internal class WebSocketManager : IDisposable
         var bindMessage = CreateBindMessage(client.Id);
         LoggerService.Instance.Log($"[Manager] Sending bind to {client.Id}");
         await SendAsync(client.Id, bindMessage);
+        
+        // Start bind timeout (10 seconds)
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            
+            // Check if client is still unbound (still a base WebSocketClient)
+            if (_clients.TryGetValue(client.Id, out var currentClient) && currentClient is not DeviceWebSocketClient and not RemoteWebSocketClient)
+            {
+                LoggerService.Instance.Log($"[Manager] Bind timeout for {client.Id}, disconnecting");
+                TryUnregister(client.Id);
+            }
+        });
     }
 
     private async void OnClientBindRequested(object? sender, BindRequestedEventArgs e)
@@ -209,6 +234,7 @@ internal class WebSocketManager : IDisposable
 
     private void OnClientDisconnected(object? _, WebSocketServer.ClientDisconnectedEventArgs e)
     {
+        // TryUnregister already triggers ClientDisconnected event
         TryUnregister(e.ClientId);
     }
 
@@ -217,6 +243,22 @@ internal class WebSocketManager : IDisposable
         LoggerService.Instance.Log($"[Manager] Message from {e.ClientId}: {e.Message}");
         if (TryGetClient(e.ClientId, out var client) && client is not null)
         {
+            // Special handling for bind reply (type:"bind" from device)
+            if (client is not DeviceWebSocketClient and not RemoteWebSocketClient)
+            {
+                using var jsonDoc = JsonDocument.Parse(e.Message);
+                var root = jsonDoc.RootElement;
+                
+                // Check if this is a bind reply (type:"bind")
+                if (root.TryGetProperty("type", out var typeElement) && typeElement.GetString() == "bind")
+                {
+                    LoggerService.Instance.Log($"[Manager] Bind reply from {e.ClientId}");
+                    // Manually trigger bind flow
+                    OnClientBindRequested(client, new BindRequestedEventArgs(jsonDoc));
+                    return;
+                }
+            }
+            
             switch (client)
             {
                 case DeviceWebSocketClient deviceClient:

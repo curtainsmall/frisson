@@ -239,6 +239,18 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void DisconnectClient(Guid clientId)
+    {
+        AppCore.Instance.DisconnectClient(clientId);
+        
+        // Clear selected device if it was the disconnected one
+        if (SelectedDeviceClientId == clientId)
+        {
+            SelectedDeviceClientId = null;
+        }
+    }
+
+    [RelayCommand]
     private async Task IncreaseChannelA()
     {
         if (SelectedDeviceClientId.HasValue)
@@ -321,33 +333,41 @@ public partial class MainWindowViewModel : ViewModelBase
             _ => "#888888"
         };
 
-        // Remove existing entry if present (e.g., reconnection)
-        var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
-        if (existing is not null)
-            ConnectedClients.Remove(existing);
-
-        ConnectedClients.Add(new ConnectedClientInfo
+        // Marshal to UI thread for ObservableCollection modification
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            ClientId = e.ClientId,
-            ClientType = e.Kind,
-            Status = e.Status,
-            StatusColor = statusColor
+            // Remove existing entry if present (e.g., reconnection)
+            var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+            if (existing is not null)
+                ConnectedClients.Remove(existing);
+
+            ConnectedClients.Add(new ConnectedClientInfo
+            {
+                ClientId = e.ClientId,
+                ClientType = e.Kind,
+                Status = e.Status,
+                StatusColor = statusColor
+            });
         });
     }
 
     private void OnClientDisconnected(object? sender, ClientConnectionEventArgs e)
     {
-        var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
-        if (existing is not null)
+        // Marshal to UI thread for ObservableCollection modification
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            ConnectedClients.Remove(existing);
-
-            // Clear selected device if it was the disconnected one
-            if (SelectedDeviceClientId == e.ClientId)
+            var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+            if (existing is not null)
             {
-                SelectedDeviceClientId = null;
+                ConnectedClients.Remove(existing);
+
+                // Clear selected device if it was the disconnected one
+                if (SelectedDeviceClientId == e.ClientId)
+                {
+                    SelectedDeviceClientId = null;
+                }
             }
-        }
+        });
     }
 
     partial void OnSelectedLanguageChanged(LanguageOption value)

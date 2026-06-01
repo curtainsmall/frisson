@@ -52,6 +52,15 @@ public class AppCore : IDisposable
     }
 
     /// <summary>
+    /// Disconnects a specific client by ID.
+    /// </summary>
+    /// <param name="clientId">The client ID to disconnect</param>
+    public void DisconnectClient(Guid clientId)
+    {
+        _wsManager.DisconnectClient(clientId);
+    }
+
+    /// <summary>
     /// Gets the strength value for a specific channel of a device client.
     /// </summary>
     /// <param name="clientId">The device client ID</param>
