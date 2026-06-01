@@ -49,8 +49,15 @@ public class LocalizationService : INotifyPropertyChanged
                 var lang = key.GetValue("Language") as string;
                 key.Close();
                 
-                // Installer language is already a valid culture code (e.g., "zh-CN", "ja-JP")
-                return string.IsNullOrEmpty(lang) ? null : lang;
+                // Map installer language codes to culture codes
+                return lang switch
+                {
+                    "en" => "en-US",
+                    "zh_CN" => "zh-CN",
+                    "zh_TW" => "zh-TW",
+                    "ja" => "ja-JP",
+                    _ => null
+                };
             }
         }
         catch

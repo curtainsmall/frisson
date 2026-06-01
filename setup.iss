@@ -48,12 +48,13 @@ PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\Frisson.App.exe
+UsedUserAreasWarning=no
 
 [Languages]
-Name: "en-US"; MessagesFile: "compiler:Default.isl"
-Name: "zh-CN"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
-Name: "zh-TW"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"
-Name: "ja-JP"; MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "zh_CN"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "zh_TW"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"
+Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
 
 [InstallDelete]
 ; Clean old files before installing new version to prevent residue
