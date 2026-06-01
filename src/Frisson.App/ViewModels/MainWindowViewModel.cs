@@ -119,7 +119,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> AvailableLanguages { get; } = new()
     {
         new LanguageOption { Code = "en-US", DisplayName = "English" },
-        new LanguageOption { Code = "zh-CN", DisplayName = "中文" }
+        new LanguageOption { Code = "zh-CN", DisplayName = "简体中文" },
+        new LanguageOption { Code = "zh-TW", DisplayName = "繁體中文" },
+        new LanguageOption { Code = "ja-JP", DisplayName = "日本語" }
     };
 
     [ObservableProperty]
@@ -275,9 +277,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        // Set default language to en-US
-        _selectedLanguage = AvailableLanguages.First(l => l.Code == "en-US");
-        LocalizationService.Instance.SetLanguage("en-US");
+        // Set default language based on current culture
+        var currentCulture = LocalizationService.Instance.CurrentCulture.Name;
+        var defaultLang = AvailableLanguages.FirstOrDefault(l => l.Code == currentCulture) 
+                          ?? AvailableLanguages.First(l => l.Code == "en-US");
+        _selectedLanguage = defaultLang;
+        
+        // Sync to LocalizationService (already set in LocalizationService constructor)
+        LocalizationService.Instance.SetLanguage(defaultLang.Code);
 
         ConnectedClients.CollectionChanged += (_, _) =>
         {

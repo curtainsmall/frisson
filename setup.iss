@@ -42,13 +42,18 @@ AppPublisherURL={#FrissonPublisherURL}
 AppSupportURL={#FrissonSupportURL}
 AppUpdatesURL={#FrissonUpdatesURL}
 LicenseFile=LICENSE
+Compression=lzma2/ultra64
+SolidCompression=yes
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\Frisson.App.exe
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "en-US"; MessagesFile: "compiler:Default.isl"
+Name: "zh-CN"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "zh-TW"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"
+Name: "ja-JP"; MessagesFile: "compiler:Languages\Japanese.isl"
 
 [InstallDelete]
 ; Clean old files before installing new version to prevent residue
@@ -67,4 +72,11 @@ Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Fris
 
 [Icons]
 Name: "{group}\Frisson"; Filename: "{app}\Frisson.App.exe"
-Name: "{autodesktop}\Frisson"; Filename: "{app}\Frisson.App.exe"
+Name: "{autodesktop}\Frisson"; Filename: "{app}\Frisson.App.exe"; Tasks: desktopicon
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Registry]
+; Save installer language choice for Frisson to read as default language
+Root: HKCU; Subkey: "Software\Frisson"; ValueType: string; ValueName: "Language"; ValueData: "{language}"

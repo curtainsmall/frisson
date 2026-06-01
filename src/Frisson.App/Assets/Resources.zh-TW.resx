@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Application Title -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Frisson</value>
+  </data>
+  <!-- Navigation -->
+  <data name="NavMixer" xml:space="preserve">
+    <value>控制面板</value>
+  </data>
+  <data name="NavWaveGenerator" xml:space="preserve">
+    <value>波形</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <!-- Control Panel Page -->
+  <data name="ChannelA" xml:space="preserve">
+    <value>通道 A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>通道 B</value>
+  </data>
+  <data name="SetAccessoryMode" xml:space="preserve">
+    <value>設定配件玩法</value>
+  </data>
+  <data name="ABChannelSync" xml:space="preserve">
+    <value>AB 通道同步</value>
+  </data>
+  <data name="CustomCombination" xml:space="preserve">
+    <value>自訂組合</value>
+  </data>
+  <!-- Connected Clients -->
+  <data name="ConnectedClients" xml:space="preserve">
+    <value>已連線用戶端</value>
+  </data>
+  <!-- Placeholders -->
+  <data name="WaveformPlaceholder" xml:space="preserve">
+    <value>波形視覺化佔位符...</value>
+  </data>
+  <data name="SettingsPlaceholder" xml:space="preserve">
+    <value>應用程式設定佔位符...</value>
+  </data>
+  <!-- Client Status -->
+  <data name="StatusConnected" xml:space="preserve">
+    <value>已連線</value>
+  </data>
+  <data name="StatusBound" xml:space="preserve">
+    <value>已綁定</value>
+  </data>
+  <data name="StatusPending" xml:space="preserve">
+    <value>等待中</value>
+  </data>
+  <!-- Client Types -->
+  <data name="WebSocketClientKindDevice" xml:space="preserve">
+    <value>裝置端</value>
+  </data>
+  <data name="WebSocketClientKindRemote" xml:space="preserve">
+    <value>遙控端</value>
+  </data>
+  <data name="WebSocketClientKindUnknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <!-- Menu Items -->
+  <data name="MenuItem1" xml:space="preserve">
+    <value>佔位選項 1</value>
+  </data>
+  <data name="MenuItem2" xml:space="preserve">
+    <value>佔位選項 2</value>
+  </data>
+  <data name="MenuItem3" xml:space="preserve">
+    <value>佔位選項 3</value>
+  </data>
+  <!-- Device Selection -->
+  <data name="NoDeviceSelected" xml:space="preserve">
+    <value>未選擇裝置</value>
+  </data>
+  <!-- Settings Page -->
+  <data name="Language" xml:space="preserve">
+    <value>語言</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
+    <value>選擇語言</value>
+  </data>
+</root>

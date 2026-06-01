@@ -22,11 +22,42 @@ public class LocalizationService : INotifyPropertyChanged
     private LocalizationService()
     {
         _resourceManager = new ResourceManager("Frisson.App.Assets.Resources", typeof(LocalizationService).Assembly);
+        
+        // Try to read language from installer registry setting first
+        var installerLanguage = GetInstallerLanguage();
+        if (!string.IsNullOrEmpty(installerLanguage))
+        {
+            _currentCulture = new CultureInfo(installerLanguage);
+            return;
+        }
+        
         // Default to en-US if current culture is not supported
         if (_currentCulture.Name != "en-US" && _currentCulture.Name != "zh-CN")
         {
             _currentCulture = new CultureInfo("en-US");
         }
+    }
+
+    private string? GetInstallerLanguage()
+    {
+        try
+        {
+            // Read from registry: HKCU\Software\Frisson\Language
+            var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Frisson");
+            if (key != null)
+            {
+                var lang = key.GetValue("Language") as string;
+                key.Close();
+                
+                // Installer language is already a valid culture code (e.g., "zh-CN", "ja-JP")
+                return string.IsNullOrEmpty(lang) ? null : lang;
+            }
+        }
+        catch
+        {
+            // Ignore registry read errors
+        }
+        return null;
     }
 
     public CultureInfo CurrentCulture
