@@ -16,14 +16,21 @@ internal static class DeviceOutputProtocolScheme
 
     /// <summary>
     /// Creates a step-mode strength message JSON string.
-    /// Format: "strength-channel+1+delta" where channel is 1 (A) or 2 (B).
+    /// Format: "strength-channel+mode+delta" where:
+    ///   - channel: 1 (A) or 2 (B)
+    ///   - mode: 0 (decrease) for negative delta, 1 (increase) for positive delta
+    ///   - delta: absolute value of strength change
     /// </summary>
     public static string CreateStrengthStep(Guid deviceId, Guid remoteId, int channel, int delta)
     {
         if (channel is not 1 and not 2)
             throw new ArgumentOutOfRangeException(nameof(channel), "Channel must be 1 (A) or 2 (B).");
 
-        var message = $"strength-{channel}+1+{delta}";
+        // Mode 0: decrease (delta < 0), Mode 1: increase (delta > 0)
+        int mode = delta < 0 ? 0 : 1;
+        int absDelta = Math.Abs(delta);
+        
+        var message = $"strength-{channel}+{mode}+{absDelta}";
         return SerializeToJson(deviceId, remoteId, message);
     }
 
