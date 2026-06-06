@@ -141,26 +141,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private Guid? _selectedDeviceClientId;
 
-    /// <summary>
-    /// Channel A strength value from the selected device.
-    /// </summary>
-    public int ChannelAStrength => AppCore.Instance.GetDeviceChannelStrength(SelectedDeviceClientId, 'A');
-
-    /// <summary>
-    /// Channel A limit value from the selected device.
-    /// </summary>
-    public int ChannelALimit => AppCore.Instance.GetDeviceChannelLimit(SelectedDeviceClientId, 'A');
-
-    /// <summary>
-    /// Channel B strength value from the selected device.
-    /// </summary>
-    public int ChannelBStrength => AppCore.Instance.GetDeviceChannelStrength(SelectedDeviceClientId, 'B');
-
-    /// <summary>
-    /// Channel B limit value from the selected device.
-    /// </summary>
-    public int ChannelBLimit => AppCore.Instance.GetDeviceChannelLimit(SelectedDeviceClientId, 'B');
-
     public bool IsMixerSelected => CurrentPage == NavPage.Mixer;
     public bool IsWavesSelected => CurrentPage == NavPage.Waves;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
@@ -180,10 +160,6 @@ public partial class MainWindowViewModel : ViewModelBase
             client.IsSelected = client.ClientId == value;
         }
 
-        OnPropertyChanged(nameof(ChannelAStrength));
-        OnPropertyChanged(nameof(ChannelALimit));
-        OnPropertyChanged(nameof(ChannelBStrength));
-        OnPropertyChanged(nameof(ChannelBLimit));
         OnPropertyChanged(nameof(HasSelectedDevice));
         OnPropertyChanged(nameof(ShowNoDevicePanel));
         OnPropertyChanged(nameof(ShowChannelControls));
@@ -218,17 +194,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ShowQrCode()
-    {
-        var qrContent = AppCore.Instance.GetQrCodeContent();
-        var window = new Views.QrCodeWindow(qrContent);
-        if (App.MainWindow is not null)
-        {
-            window.ShowDialog(App.MainWindow);
-        }
-    }
-
-    [RelayCommand]
     private void ShowLogWindow()
     {
         var window = new Views.LogWindow();
@@ -256,43 +221,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private async Task IncreaseChannelA()
-    {
-        if (SelectedDeviceClientId.HasValue)
-            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 1, 5);
-    }
-
-    [RelayCommand]
-    private async Task DecreaseChannelA()
-    {
-        if (SelectedDeviceClientId.HasValue)
-            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 1, -5);
-    }
-
-    [RelayCommand]
-    private async Task IncreaseChannelB()
-    {
-        if (SelectedDeviceClientId.HasValue)
-            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 2, 5);
-    }
-
-    [RelayCommand]
-    private async Task DecreaseChannelB()
-    {
-        if (SelectedDeviceClientId.HasValue)
-            await AppCore.Instance.SendStrengthStepAsync(SelectedDeviceClientId.Value, 2, -5);
-    }
-
-    /// <summary>
-    /// Direct-set strength for Remote forwarding. Channel 1=A, 2=B.
-    /// </summary>
-    public async Task SetChannelStrengthAsync(int channel, int value)
-    {
-        if (SelectedDeviceClientId.HasValue)
-            await AppCore.Instance.SendStrengthSetAsync(SelectedDeviceClientId.Value, channel, value);
-    }
-
     public MainWindowViewModel()
     {
         // Set default language based on current culture
@@ -315,20 +243,8 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(ShowChannelControls));
         };
 
-        AppCore.Instance.DeviceStateChanged += OnDeviceStateChanged;
         AppCore.Instance.ClientConnected += OnClientConnected;
         AppCore.Instance.ClientDisconnected += OnClientDisconnected;
-    }
-
-    private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
-    {
-        if (e.DeviceId == SelectedDeviceClientId)
-        {
-            OnPropertyChanged(nameof(ChannelAStrength));
-            OnPropertyChanged(nameof(ChannelALimit));
-            OnPropertyChanged(nameof(ChannelBStrength));
-            OnPropertyChanged(nameof(ChannelBLimit));
-        }
     }
 
     private void OnClientConnected(object? sender, ClientConnectionEventArgs e)
