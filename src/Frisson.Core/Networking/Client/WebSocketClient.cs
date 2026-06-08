@@ -1,4 +1,6 @@
-﻿namespace Frisson.Core.Networking.Client;
+﻿using Frisson.Core.Scheme;
+
+namespace Frisson.Core.Networking.Client;
 
 public enum WebSocketClientKind
 {
@@ -21,12 +23,33 @@ internal class WebSocketClient : IDisposable
 {
     public Action? OnDisposing { get; init; }
 
-    public Guid Id { get; init; }
+    /// <summary>
+    /// Callback for sending a message over the WebSocket connection.
+    /// Set by WebSocketManager during registration/upgrade.
+    /// </summary>
+    public Func<string, Task<bool>>? SendFunc { get; set; }
 
-    public WebSocketClient(Guid id, Action? onDisposing)
+    public WebSocketClient(Action? onDisposing)
     {
-        Id = id;
         OnDisposing = onDisposing;
+    }
+
+    /// <summary>
+    /// Sends a JSON string over the WebSocket connection.
+    /// </summary>
+    public async Task<bool> SendAsync(string json)
+    {
+        if (SendFunc == null)
+            return false;
+        return await SendFunc(json);
+    }
+
+    /// <summary>
+    /// Parses an incoming JSON message into the appropriate Scheme subclass.
+    /// </summary>
+    public Scheme.Scheme? Receive(string json)
+    {
+        return Scheme.Scheme.Parse(json);
     }
 
     public void Dispose()
