@@ -14,7 +14,7 @@ public abstract class Scheme
     public abstract string Type { get; }
 
     /// <summary>
-    /// Parses a JSON string and dispatches to the appropriate Remote scheme subclass.
+    /// Parses a JSON string and dispatches to the appropriate scheme subclass.
     /// Returns null if the type is unknown or the JSON is invalid.
     /// </summary>
     public static Scheme? Parse(string json)
@@ -31,12 +31,6 @@ public abstract class Scheme
             return type switch
             {
                 "bind" => Remote.BindScheme.FromJson(root),
-                "strength-set" => Remote.StrengthSetScheme.FromJson(root),
-                "strength-step" => Remote.StrengthStepScheme.FromJson(root),
-                "pulse" => Remote.PulseScheme.FromJson(root),
-                "clear" => Remote.ClearScheme.FromJson(root),
-                "error" => Remote.ErrorScheme.FromJson(root),
-                "msg" => new Remote.MsgScheme(),
                 _ => null
             };
         }

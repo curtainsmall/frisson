@@ -4,8 +4,6 @@ using Frisson.Core.Networking.Client;
 using DeviceBindScheme = Frisson.Core.Scheme.Device.BindScheme;
 using DeviceMsgScheme = Frisson.Core.Scheme.Device.MsgScheme;
 using RemoteBindScheme = Frisson.Core.Scheme.Remote.BindScheme;
-using RemoteErrorScheme = Frisson.Core.Scheme.Remote.ErrorScheme;
-using RemoteMsgScheme = Frisson.Core.Scheme.Remote.MsgScheme;
 using SchemeParser = Frisson.Core.Scheme.Scheme;
 
 namespace Frisson.Core.Networking.Server;
@@ -28,10 +26,6 @@ internal class WebSocketManager : IDisposable
 {
     private readonly WebSocketServer _server = new();
     private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
-    private readonly PeriodicTimer _heartbeatTimer = new(TimeSpan.FromSeconds(30));
-    private CancellationTokenSource? _heartbeatCts;
-
-    private const string HeartbeatJson = """{"type":"heartbeat"}""";
 
     /// <summary>
     /// Per-instance dummy frontend UUID. Represents "Frisson as frontend" for DG-LAB Device binding.
@@ -82,16 +76,11 @@ internal class WebSocketManager : IDisposable
 
     public async Task RunAsync(int port)
     {
-        _heartbeatCts = new CancellationTokenSource();
-        _ = RunHeartbeatLoopAsync(_heartbeatCts.Token);
         await _server.RunAsync(port);
     }
 
     public void Dispose()
     {
-        _heartbeatCts?.Cancel();
-        _heartbeatTimer.Dispose();
-        _heartbeatCts?.Dispose();
         RemoveEventHandlers();
 
         foreach (var client in _clients.Values)
@@ -182,8 +171,6 @@ internal class WebSocketManager : IDisposable
 
         // Invalid bind reply
         LoggerService.Instance.Log($"[Manager] Invalid bind reply from {clientId}: {json}");
-        var error = new RemoteErrorScheme { Message = "Invalid bind reply" };
-        _ = SendAsync(clientId, error.ToJson());
     }
 
     /// <summary>
@@ -210,35 +197,11 @@ internal class WebSocketManager : IDisposable
         if (scheme == null)
         {
             LoggerService.Instance.Log($"[Manager] Unknown Remote message from {clientId}: {json}");
-            var error = new RemoteErrorScheme { Message = "Unknown message type" };
-            _ = SendAsync(clientId, error.ToJson());
-            return;
-        }
-
-        if (scheme is RemoteMsgScheme)
-        {
-            // Valid but ignored (protocol compatibility)
             return;
         }
 
         LoggerService.Instance.Log($"[Manager] Remote msg from {clientId}: type={scheme.Type}");
-        // Parsed data is available on scheme object — future: surface to Control/ layer
-    }
-
-    private async Task RunHeartbeatLoopAsync(CancellationToken ct)
-    {
-        try
-        {
-            while (await _heartbeatTimer.WaitForNextTickAsync(ct))
-            {
-                foreach (var (id, client) in _clients)
-                {
-                    if (client is RemoteWebSocketClient)
-                        _ = SendAsync(id, HeartbeatJson);
-                }
-            }
-        }
-        catch (OperationCanceledException) { }
+        // Future: surface to Control/ layer
     }
 
     private WebSocketClient Register(Guid id, Action? onDisposing)
