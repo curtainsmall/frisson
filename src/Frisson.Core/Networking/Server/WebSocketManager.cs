@@ -101,8 +101,8 @@ internal class WebSocketManager : IDisposable
         // Send initial bind message (same for ALL new clients)
         var initialBind = new DeviceBindScheme
         {
-            ClientId = e.ClientId.ToString(),
-            TargetId = string.Empty,
+            ClientId = e.ClientId,
+            TargetId = Guid.Empty,
             Message = "targetId"
         };
         _ = SendAsync(e.ClientId, initialBind.ToJson());
@@ -139,22 +139,23 @@ internal class WebSocketManager : IDisposable
     /// </summary>
     private void HandleBindReply(Guid clientId, string json, WebSocketClient client)
     {
-        // Try Device bind: has clientId + targetId fields
+        // Try Device bind: Device sends { clientId: DummyFrontendId, targetId: deviceUuid }
+        // after scanning QR code containing DummyFrontendId
         var deviceBind = DeviceBindScheme.TryParseDeviceBind(json);
         if (deviceBind != null)
         {
-            // clientId should echo back the WS connection ID we sent
-            if (deviceBind.ClientId == clientId.ToString())
+            // clientId must be DummyFrontendId (Frisson as frontend)
+            if (deviceBind.ClientId == DummyFrontendId)
             {
                 UpgradeToDevice(clientId, client);
                 var confirm = new DeviceBindScheme
                 {
-                    ClientId = clientId.ToString(),
+                    ClientId = DummyFrontendId,
                     TargetId = deviceBind.TargetId,
                     Message = "200"
                 };
                 _ = SendAsync(clientId, confirm.ToJson());
-                LoggerService.Instance.Log($"[Manager] Device bound: {clientId}");
+                LoggerService.Instance.Log($"[Manager] Device bound: {clientId}, targetId={deviceBind.TargetId}");
                 return;
             }
         }

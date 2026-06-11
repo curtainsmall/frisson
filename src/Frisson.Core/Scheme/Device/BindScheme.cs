@@ -14,12 +14,12 @@ public sealed class BindScheme : SchemeBase
     /// <summary>
     /// Frontend UUID (in DG-LAB convention, always the frontend).
     /// </summary>
-    public string ClientId { get; set; } = string.Empty;
+    public Guid ClientId { get; set; }
 
     /// <summary>
     /// Device UUID (in DG-LAB convention, always the device).
     /// </summary>
-    public string TargetId { get; set; } = string.Empty;
+    public Guid TargetId { get; set; }
 
     /// <summary>
     /// Message content (e.g., "200" for success, "targetId" for initial bind).
@@ -31,8 +31,8 @@ public sealed class BindScheme : SchemeBase
         return JsonSerializer.Serialize(new
         {
             type = Type,
-            clientId = ClientId,
-            targetId = TargetId,
+            clientId = ClientId.ToString(),
+            targetId = TargetId.ToString(),
             message = Message
         });
     }
@@ -48,10 +48,14 @@ public sealed class BindScheme : SchemeBase
             !root.TryGetProperty("message", out var messageProp))
             return null;
 
+        if (!Guid.TryParse(clientIdProp.GetString(), out var clientId) ||
+            !Guid.TryParse(targetIdProp.GetString(), out var targetId))
+            return null;
+
         return new BindScheme
         {
-            ClientId = clientIdProp.GetString() ?? string.Empty,
-            TargetId = targetIdProp.GetString() ?? string.Empty,
+            ClientId = clientId,
+            TargetId = targetId,
             Message = messageProp.GetString() ?? string.Empty
         };
     }
