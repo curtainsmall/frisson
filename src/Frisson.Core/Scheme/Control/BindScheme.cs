@@ -1,33 +1,38 @@
 using System.Text.Json;
 using SchemeBase = Frisson.Core.Scheme.Scheme;
 
-namespace Frisson.Core.Scheme.Remote;
+namespace Frisson.Core.Scheme.Control;
 
 /// <summary>
-/// Remote bind reply/confirm scheme.
-/// Format: { "type": "bind", "id": "..." }
-/// No clientId/targetId fields — this is the Remote protocol format.
+/// Control bind reply/confirm scheme.
+/// Format: { "type": "bind", "id": "...", "name": "..." }
 /// </summary>
 public sealed class BindScheme : SchemeBase
 {
     public override string Type => "bind";
 
     /// <summary>
-    /// The Remote's assigned UUID.
+    /// The controller's assigned UUID.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// The controller's display name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
 
     public override string ToJson()
     {
         return JsonSerializer.Serialize(new
         {
             type = Type,
-            id = Id
+            id = Id.ToString(),
+            name = Name
         });
     }
 
     /// <summary>
-    /// Parses a Remote bind message from a JsonElement.
+    /// Parses a Control bind message from a JsonElement.
     /// Returns null if the "id" field is missing.
     /// </summary>
     public static BindScheme? FromJson(JsonElement root)
@@ -35,15 +40,22 @@ public sealed class BindScheme : SchemeBase
         if (!root.TryGetProperty("id", out var idProp))
             return null;
 
+        var idStr = idProp.GetString() ?? string.Empty;
+        if (!Guid.TryParse(idStr, out var id))
+            return null;
+
+        root.TryGetProperty("name", out var nameProp);
+
         return new BindScheme
         {
-            Id = idProp.GetString() ?? string.Empty
+            Id = id,
+            Name = nameProp.GetString() ?? string.Empty
         };
     }
 
     /// <summary>
-    /// Attempts to parse a raw JSON string as a Remote bind message.
-    /// Returns null if it doesn't match the Remote bind format (missing "id" field).
+    /// Attempts to parse a raw JSON string as a Control bind message.
+    /// Returns null if it doesn't match the Control bind format.
     /// </summary>
     public static BindScheme? TryParse(string json)
     {
@@ -55,6 +67,10 @@ public sealed class BindScheme : SchemeBase
             if (!root.TryGetProperty("type", out var typeProp))
                 return null;
             if (typeProp.GetString() != "bind")
+                return null;
+
+            // Control bind has "id" and "name" but NOT "clientId"/"targetId"
+            if (root.TryGetProperty("clientId", out _))
                 return null;
 
             return FromJson(root);

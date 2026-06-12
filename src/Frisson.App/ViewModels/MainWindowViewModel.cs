@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using Frisson.App.Services;
 using Frisson.Core;
-using Frisson.Core.Networking.Client;
-using Frisson.Core.Networking.Server;
+using Frisson.Core.Agent;
 
 namespace Frisson.App.ViewModels;
 
@@ -32,20 +29,16 @@ public class LanguageOption
 }
 
 /// <summary>
-/// Represents a connected client information for UI display.
-/// Uses localization keys for ClientType to support dynamic language switching.
+/// Represents a connected agent for UI display.
 /// </summary>
-public class ConnectedClientInfo : INotifyPropertyChanged
+public class ConnectedAgentInfo : INotifyPropertyChanged
 {
-    public required Guid ClientId { get; init; }
+    public required Guid AgentId { get; init; }
+
     /// <summary>
-    /// Type of the connected client.
+    /// Connection status of the agent.
     /// </summary>
-    public required WebSocketClientKind ClientType { get; init; }
-    /// <summary>
-    /// Connection status of the client.
-    /// </summary>
-    public required WebClientConnectionStatus Status { get; init; }
+    public required AgentConnectionStatus Status { get; set; }
     public required string StatusColor { get; init; }
 
     private bool _isSelected;
@@ -68,50 +61,44 @@ public class ConnectedClientInfo : INotifyPropertyChanged
 public partial class MainWindowViewModel : ViewModelBase
 {
     /// <summary>
-    /// List of all connected clients for display in Control Panel page.
+    /// List of all connected agents for display in Control Panel page.
     /// </summary>
-    public ObservableCollection<ConnectedClientInfo> ConnectedClients { get; } = new();
+    public ObservableCollection<ConnectedAgentInfo> ConnectedAgents { get; } = new();
 
     /// <summary>
-    /// List of device-type clients for selection.
+    /// Count of active (connected) agents.
     /// </summary>
-    public ObservableCollection<ConnectedClientInfo> DeviceClients => new(
-        ConnectedClients.Where(c => c.ClientType == WebSocketClientKind.Device));
+    public int ActiveAgentCount => ConnectedAgents.Count(a => a.Status == AgentConnectionStatus.Connected);
 
     /// <summary>
-    /// Count of active clients (Device + Remote).
+    /// Count of pending (unbound) agents.
     /// </summary>
-    public int ActiveClientCount => ConnectedClients.Count(c => c.ClientType is WebSocketClientKind.Device or WebSocketClientKind.Remote);
+    public int PendingAgentCount => ConnectedAgents.Count(a => a.Status == AgentConnectionStatus.Pending);
 
     /// <summary>
-    /// Count of unknown clients.
+    /// Whether there are any pending agents.
     /// </summary>
-    public int UnknownClientCount => ConnectedClients.Count(c => c.ClientType == WebSocketClientKind.Unknown);
+    public bool HasPendingAgents => PendingAgentCount > 0;
 
     /// <summary>
-    /// Whether there are any unknown clients (for visibility binding).
+    /// Whether there are any connected agents.
     /// </summary>
-    public bool HasUnknownClients => UnknownClientCount > 0;
+    public bool HasConnectedAgents => ConnectedAgents.Any(a => a.Status == AgentConnectionStatus.Connected);
 
     /// <summary>
-    /// Whether there are any device clients connected.
+    /// Whether an agent is currently selected for control.
     /// </summary>
-    public bool HasDeviceClients => ConnectedClients.Any(c => c.ClientType == WebSocketClientKind.Device);
+    public bool HasSelectedAgent => SelectedAgentId.HasValue;
 
     /// <summary>
-    /// Whether a device is currently selected for control.
+    /// Show 'No Agent Selected' panel when no agent is selected.
     /// </summary>
-    public bool HasSelectedDevice => SelectedDeviceClientId.HasValue;
+    public bool ShowNoAgentPanel => !HasSelectedAgent;
 
     /// <summary>
-    /// Show 'No Device Selected' panel when no device is selected.
+    /// Show controls when an agent is selected.
     /// </summary>
-    public bool ShowNoDevicePanel => !HasSelectedDevice;
-
-    /// <summary>
-    /// Show channel controls when a device is selected.
-    /// </summary>
-    public bool ShowChannelControls => HasSelectedDevice;
+    public bool ShowAgentControls => HasSelectedAgent;
 
     /// <summary>
     /// Available languages for selection.
@@ -131,15 +118,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private LanguageOption _selectedLanguage;
 
     [ObservableProperty]
-    private bool _isClientPanelExpanded = true;
+    private bool _isAgentPanelExpanded = true;
 
-    public bool IsClientPanelCollapsed => !IsClientPanelExpanded;
+    public bool IsAgentPanelCollapsed => !IsAgentPanelExpanded;
 
     /// <summary>
-    /// Currently selected device client ID for Channel control.
+    /// Currently selected agent ID.
     /// </summary>
     [ObservableProperty]
-    private Guid? _selectedDeviceClientId;
+    private Guid? _selectedAgentId;
 
     public bool IsMixerSelected => CurrentPage == NavPage.Mixer;
     public bool IsWavesSelected => CurrentPage == NavPage.Waves;
@@ -152,22 +139,21 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
-    partial void OnSelectedDeviceClientIdChanged(Guid? value)
+    partial void OnSelectedAgentIdChanged(Guid? value)
     {
-        // Update selection highlight on client cards
-        foreach (var client in ConnectedClients)
+        foreach (var agent in ConnectedAgents)
         {
-            client.IsSelected = client.ClientId == value;
+            agent.IsSelected = agent.AgentId == value;
         }
 
-        OnPropertyChanged(nameof(HasSelectedDevice));
-        OnPropertyChanged(nameof(ShowNoDevicePanel));
-        OnPropertyChanged(nameof(ShowChannelControls));
+        OnPropertyChanged(nameof(HasSelectedAgent));
+        OnPropertyChanged(nameof(ShowNoAgentPanel));
+        OnPropertyChanged(nameof(ShowAgentControls));
     }
 
-    partial void OnIsClientPanelExpandedChanged(bool value)
+    partial void OnIsAgentPanelExpandedChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsClientPanelCollapsed));
+        OnPropertyChanged(nameof(IsAgentPanelCollapsed));
     }
 
     [RelayCommand]
@@ -177,20 +163,19 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ToggleClientPanel()
+    private void ToggleAgentPanel()
     {
-        IsClientPanelExpanded = !IsClientPanelExpanded;
+        IsAgentPanelExpanded = !IsAgentPanelExpanded;
     }
 
     [RelayCommand]
-    private void SelectDevice(Guid clientId)
+    private void SelectAgent(Guid agentId)
     {
-        // Only allow selecting Device-type clients
-        var client = ConnectedClients.FirstOrDefault(c => c.ClientId == clientId);
-        if (client?.ClientType != WebSocketClientKind.Device)
+        var agent = ConnectedAgents.FirstOrDefault(a => a.AgentId == agentId);
+        if (agent?.Status != AgentConnectionStatus.Connected)
             return;
 
-        SelectedDeviceClientId = clientId;
+        SelectedAgentId = agentId;
     }
 
     [RelayCommand]
@@ -210,83 +195,66 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void DisconnectClient(Guid clientId)
+    private void DisconnectAgent(Guid agentId)
     {
-        AppCore.Instance.DisconnectClient(clientId);
-        
-        // Clear selected device if it was the disconnected one
-        if (SelectedDeviceClientId == clientId)
+        AppCore.Instance.DisconnectAgent(agentId);
+
+        if (SelectedAgentId == agentId)
         {
-            SelectedDeviceClientId = null;
+            SelectedAgentId = null;
         }
     }
 
     public MainWindowViewModel()
     {
-        // Set default language based on current culture
         var currentCulture = LocalizationService.Instance.CurrentCulture.Name;
-        var defaultLang = AvailableLanguages.FirstOrDefault(l => l.Code == currentCulture) 
+        var defaultLang = AvailableLanguages.FirstOrDefault(l => l.Code == currentCulture)
                           ?? AvailableLanguages.First(l => l.Code == "en-US");
         _selectedLanguage = defaultLang;
-        
-        // Sync to LocalizationService (already set in LocalizationService constructor)
+
         LocalizationService.Instance.SetLanguage(defaultLang.Code);
 
-        ConnectedClients.CollectionChanged += (_, _) =>
+        ConnectedAgents.CollectionChanged += (_, _) =>
         {
-            OnPropertyChanged(nameof(ActiveClientCount));
-            OnPropertyChanged(nameof(UnknownClientCount));
-            OnPropertyChanged(nameof(HasUnknownClients));
-            OnPropertyChanged(nameof(HasDeviceClients));
-            OnPropertyChanged(nameof(DeviceClients));
-            OnPropertyChanged(nameof(ShowNoDevicePanel));
-            OnPropertyChanged(nameof(ShowChannelControls));
+            OnPropertyChanged(nameof(ActiveAgentCount));
+            OnPropertyChanged(nameof(PendingAgentCount));
+            OnPropertyChanged(nameof(HasPendingAgents));
+            OnPropertyChanged(nameof(HasConnectedAgents));
         };
 
-        AppCore.Instance.ClientConnected += OnClientConnected;
-        AppCore.Instance.ClientDisconnected += OnClientDisconnected;
+        AppCore.Instance.AgentConnected += OnAgentConnected;
+        AppCore.Instance.AgentDisconnected += OnAgentDisconnected;
     }
 
-    private void OnClientConnected(object? sender, ClientConnectionEventArgs e)
+    private void OnAgentConnected(object? sender, AgentConnectionEventArgs e)
     {
-        var statusColor = e.Status switch
-        {
-            WebClientConnectionStatus.Connected => "#00FF00",
-            _ => "#888888"
-        };
-
-        // Marshal to UI thread for ObservableCollection modification
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            // Remove existing entry if present (e.g., reconnection)
-            var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+            var existing = ConnectedAgents.FirstOrDefault(a => a.AgentId == e.AgentId);
             if (existing is not null)
-                ConnectedClients.Remove(existing);
+                ConnectedAgents.Remove(existing);
 
-            ConnectedClients.Add(new ConnectedClientInfo
+            ConnectedAgents.Add(new ConnectedAgentInfo
             {
-                ClientId = e.ClientId,
-                ClientType = e.Kind,
+                AgentId = e.AgentId,
                 Status = e.Status,
-                StatusColor = statusColor
+                StatusColor = "#00FF00"
             });
         });
     }
 
-    private void OnClientDisconnected(object? sender, ClientConnectionEventArgs e)
+    private void OnAgentDisconnected(object? sender, AgentConnectionEventArgs e)
     {
-        // Marshal to UI thread for ObservableCollection modification
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            var existing = ConnectedClients.FirstOrDefault(c => c.ClientId == e.ClientId);
+            var existing = ConnectedAgents.FirstOrDefault(a => a.AgentId == e.AgentId);
             if (existing is not null)
             {
-                ConnectedClients.Remove(existing);
+                ConnectedAgents.Remove(existing);
 
-                // Clear selected device if it was the disconnected one
-                if (SelectedDeviceClientId == e.ClientId)
+                if (SelectedAgentId == e.AgentId)
                 {
-                    SelectedDeviceClientId = null;
+                    SelectedAgentId = null;
                 }
             }
         });
@@ -299,5 +267,4 @@ public partial class MainWindowViewModel : ViewModelBase
             LocalizationService.Instance.SetLanguage(value.Code);
         }
     }
-
 }

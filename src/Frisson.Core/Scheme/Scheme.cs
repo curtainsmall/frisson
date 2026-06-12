@@ -30,7 +30,7 @@ public abstract class Scheme
             var type = typeProp.GetString();
             return type switch
             {
-                "bind" => Remote.BindScheme.FromJson(root),
+                "bind" => TryParseBind(root),
                 _ => null
             };
         }
@@ -44,4 +44,15 @@ public abstract class Scheme
     /// Serializes this scheme to a JSON string.
     /// </summary>
     public abstract string ToJson();
+
+    /// <summary>
+    /// Tries to parse a bind message — dispatches to Device or Control based on fields.
+    /// Device bind has clientId/targetId; Control bind has id/name.
+    /// </summary>
+    private static Scheme? TryParseBind(JsonElement root)
+    {
+        if (root.TryGetProperty("clientId", out _))
+            return Device.BindScheme.FromJson(root);
+        return Control.BindScheme.FromJson(root);
+    }
 }

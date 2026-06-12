@@ -25,14 +25,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnClientCardPointerPressed(object? sender, PointerPressedEventArgs e)
+    private void OnAgentCardPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is not Border border || border.Tag is not Guid clientId)
+        if (sender is not Border border || border.Tag is not Guid agentId)
             return;
 
         if (DataContext is MainWindowViewModel vm)
         {
-            vm.SelectDeviceCommand.Execute(clientId);
+            vm.SelectAgentCommand.Execute(agentId);
         }
     }
 }

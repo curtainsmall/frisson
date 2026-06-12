@@ -9,7 +9,7 @@
         xmlns:converters="using:Frisson.App.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Frisson.App.Views.MainWindow"
-        x:Name="ClientWindow"
+        x:Name="Root"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/Frisson.ico"
         Title="{loc:Loc AppTitle}"
@@ -192,7 +192,7 @@
                 </Border>
 
                 <!-- Right: Collapsible Connected Clients Panel -->
-                <Grid Grid.Column="2" Width="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToWidthConverter.Instance}, ConverterParameter=300}">
+                <Grid Grid.Column="2" Width="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToWidthConverter.Instance}, ConverterParameter=300}">
                     <Grid RowDefinitions="Auto, Auto, *">
                         <!-- Toggle Button Header -->
                         <Border Grid.Row="0" Padding="10" BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,0,1">
@@ -200,21 +200,21 @@
                                     BorderThickness="0"
                                     Padding="5"
                                     HorizontalAlignment="Stretch"
-                                    Command="{Binding ToggleClientPanelCommand}">
+                                    Command="{Binding ToggleAgentPanelCommand}">
                                 <Panel>
-                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsClientPanelExpanded}">
+                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsAgentPanelExpanded}">
                                         <TextBlock Grid.Column="0"
-                                                   Text="{loc:Loc ConnectedClients}"
+                                                   Text="{loc:Loc ConnectedAgents}"
                                                    Foreground="{DynamicResource AccentBrush}"
                                                    FontSize="10"
                                                    FontWeight="Bold" />
                                         <i:Icon Grid.Column="1"
-                                                Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
+                                                Value="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
                                                 FontSize="12"
                                                 Foreground="{DynamicResource AccentBrush}" />
                                     </Grid>
-                                    <i:Icon IsVisible="{Binding IsClientPanelCollapsed}"
-                                            Value="{Binding IsClientPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
+                                    <i:Icon IsVisible="{Binding IsAgentPanelCollapsed}"
+                                            Value="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
                                             FontSize="12"
                                             Foreground="{DynamicResource AccentBrush}"
                                             HorizontalAlignment="Center" />
@@ -226,10 +226,10 @@
                         <StackPanel Grid.Row="1"
                                     Orientation="Vertical"
                                     Spacing="4"
-                                    IsVisible="{Binding IsClientPanelCollapsed}"
+                                    IsVisible="{Binding IsAgentPanelCollapsed}"
                                     HorizontalAlignment="Center"
                                     Margin="0,8,0,0">
-                            <TextBlock Text="{Binding ActiveClientCount}"
+                            <TextBlock Text="{Binding ActiveAgentCount}"
                                        Foreground="#00CC00"
                                        FontWeight="Bold"
                                        FontSize="12"
@@ -238,19 +238,19 @@
                                        Width="20"
                                        Fill="{DynamicResource AccentMuted}"
                                        Margin="0,2"
-                                       IsVisible="{Binding HasUnknownClients}"
+                                       IsVisible="{Binding HasPendingAgents}"
                                        HorizontalAlignment="Center" />
-                            <TextBlock Text="{Binding UnknownClientCount}"
+                            <TextBlock Text="{Binding PendingAgentCount}"
                                        Foreground="#888888"
                                        FontSize="12"
-                                       IsVisible="{Binding HasUnknownClients}"
+                                       IsVisible="{Binding HasPendingAgents}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
 
                         <!-- Client List -->
-                        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsClientPanelExpanded}">
+                        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsAgentPanelExpanded}">
                             <StackPanel Margin="10">
-                                <ItemsControl x:Name="ClientList" ItemsSource="{Binding ConnectedClients}">
+                                <ItemsControl x:Name="ClientList" ItemsSource="{Binding ConnectedAgents}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border Background="{DynamicResource Black}"
@@ -259,22 +259,16 @@
                                                     CornerRadius="8"
                                                     Padding="12"
                                                     Margin="0,0,0,10"
-                                                    Tag="{Binding ClientId}"
+                                                    Tag="{Binding AgentId}"
                                                     Classes.selected="{Binding IsSelected}"
-                                                    PointerPressed="OnClientCardPointerPressed">
+                                                    PointerPressed="OnAgentCardPointerPressed">
                                                 <Grid RowDefinitions="Auto, Auto, Auto, Auto">
                                                     <TextBlock Grid.Row="0"
                                                                Foreground="{DynamicResource AccentBrush}"
-                                                               FontWeight="SemiBold" FontSize="12">
-                                                        <TextBlock.Text>
-                                                            <MultiBinding Converter="{x:Static services:LocMultiConverter.Instance}">
-                                                                <Binding Path="ClientType" />
-                                                                <Binding Source="{x:Static services:LocalizationService.Instance}" Path="CurrentCulture" />
-                                                            </MultiBinding>
-                                                        </TextBlock.Text>
-                                                    </TextBlock>
+                                                               FontWeight="SemiBold" FontSize="12"
+                                                               Text="Agent" />
                                                     <TextBlock Grid.Row="1"
-                                                               Text="{Binding ClientId, StringFormat='{}{0}'}"
+                                                               Text="{Binding AgentId, StringFormat='{}{0}'}"
                                                                Foreground="{DynamicResource SecondaryText}"
                                                                FontSize="10" TextTrimming="CharacterEllipsis" />
                                                     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
@@ -309,8 +303,8 @@
                                                                 HorizontalAlignment="Right"
                                                                 Background="Transparent"
                                                                 Padding="4"
-                                                                Command="{Binding #ClientWindow.DataContext.DisconnectClientCommand}"
-                                                                CommandParameter="{Binding ClientId}">
+                                                                Command="{Binding #Root.DataContext.DisconnectAgentCommand}"
+                                                                CommandParameter="{Binding AgentId}">
                                                             <i:Icon Value="fa-solid fa-stop" FontSize="14" Foreground="#FF4444" />
                                                         </Button>
                                                     </Grid>
