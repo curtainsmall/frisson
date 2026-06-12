@@ -63,11 +63,11 @@
     <value>Frisson</value>
   </data>
   <!-- Navigation -->
-  <data name="NavMixer" xml:space="preserve">
-    <value>Control Panel</value>
+  <data name="NavConnections" xml:space="preserve">
+    <value>Connections</value>
   </data>
-  <data name="NavWaveGenerator" xml:space="preserve">
-    <value>Wave</value>
+  <data name="NavLocalControl" xml:space="preserve">
+    <value>Local Control</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>Settings</value>
@@ -148,5 +148,15 @@
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>Log</value>
+  </data>
+  <!-- Connections Page -->
+  <data name="AgentsListTitle" xml:space="preserve">
+    <value>Agents</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>No Agent</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>Local Control</value>
   </data>
 </root>

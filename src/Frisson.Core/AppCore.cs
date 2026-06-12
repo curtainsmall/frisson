@@ -20,6 +20,8 @@ public class AppCore : IDisposable
     public event Action<string>? ErrorOccurred;
     public event EventHandler<AgentConnectionEventArgs>? AgentConnected;
     public event EventHandler<AgentConnectionEventArgs>? AgentDisconnected;
+    public event Action<Guid, Guid>? AgentLinked;
+    public event Action<Guid>? AgentUnlinked;
 
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
@@ -32,6 +34,8 @@ public class AppCore : IDisposable
         // Forward AgentManager events to AppCore consumers
         _agentManager.AgentConnected += (s, e) => AgentConnected?.Invoke(s, e);
         _agentManager.AgentDisconnected += (s, e) => AgentDisconnected?.Invoke(s, e);
+        _agentManager.AgentLinked += (d, c) => AgentLinked?.Invoke(d, c);
+        _agentManager.AgentUnlinked += d => AgentUnlinked?.Invoke(d);
     }
 
     public void Startup(int port)
@@ -59,4 +63,9 @@ public class AppCore : IDisposable
     {
         _wsServer.Close(agentId);
     }
+
+    public void LinkAgents(Guid deviceId, Guid controlId) => _agentManager.LinkAgents(deviceId, controlId);
+    public void UnlinkAgent(Guid deviceId) => _agentManager.UnlinkAgent(deviceId);
+    public IReadOnlyList<Guid> GetLinkedDevices(Guid controlId) => _agentManager.GetLinkedDevices(controlId);
+    public IReadOnlyDictionary<Guid, Guid> GetAgentLinks() => _agentManager.GetAgentLinks();
 }

@@ -63,11 +63,11 @@
     <value>Frisson</value>
   </data>
   <!-- Navigation -->
-  <data name="NavMixer" xml:space="preserve">
-    <value>コントロールパネル</value>
+  <data name="NavConnections" xml:space="preserve">
+    <value>接続</value>
   </data>
-  <data name="NavWaveGenerator" xml:space="preserve">
-    <value>波形</value>
+  <data name="NavLocalControl" xml:space="preserve">
+    <value>ローカルコントロール</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
@@ -148,5 +148,15 @@
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>ログ</value>
+  </data>
+  <!-- Connections Page -->
+  <data name="AgentsListTitle" xml:space="preserve">
+    <value>エージェント</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>エージェントなし</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>ローカルコントロール</value>
   </data>
 </root>

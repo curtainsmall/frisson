@@ -63,11 +63,11 @@
     <value>Frisson</value>
   </data>
   <!-- Navigation -->
-  <data name="NavMixer" xml:space="preserve">
-    <value>控制面板</value>
+  <data name="NavConnections" xml:space="preserve">
+    <value>連線</value>
   </data>
-  <data name="NavWaveGenerator" xml:space="preserve">
-    <value>波形</value>
+  <data name="NavLocalControl" xml:space="preserve">
+    <value>本機控制</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
@@ -148,5 +148,15 @@
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>日誌</value>
+  </data>
+  <!-- Connections Page -->
+  <data name="AgentsListTitle" xml:space="preserve">
+    <value>代理</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>無代理</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>本機控制</value>
   </data>
 </root>

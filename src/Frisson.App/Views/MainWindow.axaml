@@ -46,8 +46,7 @@
         </Style>
 
         <Style Selector="Border.selected">
-            <Setter Property="BorderThickness" Value="3" />
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
         </Style>
     </Window.Styles>
 
@@ -67,23 +66,23 @@
                 <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
             </Border>
 
-            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Background="Transparent">
                 <!-- Left Navigation Panel -->
                 <Grid Grid.Column="0" Width="60" Background="Transparent">
                     <StackPanel Spacing="10" Margin="5">
                         <Button Classes="nav-btn"
-                                Classes.selected="{Binding IsMixerSelected}"
-                                ToolTip.Tip="{loc:Loc NavMixer}"
+                                Classes.selected="{Binding IsConnectionsSelected}"
+                                ToolTip.Tip="{loc:Loc NavConnections}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.Mixer}">
-                            <i:Icon Value="fa-solid fa-sliders" />
+                                CommandParameter="{x:Static vm:NavPage.Connections}">
+                            <i:Icon Value="fa-solid fa-diagram-project" />
                         </Button>
                         <Button Classes="nav-btn"
-                                Classes.selected="{Binding IsWavesSelected}"
-                                ToolTip.Tip="{loc:Loc NavWaveGenerator}"
+                                Classes.selected="{Binding IsLocalControlSelected}"
+                                ToolTip.Tip="{loc:Loc NavLocalControl}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.Waves}">
-                            <i:Icon Value="fa-solid fa-wave-square" />
+                                CommandParameter="{x:Static vm:NavPage.LocalControl}">
+                            <i:Icon Value="fa-solid fa-sliders" />
                         </Button>
                     </StackPanel>
 
@@ -101,23 +100,86 @@
                 <!-- Center Content Area -->
                 <Border Grid.Column="1" Padding="20" Background="Transparent">
                     <Panel>
-                        <!-- Control Panel Page -->
-                        <Grid IsVisible="{Binding IsMixerSelected}" RowDefinitions="Auto" Margin="10">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="15">
-                                <TextBlock Text="{loc:Loc NoDeviceSelected}" FontSize="20" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" />
-                            </StackPanel>
+                        <!-- Connections Page -->
+                        <Grid IsVisible="{Binding IsConnectionsSelected}" ColumnDefinitions="300, 8, *">
+                            <!-- Left: Agent Card List -->
+                            <Grid Grid.Column="0" RowDefinitions="Auto, *">
+                                <!-- List Title -->
+                                <TextBlock Grid.Row="0" Text="{loc:Loc AgentsListTitle}"
+                                           Foreground="{DynamicResource PrimaryText}"
+                                           FontWeight="SemiBold" FontSize="14"
+                                           Margin="4,0,0,8" />
+                                <Border Grid.Row="1"
+                                        Background="{DynamicResource Black}"
+                                        BorderBrush="{DynamicResource AccentMuted}"
+                                        BorderThickness="0,2,0,0"
+                                        CornerRadius="0"
+                                        Padding="8">
+                                    <Panel>
+                                    <ScrollViewer>
+                                        <ItemsControl ItemsSource="{Binding AgentCards}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SurfaceDark}"
+                                                            CornerRadius="6"
+                                                            Padding="12"
+                                                            Margin="0,0,0,4"
+                                                    Tag="{Binding AgentId}"
+                                                    Classes.selected="{Binding IsSelected}"
+                                                    Classes.device="{Binding IsDevice}"
+                                                    Classes.control="{Binding IsControl}"
+                                                    PointerPressed="OnAgentCardPointerPressed"
+                                                    DragDrop.Drop="OnAgentCardDrop"
+                                                    DragDrop.DragOver="OnAgentCardDragOver"
+                                                    DragDrop.AllowDrop="{Binding IsControl}">
+                                                <Border.RenderTransform>
+                                                    <TranslateTransform X="{Binding IndentLevel, Converter={x:Static converters:IndentToMarginConverter.Instance}}" />
+                                                </Border.RenderTransform>
+                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
+                                                    <!-- Kind icon -->
+                                                    <i:Icon Grid.Column="0" Grid.RowSpan="2"
+                                                            Value="fa-solid fa-microchip"
+                                                            FontSize="16"
+                                                            Foreground="{DynamicResource AccentBrush}"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,10,0" />
+                                                    <!-- Kind label -->
+                                                    <TextBlock Grid.Column="1" Grid.Row="0"
+                                                               Text="{Binding AgentKindLabel}"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontWeight="SemiBold" FontSize="12" />
+                                                    <!-- Agent ID -->
+                                                    <TextBlock Grid.Column="1" Grid.Row="1"
+                                                               Text="{Binding AgentId, StringFormat='{}{0}'}"
+                                                               Foreground="{DynamicResource SecondaryText}"
+                                                               FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                </Grid>
+                                            </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                    <!-- Empty state -->
+                                    <TextBlock Text="{loc:Loc NoAgent}"
+                                               IsVisible="{Binding !HasAgents}"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               FontSize="14"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Panel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Right: Agent Detail Panel (placeholder) -->
+                            <Border Grid.Column="2"
+                                    Background="{DynamicResource Black}"
+                                    Padding="20" />
                         </Grid>
 
-                        <!-- Waves Page -->
-                        <Grid IsVisible="{Binding IsWavesSelected}">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <i:Icon Value="fa-solid fa-wave-square" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
-                                <TextBlock Text="{loc:Loc NavWaveGenerator}" FontSize="24"
-                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
-                                <Separator Background="{DynamicResource AccentMuted}" Margin="0,10" Width="200" Height="1" />
-                                <TextBlock Text="{loc:Loc WaveformPlaceholder}"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                            </StackPanel>
+                        <!-- Local Control Page -->
+                        <Grid IsVisible="{Binding IsLocalControlSelected}">
+                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="24"
+                                       Foreground="{DynamicResource SecondaryText}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
                         </Grid>
 
                         <!-- Settings Page -->
@@ -191,132 +253,6 @@
                     </Panel>
                 </Border>
 
-                <!-- Right: Collapsible Connected Clients Panel -->
-                <Grid Grid.Column="2" Width="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToWidthConverter.Instance}, ConverterParameter=300}">
-                    <Grid RowDefinitions="Auto, Auto, *">
-                        <!-- Toggle Button Header -->
-                        <Border Grid.Row="0" Padding="10" BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,0,1">
-                            <Button Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="5"
-                                    HorizontalAlignment="Stretch"
-                                    Command="{Binding ToggleAgentPanelCommand}">
-                                <Panel>
-                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsAgentPanelExpanded}">
-                                        <TextBlock Grid.Column="0"
-                                                   Text="{loc:Loc ConnectedAgents}"
-                                                   Foreground="{DynamicResource AccentBrush}"
-                                                   FontSize="10"
-                                                   FontWeight="Bold" />
-                                        <i:Icon Grid.Column="1"
-                                                Value="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
-                                                FontSize="12"
-                                                Foreground="{DynamicResource AccentBrush}" />
-                                    </Grid>
-                                    <i:Icon IsVisible="{Binding IsAgentPanelCollapsed}"
-                                            Value="{Binding IsAgentPanelExpanded, Converter={x:Static converters:BoolToIconConverter.Instance}, ConverterParameter='fa-solid fa-chevron-right;fa-solid fa-chevron-left'}"
-                                            FontSize="12"
-                                            Foreground="{DynamicResource AccentBrush}"
-                                            HorizontalAlignment="Center" />
-                                </Panel>
-                            </Button>
-                        </Border>
-
-                        <!-- Collapsed Client Counts -->
-                        <StackPanel Grid.Row="1"
-                                    Orientation="Vertical"
-                                    Spacing="4"
-                                    IsVisible="{Binding IsAgentPanelCollapsed}"
-                                    HorizontalAlignment="Center"
-                                    Margin="0,8,0,0">
-                            <TextBlock Text="{Binding ActiveAgentCount}"
-                                       Foreground="#00CC00"
-                                       FontWeight="Bold"
-                                       FontSize="12"
-                                       HorizontalAlignment="Center" />
-                            <Rectangle Height="1"
-                                       Width="20"
-                                       Fill="{DynamicResource AccentMuted}"
-                                       Margin="0,2"
-                                       IsVisible="{Binding HasPendingAgents}"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="{Binding PendingAgentCount}"
-                                       Foreground="#888888"
-                                       FontSize="12"
-                                       IsVisible="{Binding HasPendingAgents}"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-
-                        <!-- Client List -->
-                        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsAgentPanelExpanded}">
-                            <StackPanel Margin="10">
-                                <ItemsControl x:Name="ClientList" ItemsSource="{Binding ConnectedAgents}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="{DynamicResource Black}"
-                                                    BorderBrush="{DynamicResource AccentMuted}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="8"
-                                                    Padding="12"
-                                                    Margin="0,0,0,10"
-                                                    Tag="{Binding AgentId}"
-                                                    Classes.selected="{Binding IsSelected}"
-                                                    PointerPressed="OnAgentCardPointerPressed">
-                                                <Grid RowDefinitions="Auto, Auto, Auto, Auto">
-                                                    <TextBlock Grid.Row="0"
-                                                               Foreground="{DynamicResource AccentBrush}"
-                                                               FontWeight="SemiBold" FontSize="12"
-                                                               Text="Agent" />
-                                                    <TextBlock Grid.Row="1"
-                                                               Text="{Binding AgentId, StringFormat='{}{0}'}"
-                                                               Foreground="{DynamicResource SecondaryText}"
-                                                               FontSize="10" TextTrimming="CharacterEllipsis" />
-                                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5" Margin="0,5,0,0">
-                                                        <Ellipse Width="6" Height="6"
-                                                                 Fill="{Binding StatusColor}" />
-                                                        <TextBlock Foreground="{DynamicResource SecondaryText}"
-                                                                   FontSize="10">
-                                                            <TextBlock.Text>
-                                                                <MultiBinding Converter="{x:Static services:LocMultiConverter.Instance}">
-                                                                    <Binding Path="Status" />
-                                                                    <Binding Source="{x:Static services:LocalizationService.Instance}" Path="CurrentCulture" />
-                                                                </MultiBinding>
-                                                            </TextBlock.Text>
-                                                        </TextBlock>
-                                                    </StackPanel>
-                                                    <!-- Client Panel Buttons -->
-                                                    <Grid Grid.Row="3" ColumnDefinitions="*, Auto" Margin="0,8,0,0">
-                                                        <Button Grid.Column="0"
-                                                                HorizontalAlignment="Left"
-                                                                Background="Transparent"
-                                                                Padding="4">
-                                                            <i:Icon Value="fa-solid fa-ellipsis" FontSize="14" Foreground="{DynamicResource SecondaryText}" />
-                                                            <Button.Flyout>
-                                                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                                                                    <MenuItem Header="{loc:Loc MenuItem1}" />
-                                                                    <MenuItem Header="{loc:Loc MenuItem2}" />
-                                                                    <MenuItem Header="{loc:Loc MenuItem3}" />
-                                                                </MenuFlyout>
-                                                            </Button.Flyout>
-                                                        </Button>
-                                                        <Button Grid.Column="1"
-                                                                HorizontalAlignment="Right"
-                                                                Background="Transparent"
-                                                                Padding="4"
-                                                                Command="{Binding #Root.DataContext.DisconnectAgentCommand}"
-                                                                CommandParameter="{Binding AgentId}">
-                                                            <i:Icon Value="fa-solid fa-stop" FontSize="14" Foreground="#FF4444" />
-                                                        </Button>
-                                                    </Grid>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
             </Grid>
         </Grid>
     </Border>

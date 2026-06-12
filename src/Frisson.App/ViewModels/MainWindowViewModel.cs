@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
@@ -14,14 +16,11 @@ namespace Frisson.App.ViewModels;
 
 public enum NavPage
 {
-    Mixer,
-    Waves,
+    Connections,
+    LocalControl,
     Settings,
 }
 
-/// <summary>
-/// Represents a language option for the language selector.
-/// </summary>
 public class LanguageOption
 {
     public required string Code { get; init; }
@@ -29,17 +28,21 @@ public class LanguageOption
 }
 
 /// <summary>
-/// Represents a connected agent for UI display.
+/// Represents a card in the Connections tab agent list.
 /// </summary>
-public class ConnectedAgentInfo : INotifyPropertyChanged
+public class ConnectedAgentCard : INotifyPropertyChanged
 {
-    public required Guid AgentId { get; init; }
+    public Guid AgentId { get; init; }
+    public AgentKind Kind { get; init; }
 
-    /// <summary>
-    /// Connection status of the agent.
-    /// </summary>
-    public required AgentConnectionStatus Status { get; set; }
-    public required string StatusColor { get; init; }
+    public bool IsDevice => Kind == AgentKind.Device;
+    public bool IsControl => Kind == AgentKind.Control;
+    public string AgentKindLabel => IsDevice ? "Device" : IsControl ? "Control" : "Pending";
+
+    public string StatusColor { get; set; } = "#888888";
+
+    public int IndentLevel { get; set; }
+    public Guid? LinkedToControlId { get; set; }
 
     private bool _isSelected;
     public bool IsSelected
@@ -56,53 +59,19 @@ public class ConnectedAgentInfo : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void NotifyLayoutChanged()
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IndentLevel)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LinkedToControlId)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDevice)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsControl)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Kind)));
+    }
 }
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    /// <summary>
-    /// List of all connected agents for display in Control Panel page.
-    /// </summary>
-    public ObservableCollection<ConnectedAgentInfo> ConnectedAgents { get; } = new();
-
-    /// <summary>
-    /// Count of active (connected) agents.
-    /// </summary>
-    public int ActiveAgentCount => ConnectedAgents.Count(a => a.Status == AgentConnectionStatus.Connected);
-
-    /// <summary>
-    /// Count of pending (unbound) agents.
-    /// </summary>
-    public int PendingAgentCount => ConnectedAgents.Count(a => a.Status == AgentConnectionStatus.Pending);
-
-    /// <summary>
-    /// Whether there are any pending agents.
-    /// </summary>
-    public bool HasPendingAgents => PendingAgentCount > 0;
-
-    /// <summary>
-    /// Whether there are any connected agents.
-    /// </summary>
-    public bool HasConnectedAgents => ConnectedAgents.Any(a => a.Status == AgentConnectionStatus.Connected);
-
-    /// <summary>
-    /// Whether an agent is currently selected for control.
-    /// </summary>
-    public bool HasSelectedAgent => SelectedAgentId.HasValue;
-
-    /// <summary>
-    /// Show 'No Agent Selected' panel when no agent is selected.
-    /// </summary>
-    public bool ShowNoAgentPanel => !HasSelectedAgent;
-
-    /// <summary>
-    /// Show controls when an agent is selected.
-    /// </summary>
-    public bool ShowAgentControls => HasSelectedAgent;
-
-    /// <summary>
-    /// Available languages for selection.
-    /// </summary>
     public ObservableCollection<LanguageOption> AvailableLanguages { get; } = new()
     {
         new LanguageOption { Code = "en-US", DisplayName = "English" },
@@ -111,71 +80,45 @@ public partial class MainWindowViewModel : ViewModelBase
         new LanguageOption { Code = "ja-JP", DisplayName = "日本語" }
     };
 
+    /// <summary>
+    /// Ordered list of agent cards for the Connections tab.
+    /// Control agents first (with linked devices indented below), then unlinked devices.
+    /// </summary>
+    public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
+
+    /// <summary>
+    /// Currently selected agent card.
+    /// </summary>
     [ObservableProperty]
-    private NavPage _currentPage = NavPage.Mixer;
+    private ConnectedAgentCard? _selectedCard;
+
+    [ObservableProperty]
+    private NavPage _currentPage = NavPage.Connections;
 
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
-    [ObservableProperty]
-    private bool _isAgentPanelExpanded = true;
-
-    public bool IsAgentPanelCollapsed => !IsAgentPanelExpanded;
-
-    /// <summary>
-    /// Currently selected agent ID.
-    /// </summary>
-    [ObservableProperty]
-    private Guid? _selectedAgentId;
-
-    public bool IsMixerSelected => CurrentPage == NavPage.Mixer;
-    public bool IsWavesSelected => CurrentPage == NavPage.Waves;
+    public bool IsConnectionsSelected => CurrentPage == NavPage.Connections;
+    public bool IsLocalControlSelected => CurrentPage == NavPage.LocalControl;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
+    public bool HasAgents => AgentCards.Count > 0;
 
     partial void OnCurrentPageChanged(NavPage value)
     {
-        OnPropertyChanged(nameof(IsMixerSelected));
-        OnPropertyChanged(nameof(IsWavesSelected));
+        OnPropertyChanged(nameof(IsConnectionsSelected));
+        OnPropertyChanged(nameof(IsLocalControlSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
-    partial void OnSelectedAgentIdChanged(Guid? value)
-    {
-        foreach (var agent in ConnectedAgents)
-        {
-            agent.IsSelected = agent.AgentId == value;
-        }
-
-        OnPropertyChanged(nameof(HasSelectedAgent));
-        OnPropertyChanged(nameof(ShowNoAgentPanel));
-        OnPropertyChanged(nameof(ShowAgentControls));
-    }
-
-    partial void OnIsAgentPanelExpandedChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsAgentPanelCollapsed));
-    }
-
     [RelayCommand]
-    private void SelectPage(NavPage page)
-    {
-        CurrentPage = page;
-    }
-
-    [RelayCommand]
-    private void ToggleAgentPanel()
-    {
-        IsAgentPanelExpanded = !IsAgentPanelExpanded;
-    }
+    private void SelectPage(NavPage page) => CurrentPage = page;
 
     [RelayCommand]
     private void SelectAgent(Guid agentId)
     {
-        var agent = ConnectedAgents.FirstOrDefault(a => a.AgentId == agentId);
-        if (agent?.Status != AgentConnectionStatus.Connected)
-            return;
-
-        SelectedAgentId = agentId;
+        var card = AgentCards.FirstOrDefault(c => c.AgentId == agentId);
+        if (card != null)
+            SelectedCard = card;
     }
 
     [RelayCommand]
@@ -183,27 +126,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var window = new Views.LogWindow();
         if (App.MainWindow is not null)
-        {
             window.Show(App.MainWindow);
-        }
     }
 
     [RelayCommand]
-    private void ClearLogs()
-    {
-        LoggerService.Instance.Clear();
-    }
-
-    [RelayCommand]
-    private void DisconnectAgent(Guid agentId)
-    {
-        AppCore.Instance.DisconnectAgent(agentId);
-
-        if (SelectedAgentId == agentId)
-        {
-            SelectedAgentId = null;
-        }
-    }
+    private void ClearLogs() => LoggerService.Instance.Clear();
 
     public MainWindowViewModel()
     {
@@ -211,35 +138,28 @@ public partial class MainWindowViewModel : ViewModelBase
         var defaultLang = AvailableLanguages.FirstOrDefault(l => l.Code == currentCulture)
                           ?? AvailableLanguages.First(l => l.Code == "en-US");
         _selectedLanguage = defaultLang;
-
         LocalizationService.Instance.SetLanguage(defaultLang.Code);
-
-        ConnectedAgents.CollectionChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(ActiveAgentCount));
-            OnPropertyChanged(nameof(PendingAgentCount));
-            OnPropertyChanged(nameof(HasPendingAgents));
-            OnPropertyChanged(nameof(HasConnectedAgents));
-        };
 
         AppCore.Instance.AgentConnected += OnAgentConnected;
         AppCore.Instance.AgentDisconnected += OnAgentDisconnected;
+        AppCore.Instance.AgentLinked += OnAgentLinked;
+        AppCore.Instance.AgentUnlinked += OnAgentUnlinked;
+
+        AgentCards.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgents));
     }
 
     private void OnAgentConnected(object? sender, AgentConnectionEventArgs e)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            var existing = ConnectedAgents.FirstOrDefault(a => a.AgentId == e.AgentId);
-            if (existing is not null)
-                ConnectedAgents.Remove(existing);
-
-            ConnectedAgents.Add(new ConnectedAgentInfo
+            var card = new ConnectedAgentCard
             {
                 AgentId = e.AgentId,
-                Status = e.Status,
+                Kind = e.Kind,
                 StatusColor = "#00FF00"
-            });
+            };
+            AgentCards.Add(card);
+            ReorderCards();
         });
     }
 
@@ -247,24 +167,79 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            var existing = ConnectedAgents.FirstOrDefault(a => a.AgentId == e.AgentId);
-            if (existing is not null)
+            var card = AgentCards.FirstOrDefault(c => c.AgentId == e.AgentId);
+            if (card != null)
             {
-                ConnectedAgents.Remove(existing);
-
-                if (SelectedAgentId == e.AgentId)
-                {
-                    SelectedAgentId = null;
-                }
+                AgentCards.Remove(card);
+                if (SelectedCard == card)
+                    SelectedCard = null;
+                ReorderCards();
             }
         });
+    }
+
+    private void OnAgentLinked(Guid deviceId, Guid controlId)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var deviceCard = AgentCards.FirstOrDefault(c => c.AgentId == deviceId);
+            if (deviceCard != null)
+            {
+                deviceCard.LinkedToControlId = controlId;
+                deviceCard.IndentLevel = 1;
+                ReorderCards();
+            }
+        });
+    }
+
+    private void OnAgentUnlinked(Guid deviceId)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var deviceCard = AgentCards.FirstOrDefault(c => c.AgentId == deviceId);
+            if (deviceCard != null)
+            {
+                deviceCard.LinkedToControlId = null;
+                deviceCard.IndentLevel = 0;
+                ReorderCards();
+            }
+        });
+    }
+
+    /// <summary>
+    /// Reorders cards: Control agents first (with linked devices indented below), then unlinked devices.
+    /// </summary>
+    private void ReorderCards()
+    {
+        var links = AppCore.Instance.GetAgentLinks();
+
+        var controls = AgentCards.Where(c => c.IsControl).ToList();
+        var unlinkedDevices = AgentCards.Where(c => c.IsDevice && !links.ContainsKey(c.AgentId)).ToList();
+
+        var ordered = new List<ConnectedAgentCard>();
+        foreach (var control in controls)
+        {
+            ordered.Add(control);
+            var linkedDevices = AgentCards
+                .Where(c => c.IsDevice && links.TryGetValue(c.AgentId, out var cid) && cid == control.AgentId)
+                .ToList();
+            foreach (var device in linkedDevices)
+            {
+                device.IndentLevel = 1;
+                device.LinkedToControlId = control.AgentId;
+                ordered.Add(device);
+            }
+        }
+        ordered.AddRange(unlinkedDevices);
+
+        AgentCards.Clear();
+        foreach (var card in ordered)
+            AgentCards.Add(card);
     }
 
     partial void OnSelectedLanguageChanged(LanguageOption value)
     {
         if (value != null)
-        {
             LocalizationService.Instance.SetLanguage(value.Code);
-        }
     }
 }
