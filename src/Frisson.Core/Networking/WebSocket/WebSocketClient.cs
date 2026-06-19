@@ -29,7 +29,15 @@ internal class WebSocketClient
 
     public void Close() => _socket.Close();
 
-    // AgentManager wires this to Agent.HandleMessage
+    /// <summary>
+    /// Whether this client has been bound to an Agent (first reply processed).
+    /// </summary>
+    public bool IsBound { get; set; }
+
     public Action<string>? MessageHandler { get; set; }
-    internal void OnMessage(string message) => MessageHandler?.Invoke(message);
+    internal void OnMessage(string message)
+    {
+        if (IsBound)
+            MessageHandler?.Invoke(message);
+    }
 }

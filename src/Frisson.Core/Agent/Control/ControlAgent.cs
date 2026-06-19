@@ -1,12 +1,18 @@
 namespace Frisson.Core.Agent.Control;
 
-internal class ControlAgent : Agent
+public sealed class ControlSourceAgent : Agent
 {
-    public ControlAgent(Agent existing) : base(existing) { }
+    public string SourceName { get; }
+    public Action<string>? ForwardToControlDesk { get; set; }
 
-    protected override async Task HandleProtocolMessage(string json)
+    public ControlSourceAgent(Guid id, string sourceName, Action? onDisposing = null) : base(id, onDisposing)
     {
-        var scheme = Scheme.Scheme.Parse(json);
-        // Control-specific protocol
+        SourceName = sourceName;
+    }
+
+    public override async Task HandleMessage(string json)
+    {
+        ForwardToControlDesk?.Invoke(json);
+        await Task.CompletedTask;
     }
 }

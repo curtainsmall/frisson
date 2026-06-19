@@ -1,5 +1,6 @@
 ﻿using Frisson.Core.Agent;
 using Frisson.Core.Error;
+using Frisson.Core.Frisson;
 using Frisson.Core.Networking.WebSocket;
 
 namespace Frisson.Core;
@@ -14,28 +15,39 @@ public class AppCore : IDisposable
     /// </summary>
     public static Guid DummyFrontendId { get; } = Guid.NewGuid();
 
-    private readonly WebSocketServer _wsServer = new();
-    private readonly AgentManager _agentManager = new();
+    private readonly ControlDesk _controlDesk;
+    private readonly WebSocketServer _wsServer;
+    private readonly AgentManager _agentManager;
 
     public event Action<string>? ErrorOccurred;
-    public event EventHandler<AgentConnectionEventArgs>? AgentConnected;
-    public event EventHandler<AgentConnectionEventArgs>? AgentDisconnected;
-    public event Action<Guid, Guid>? AgentLinked;
-    public event Action<Guid>? AgentUnlinked;
+
+    // Forwarded from AgentManager
+    public event EventHandler<AgentEventArgs>? AgentConnected;
+    public event EventHandler<AgentEventArgs>? AgentClosing;
+    public event Action<Guid>? DeviceActivated;
+    public event Action<Guid>? DeviceDeactivated;
+    public event Action<Guid>? SourceActivated;
+    public event Action? SourceDeactivated;
 
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
     private AppCore()
     {
-        // Bridge transport events to AgentManager
-        _wsServer.ClientConnected += conn => _agentManager.CreateAgent(conn);
+        _controlDesk = new ControlDesk();
+        _wsServer = new WebSocketServer();
+        _agentManager = new AgentManager(_controlDesk, id => _wsServer.TryRemove(id));
+
+        // WebSocketServer → AgentManager
+        _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
         _wsServer.ClientDisconnected += id => _agentManager.RemoveAgent(id);
 
         // Forward AgentManager events to AppCore consumers
-        _agentManager.AgentConnected += (s, e) => AgentConnected?.Invoke(s, e);
-        _agentManager.AgentDisconnected += (s, e) => AgentDisconnected?.Invoke(s, e);
-        _agentManager.AgentLinked += (d, c) => AgentLinked?.Invoke(d, c);
-        _agentManager.AgentUnlinked += d => AgentUnlinked?.Invoke(d);
+        _agentManager.AgentConnected += (_, e) => AgentConnected?.Invoke(this, e);
+        _agentManager.AgentClosing += (_, e) => AgentClosing?.Invoke(this, e);
+        _agentManager.DeviceActivated += id => DeviceActivated?.Invoke(id);
+        _agentManager.DeviceDeactivated += id => DeviceDeactivated?.Invoke(id);
+        _agentManager.SourceActivated += id => SourceActivated?.Invoke(id);
+        _agentManager.SourceDeactivated += () => SourceDeactivated?.Invoke();
     }
 
     public void Startup(int port)
@@ -56,16 +68,14 @@ public class AppCore : IDisposable
         _wsServer.Dispose();
     }
 
-    /// <summary>
-    /// Disconnects a specific agent by ID (closes the underlying transport).
-    /// </summary>
     public void DisconnectAgent(Guid agentId)
     {
-        _wsServer.Close(agentId);
+        _wsServer.TryRemove(agentId);
     }
 
-    public void LinkAgents(Guid deviceId, Guid controlId) => _agentManager.LinkAgents(deviceId, controlId);
-    public void UnlinkAgent(Guid deviceId) => _agentManager.UnlinkAgent(deviceId);
-    public IReadOnlyList<Guid> GetLinkedDevices(Guid controlId) => _agentManager.GetLinkedDevices(controlId);
-    public IReadOnlyDictionary<Guid, Guid> GetAgentLinks() => _agentManager.GetAgentLinks();
+    public void ActivateDevice(Guid id) => _agentManager.ActivateDevice(id);
+    public void DeactivateDevice(Guid id) => _agentManager.DeactivateDevice(id);
+    public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
+    public void ClearActiveSource() => _agentManager.ClearActiveSource();
+    public Agent.Agent? GetAgent(Guid id) => _agentManager.Get(id);
 }

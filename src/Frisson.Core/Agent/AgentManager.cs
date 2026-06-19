@@ -1,118 +1,119 @@
 using System.Collections.Concurrent;
 
-using Frisson.Core.Networking.WebSocket;
+using Frisson.Core.Agent.Control;
+using Frisson.Core.Agent.Device;
+using Frisson.Core.Frisson;
 
 namespace Frisson.Core.Agent;
 
-public enum AgentKind { Pending, Device, Control }
-
-public sealed class AgentConnectionEventArgs : EventArgs
+public sealed class AgentEventArgs : EventArgs
 {
     public Guid AgentId { get; }
-    public AgentConnectionStatus Status { get; }
     public Type AgentType { get; }
-    public AgentKind Kind { get; }
 
-    public AgentConnectionEventArgs(Guid agentId, AgentConnectionStatus status, Type agentType, AgentKind kind)
+    public AgentEventArgs(Guid agentId, Type agentType)
     {
         AgentId = agentId;
-        Status = status;
         AgentType = agentType;
-        Kind = kind;
     }
 }
 
 internal class AgentManager
 {
-    private readonly ConcurrentDictionary<Guid, Agent> _agents = new();
-    private readonly ConcurrentDictionary<Guid, Guid> _agentLinks = new(); // DeviceAgentId → ControlAgentId
+    ControlDesk _desk;
+    Action<Guid> _closeClient;
+    HashSet<Guid> _removing = new();
+    ConcurrentDictionary<Guid, Agent> _agents = new();
+    HashSet<Guid> _activeDevices = new();
+    Guid? _activeSource;
 
-    public event EventHandler<AgentConnectionEventArgs>? AgentConnected;
-    public event EventHandler<AgentConnectionEventArgs>? AgentDisconnected;
-    public event Action<Guid, Guid>? AgentLinked;   // (deviceId, controlId)
-    public event Action<Guid>? AgentUnlinked;        // deviceId
+    public event EventHandler<AgentEventArgs>? AgentConnected;
+    public event EventHandler<AgentEventArgs>? AgentClosing;
+    public event Action<Guid>? DeviceActivated;
+    public event Action<Guid>? DeviceDeactivated;
+    public event Action<Guid>? SourceActivated;
+    public event Action? SourceDeactivated;
 
-    public void CreateAgent(AgentCreationArgs conn)
+    public AgentManager(ControlDesk desk, Action<Guid> closeClient)
     {
-        var agent = new Agent(conn.Id, onDisposing: conn.CloseAction);
+        _desk = desk;
+        _closeClient = closeClient;
 
-        // Hot path direct wire: Agent → transport
-        agent.SendFunc = conn.SendFunc;
-
-        // Hot path direct wire: transport → Agent
-        conn.SetMessageHandler(json => agent.HandleMessage(json));
-
-        // Meta flow: re-wire on Agent upgrade
-        agent.OnBound += type =>
+        // Subscribe to ControlDesk state changes — broadcast to all active devices
+        _desk.StateChanged += () =>
         {
-            var upgraded = (Agent)Activator.CreateInstance(type, agent)!;
-            conn.SetMessageHandler(json => upgraded.HandleMessage(json));
-            UpgradeAgent(conn.Id, upgraded);
+            var msg = _desk.ToPulseMessage();
+            foreach (var id in _activeDevices)
+                if (_agents.TryGetValue(id, out var a) && a is DeviceAgent)
+                    a.SendFunc?.Invoke(msg);
         };
-
-        _agents.TryAdd(conn.Id, agent);
-        _ = agent.HandleMessage(string.Empty); // trigger initial bind
     }
 
-    private static AgentKind GetKind(Type type) => type.Name switch
+    public void AddAgent(Agent agent)
     {
-        nameof(AgentKind.Device) + "Agent" => AgentKind.Device,
-        _ when type.Name.Contains("Control") => AgentKind.Control,
-        _ => AgentKind.Pending,
-    };
+        _agents[agent.Id] = agent;
 
+        if (agent is ControlSourceAgent csa)
+            csa.ForwardToControlDesk = _desk.ApplyFromSource;
+
+        AgentConnected?.Invoke(this, new AgentEventArgs(agent.Id, agent.GetType()));
+    }
+
+    /// <summary>
+    /// Remove agent with re-entrancy guard. AgentClosing fires before removal so
+    /// listeners can read the agent's final state.
+    /// </summary>
     public void RemoveAgent(Guid id)
     {
-        if (_agents.TryRemove(id, out var agent))
+        if (_removing.Contains(id)) return;
+        _removing.Add(id);
+        try
         {
-            // Remove any links involving this agent
-            _agentLinks.TryRemove(id, out _);
-            foreach (var kvp in _agentLinks.Where(k => k.Value == id).ToList())
-                _agentLinks.TryRemove(kvp.Key, out _);
-
-            AgentDisconnected?.Invoke(this, new AgentConnectionEventArgs(id, AgentConnectionStatus.Disconnected, agent.GetType(), GetKind(agent.GetType())));
-            agent.Dispose();
+            if (_agents.TryGetValue(id, out var agent))
+            {
+                AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
+                _agents.TryRemove(id, out _);
+                _activeDevices.Remove(id);
+                if (_activeSource == id) _activeSource = null;
+                agent.Dispose();
+                _closeClient?.Invoke(id);
+            }
         }
+        finally { _removing.Remove(id); }
     }
 
-    private void UpgradeAgent(Guid id, Agent upgraded)
+    public void ActivateDevice(Guid id)
     {
-        _agents.TryRemove(id, out _);
-        _agents.TryAdd(id, upgraded);
-        AgentConnected?.Invoke(this, new AgentConnectionEventArgs(id, AgentConnectionStatus.Connected, upgraded.GetType(), GetKind(upgraded.GetType())));
+        _activeDevices.Add(id);
+        // Immediately sync current ControlDesk state
+        if (_agents.TryGetValue(id, out var a) && a is DeviceAgent da)
+            da.SendFunc?.Invoke(_desk.ToPulseMessage());
+        DeviceActivated?.Invoke(id);
     }
 
-    /// <summary>
-    /// Links a Device agent to a Control agent.
-    /// </summary>
-    public void LinkAgents(Guid deviceId, Guid controlId)
+    public void DeactivateDevice(Guid id)
     {
-        _agentLinks[deviceId] = controlId;
-        AgentLinked?.Invoke(deviceId, controlId);
+        _activeDevices.Remove(id);
+        DeviceDeactivated?.Invoke(id);
     }
 
-    /// <summary>
-    /// Unlinks a Device agent from its Control agent.
-    /// </summary>
-    public void UnlinkAgent(Guid deviceId)
+    public void SetActiveSource(Guid id)
     {
-        if (_agentLinks.TryRemove(deviceId, out _))
-            AgentUnlinked?.Invoke(deviceId);
+        _activeSource = id;
+        _desk.SetBlocked(true);
+        SourceActivated?.Invoke(id);
     }
 
-    /// <summary>
-    /// Gets all linked Device agent IDs for a given Control agent.
-    /// </summary>
-    public IReadOnlyList<Guid> GetLinkedDevices(Guid controlId)
+    public void ClearActiveSource()
     {
-        return _agentLinks
-            .Where(kvp => kvp.Value == controlId)
-            .Select(kvp => kvp.Key)
-            .ToList();
+        _activeSource = null;
+        _desk.SetBlocked(false);
+        SourceDeactivated?.Invoke();
     }
 
-    /// <summary>
-    /// Gets all current agent links.
-    /// </summary>
-    public IReadOnlyDictionary<Guid, Guid> GetAgentLinks() => new Dictionary<Guid, Guid>(_agentLinks);
+    public Agent? Get(Guid id)
+    {
+        _agents.TryGetValue(id, out var agent);
+        return agent;
+    }
 }

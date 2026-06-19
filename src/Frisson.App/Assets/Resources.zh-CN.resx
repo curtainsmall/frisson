@@ -63,14 +63,17 @@
     <value>Frisson</value>
   </data>
   <!-- 导航 -->
-  <data name="NavConnections" xml:space="preserve">
-    <value>连接</value>
+  <data name="NavControlDesk" xml:space="preserve">
+    <value>控制台</value>
   </data>
-  <data name="NavLocalControl" xml:space="preserve">
-    <value>本地控制</value>
+  <data name="NavControlSources" xml:space="preserve">
+    <value>控制源</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>设置</value>
+  </data>
+  <data name="DevicesTitle" xml:space="preserve">
+    <value>设备</value>
   </data>
   <!-- 混音器页面 -->
   <data name="ChannelA" xml:space="preserve">

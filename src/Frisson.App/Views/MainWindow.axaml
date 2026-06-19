@@ -7,7 +7,7 @@
         xmlns:loc="using:Frisson.App.MarkupExtensions"
         xmlns:services="using:Frisson.App.Services"
         xmlns:converters="using:Frisson.App.Converters"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="Frisson.App.Views.MainWindow"
         x:Name="Root"
         x:DataType="vm:MainWindowViewModel"
@@ -50,62 +50,68 @@
         </Style>
     </Window.Styles>
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-
     <Border BorderThickness="4" Background="Transparent" Padding="8,0,8,8">
         <Grid RowDefinitions="Auto, *" Background="Transparent">
+            <!-- Title Bar -->
             <Border
                 Grid.Row="0"
                 Background="{DynamicResource Black}"
                 Padding="10,8,140,8"
                 PointerPressed="OnTitleBarPointerPressed">
-                <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
+                <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
             </Border>
 
-            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Background="Transparent">
-                <!-- Left Navigation Panel -->
+            <!-- Main 3-Column Layout -->
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
+
+                <!-- ===== Column 0: Nav Bar ===== -->
                 <Grid Grid.Column="0" Width="60" Background="Transparent">
-                    <StackPanel Spacing="10" Margin="5">
+                    <!-- Top: Page nav buttons -->
+                    <StackPanel Spacing="10" Margin="5" VerticalAlignment="Top">
                         <Button Classes="nav-btn"
-                                Classes.selected="{Binding IsConnectionsSelected}"
-                                ToolTip.Tip="{loc:Loc NavConnections}"
+                                Classes.selected="{Binding IsControlDeskSelected}"
+                                ToolTip.Tip="{loc:Loc NavControlDesk}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.Connections}">
-                            <i:Icon Value="fa-solid fa-diagram-project" />
+                                CommandParameter="{x:Static vm:NavPage.ControlDesk}">
+                            <i:Icon Value="fa-solid fa-sliders" FontSize="20" />
                         </Button>
                         <Button Classes="nav-btn"
-                                Classes.selected="{Binding IsLocalControlSelected}"
-                                ToolTip.Tip="{loc:Loc NavLocalControl}"
+                                Classes.selected="{Binding IsControlSourcesSelected}"
+                                ToolTip.Tip="{loc:Loc NavControlSources}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.LocalControl}">
-                            <i:Icon Value="fa-solid fa-sliders" />
+                                CommandParameter="{x:Static vm:NavPage.ControlSources}">
+                            <i:Icon Value="fa-solid fa-diagram-project" FontSize="20" />
                         </Button>
                     </StackPanel>
 
-                    <StackPanel VerticalAlignment="Bottom" Spacing="5" Margin="5">
-                        <Button Classes="nav-btn"
-                                Classes.selected="{Binding IsSettingsSelected}"
-                                ToolTip.Tip="{loc:Loc NavSettings}"
-                                Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.Settings}">
-                            <i:Icon Value="fa-solid fa-gear" />
-                        </Button>
-                    </StackPanel>
+                    <!-- Bottom: Settings gear -->
+                    <Button Classes="nav-btn"
+                            Classes.selected="{Binding IsSettingsSelected}"
+                            ToolTip.Tip="{loc:Loc NavSettings}"
+                            Command="{Binding SelectPageCommand}"
+                            CommandParameter="{x:Static vm:NavPage.Settings}"
+                            VerticalAlignment="Bottom"
+                            Margin="5,0,5,5">
+                        <i:Icon Value="fa-solid fa-gear" FontSize="20" />
+                    </Button>
                 </Grid>
 
-                <!-- Center Content Area -->
-                <Border Grid.Column="1" Padding="20" Background="Transparent">
+                <!-- ===== Column 1: Center Content ===== -->
+                <Border Grid.Column="1" Padding="16" Background="Transparent">
                     <Panel>
-                        <!-- Connections Page -->
-                        <Grid IsVisible="{Binding IsConnectionsSelected}" ColumnDefinitions="300, 8, *">
-                            <!-- Left: Agent Card List -->
+                        <!-- Control Desk Page -->
+                        <Grid IsVisible="{Binding IsControlDeskSelected}">
+                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="24"
+                                       Foreground="{DynamicResource SecondaryText}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Grid>
+
+                        <!-- Control Sources Page -->
+                        <Grid IsVisible="{Binding IsControlSourcesSelected}" ColumnDefinitions="260, 8, *">
+                            <!-- Left: Source Card List -->
                             <Grid Grid.Column="0" RowDefinitions="Auto, *">
-                                <!-- List Title -->
-                                <TextBlock Grid.Row="0" Text="{loc:Loc AgentsListTitle}"
+                                <TextBlock Grid.Row="0" Text="{loc:Loc NavControlSources}"
                                            Foreground="{DynamicResource PrimaryText}"
                                            FontWeight="SemiBold" FontSize="14"
                                            Margin="4,0,0,8" />
@@ -116,75 +122,59 @@
                                         CornerRadius="0"
                                         Padding="8">
                                     <Panel>
-                                    <ScrollViewer>
-                                        <ItemsControl ItemsSource="{Binding AgentCards}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{DynamicResource SurfaceDark}"
-                                                            CornerRadius="6"
-                                                            Padding="12"
-                                                            Margin="0,0,0,4"
-                                                    Tag="{Binding AgentId}"
-                                                    Classes.selected="{Binding IsSelected}"
-                                                    Classes.device="{Binding IsDevice}"
-                                                    Classes.control="{Binding IsControl}"
-                                                    PointerPressed="OnAgentCardPointerPressed"
-                                                    DragDrop.Drop="OnAgentCardDrop"
-                                                    DragDrop.DragOver="OnAgentCardDragOver"
-                                                    DragDrop.AllowDrop="{Binding IsControl}">
-                                                <Border.RenderTransform>
-                                                    <TranslateTransform X="{Binding IndentLevel, Converter={x:Static converters:IndentToMarginConverter.Instance}}" />
-                                                </Border.RenderTransform>
-                                                <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
-                                                    <!-- Kind icon -->
-                                                    <i:Icon Grid.Column="0" Grid.RowSpan="2"
-                                                            Value="fa-solid fa-microchip"
-                                                            FontSize="16"
-                                                            Foreground="{DynamicResource AccentBrush}"
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,10,0" />
-                                                    <!-- Kind label -->
-                                                    <TextBlock Grid.Column="1" Grid.Row="0"
-                                                               Text="{Binding AgentKindLabel}"
-                                                               Foreground="{DynamicResource AccentBrush}"
-                                                               FontWeight="SemiBold" FontSize="12" />
-                                                    <!-- Agent ID -->
-                                                    <TextBlock Grid.Column="1" Grid.Row="1"
-                                                               Text="{Binding AgentId, StringFormat='{}{0}'}"
-                                                               Foreground="{DynamicResource SecondaryText}"
-                                                               FontSize="10" TextTrimming="CharacterEllipsis" />
-                                                </Grid>
-                                            </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
-                                    <!-- Empty state -->
-                                    <TextBlock Text="{loc:Loc NoAgent}"
-                                               IsVisible="{Binding !HasAgents}"
-                                               Foreground="{DynamicResource SecondaryText}"
-                                               FontSize="14"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <ScrollViewer>
+                                            <ItemsControl ItemsSource="{Binding SourceCards}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource SurfaceDark}"
+                                                                CornerRadius="6"
+                                                                Padding="12"
+                                                                Margin="0,0,0,4"
+                                                                PointerPressed="OnAgentCardPointerPressed">
+                                                            <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
+                                                                <i:Icon Grid.Column="0" Grid.RowSpan="2"
+                                                                        Value="fa-solid fa-diagram-project"
+                                                                        FontSize="16"
+                                                                        Foreground="{DynamicResource AccentBrush}"
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="0,0,10,0" />
+                                                                <TextBlock Grid.Column="1" Grid.Row="0"
+                                                                           Text="{Binding AgentKindLabel}"
+                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           FontWeight="SemiBold" FontSize="12" />
+                                                                <TextBlock Grid.Column="1" Grid.Row="1"
+                                                                           Text="{Binding AgentId, StringFormat='{}{0}'}"
+                                                                           Foreground="{DynamicResource SecondaryText}"
+                                                                           FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                        <TextBlock Text="{loc:Loc NoAgent}"
+                                                   IsVisible="{Binding !HasAgents}"
+                                                   Foreground="{DynamicResource SecondaryText}"
+                                                   FontSize="14"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Panel>
                                 </Border>
                             </Grid>
 
-                            <!-- Right: Agent Detail Panel (placeholder) -->
+                            <!-- Right: Detail Panel (placeholder) -->
                             <Border Grid.Column="2"
                                     Background="{DynamicResource Black}"
-                                    Padding="20" />
-                        </Grid>
-
-                        <!-- Local Control Page -->
-                        <Grid IsVisible="{Binding IsLocalControlSelected}">
-                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="24"
-                                       Foreground="{DynamicResource SecondaryText}"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    Padding="20">
+                                <TextBlock Text="Source Details"
+                                           Foreground="{DynamicResource SecondaryText}"
+                                           FontSize="14"
+                                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                                           Opacity="0.5" />
+                            </Border>
                         </Grid>
 
                         <!-- Settings Page -->
                         <Grid IsVisible="{Binding IsSettingsSelected}" RowDefinitions="Auto,*,Auto">
-                            <!-- Settings Header -->
                             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20">
                                 <i:Icon Value="fa-solid fa-gear" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
                                 <TextBlock Text="{loc:Loc NavSettings}" FontSize="24"
@@ -192,10 +182,8 @@
                                 <Separator Background="{DynamicResource AccentMuted}" Margin="0,10" Width="200" Height="1" />
                             </StackPanel>
 
-                            <!-- Settings Content -->
                             <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
                                 <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
-                                    <!-- Language Selection -->
                                     <TextBlock Grid.Row="0" Grid.Column="0"
                                                Text="{loc:Loc Language}"
                                                Foreground="{DynamicResource PrimaryText}"
@@ -218,7 +206,6 @@
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
 
-                                    <!-- Log -->
                                     <TextBlock Grid.Row="1" Grid.Column="0"
                                                Text="{loc:Loc LogLabel}"
                                                Foreground="{DynamicResource PrimaryText}"
@@ -251,6 +238,67 @@
                             </ScrollViewer>
                         </Grid>
                     </Panel>
+                </Border>
+
+                <!-- ===== Column 2: Global Right Device Panel ===== -->
+                <Border Grid.Column="2" Width="260"
+                        Background="{DynamicResource Black}"
+                        BorderBrush="{DynamicResource AccentMuted}"
+                        BorderThickness="2,0,0,0"
+                        Padding="12">
+                    <Grid RowDefinitions="Auto, Auto, *">
+                        <TextBlock Grid.Row="0" Text="{loc:Loc DevicesTitle}"
+                                   Foreground="{DynamicResource PrimaryText}"
+                                   FontWeight="SemiBold" FontSize="14"
+                                   Margin="4,8,0,4" />
+                        <Separator Grid.Row="1"
+                                   Background="{DynamicResource AccentMuted}"
+                                   Margin="4,0,4,8"
+                                   Height="1" />
+                        <Border Grid.Row="2"
+                                Background="Transparent"
+                                CornerRadius="0"
+                                Padding="4">
+                            <Panel>
+                                <ScrollViewer>
+                                    <ItemsControl ItemsSource="{Binding DeviceCards}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource SurfaceDark}"
+                                                        CornerRadius="6"
+                                                        Padding="10"
+                                                        Margin="0,0,0,6"
+                                                        Classes.selected="{Binding IsSelected}"
+                                                        PointerPressed="OnAgentCardPointerPressed">
+                                                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
+                                                        <i:Icon Grid.Column="0" Grid.RowSpan="2"
+                                                                Value="fa-solid fa-microchip"
+                                                                FontSize="16"
+                                                                Foreground="{DynamicResource AccentBrush}"
+                                                                VerticalAlignment="Center"
+                                                                Margin="0,0,10,0" />
+                                                        <TextBlock Grid.Column="1" Grid.Row="0"
+                                                                   Text="{Binding AgentKindLabel}"
+                                                                   Foreground="{DynamicResource AccentBrush}"
+                                                                   FontWeight="SemiBold" FontSize="12" />
+                                                        <TextBlock Grid.Column="1" Grid.Row="1"
+                                                                   Text="{Binding AgentId, StringFormat='{}{0}'}"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <TextBlock Text="{loc:Loc NoAgent}"
+                                           IsVisible="{Binding !HasAgents}"
+                                           Foreground="{DynamicResource SecondaryText}"
+                                           FontSize="14"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Panel>
+                        </Border>
+                    </Grid>
                 </Border>
 
             </Grid>

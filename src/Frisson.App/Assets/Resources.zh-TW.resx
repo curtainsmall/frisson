@@ -63,14 +63,17 @@
     <value>Frisson</value>
   </data>
   <!-- Navigation -->
-  <data name="NavConnections" xml:space="preserve">
-    <value>連線</value>
+  <data name="NavControlDesk" xml:space="preserve">
+    <value>控制台</value>
   </data>
-  <data name="NavLocalControl" xml:space="preserve">
-    <value>本機控制</value>
+  <data name="NavControlSources" xml:space="preserve">
+    <value>控制源</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
+  </data>
+  <data name="DevicesTitle" xml:space="preserve">
+    <value>裝置</value>
   </data>
   <!-- Control Panel Page -->
   <data name="ChannelA" xml:space="preserve">

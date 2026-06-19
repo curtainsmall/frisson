@@ -11,13 +11,15 @@ using CommunityToolkit.Mvvm.Input;
 using Frisson.App.Services;
 using Frisson.Core;
 using Frisson.Core.Agent;
+using Frisson.Core.Agent.Control;
+using Frisson.Core.Agent.Device;
 
 namespace Frisson.App.ViewModels;
 
 public enum NavPage
 {
-    Connections,
-    LocalControl,
+    ControlDesk,
+    ControlSources,
     Settings,
 }
 
@@ -27,22 +29,30 @@ public class LanguageOption
     public required string DisplayName { get; init; }
 }
 
-/// <summary>
-/// Represents a card in the Connections tab agent list.
-/// </summary>
 public class ConnectedAgentCard : INotifyPropertyChanged
 {
     public Guid AgentId { get; init; }
-    public AgentKind Kind { get; init; }
+    public Type AgentType { get; init; } = typeof(Agent);
 
-    public bool IsDevice => Kind == AgentKind.Device;
-    public bool IsControl => Kind == AgentKind.Control;
-    public string AgentKindLabel => IsDevice ? "Device" : IsControl ? "Control" : "Pending";
+    public bool IsDevice => AgentType == typeof(DeviceAgent);
+    public bool IsControl => AgentType == typeof(ControlSourceAgent);
+    public string AgentKindLabel => IsDevice ? "Device" : IsControl ? "Control" : "?";
 
     public string StatusColor { get; set; } = "#888888";
 
-    public int IndentLevel { get; set; }
-    public Guid? LinkedToControlId { get; set; }
+    private bool _isActive;
+    public bool IsActive
+    {
+        get => _isActive;
+        set
+        {
+            if (_isActive != value)
+            {
+                _isActive = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActive)));
+            }
+        }
+    }
 
     private bool _isSelected;
     public bool IsSelected
@@ -62,11 +72,8 @@ public class ConnectedAgentCard : INotifyPropertyChanged
 
     public void NotifyLayoutChanged()
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IndentLevel)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LinkedToControlId)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDevice)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsControl)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Kind)));
     }
 }
 
@@ -80,33 +87,33 @@ public partial class MainWindowViewModel : ViewModelBase
         new LanguageOption { Code = "ja-JP", DisplayName = "日本語" }
     };
 
-    /// <summary>
-    /// Ordered list of agent cards for the Connections tab.
-    /// Control agents first (with linked devices indented below), then unlinked devices.
-    /// </summary>
+    /// <summary>All connected agents (for internal tracking).</summary>
     public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
 
-    /// <summary>
-    /// Currently selected agent card.
-    /// </summary>
+    /// <summary>Only Device agents — shown in the global right panel.</summary>
+    public IEnumerable<ConnectedAgentCard> DeviceCards => AgentCards.Where(c => c.IsDevice);
+
+    /// <summary>Only ControlSource agents — shown on the Sources page.</summary>
+    public IEnumerable<ConnectedAgentCard> SourceCards => AgentCards.Where(c => c.IsControl);
+
     [ObservableProperty]
     private ConnectedAgentCard? _selectedCard;
 
     [ObservableProperty]
-    private NavPage _currentPage = NavPage.Connections;
+    private NavPage _currentPage = NavPage.ControlDesk;
 
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
-    public bool IsConnectionsSelected => CurrentPage == NavPage.Connections;
-    public bool IsLocalControlSelected => CurrentPage == NavPage.LocalControl;
+    public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
+    public bool IsControlSourcesSelected => CurrentPage == NavPage.ControlSources;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
     public bool HasAgents => AgentCards.Count > 0;
 
     partial void OnCurrentPageChanged(NavPage value)
     {
-        OnPropertyChanged(nameof(IsConnectionsSelected));
-        OnPropertyChanged(nameof(IsLocalControlSelected));
+        OnPropertyChanged(nameof(IsControlDeskSelected));
+        OnPropertyChanged(nameof(IsControlSourcesSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
@@ -141,29 +148,31 @@ public partial class MainWindowViewModel : ViewModelBase
         LocalizationService.Instance.SetLanguage(defaultLang.Code);
 
         AppCore.Instance.AgentConnected += OnAgentConnected;
-        AppCore.Instance.AgentDisconnected += OnAgentDisconnected;
-        AppCore.Instance.AgentLinked += OnAgentLinked;
-        AppCore.Instance.AgentUnlinked += OnAgentUnlinked;
+        AppCore.Instance.AgentClosing += OnAgentClosing;
 
-        AgentCards.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAgents));
+        AgentCards.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasAgents));
+            OnPropertyChanged(nameof(DeviceCards));
+            OnPropertyChanged(nameof(SourceCards));
+        };
     }
 
-    private void OnAgentConnected(object? sender, AgentConnectionEventArgs e)
+    private void OnAgentConnected(object? sender, AgentEventArgs e)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             var card = new ConnectedAgentCard
             {
                 AgentId = e.AgentId,
-                Kind = e.Kind,
+                AgentType = e.AgentType,
                 StatusColor = "#00FF00"
             };
             AgentCards.Add(card);
-            ReorderCards();
         });
     }
 
-    private void OnAgentDisconnected(object? sender, AgentConnectionEventArgs e)
+    private void OnAgentClosing(object? sender, AgentEventArgs e)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
@@ -173,68 +182,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 AgentCards.Remove(card);
                 if (SelectedCard == card)
                     SelectedCard = null;
-                ReorderCards();
             }
         });
-    }
-
-    private void OnAgentLinked(Guid deviceId, Guid controlId)
-    {
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            var deviceCard = AgentCards.FirstOrDefault(c => c.AgentId == deviceId);
-            if (deviceCard != null)
-            {
-                deviceCard.LinkedToControlId = controlId;
-                deviceCard.IndentLevel = 1;
-                ReorderCards();
-            }
-        });
-    }
-
-    private void OnAgentUnlinked(Guid deviceId)
-    {
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            var deviceCard = AgentCards.FirstOrDefault(c => c.AgentId == deviceId);
-            if (deviceCard != null)
-            {
-                deviceCard.LinkedToControlId = null;
-                deviceCard.IndentLevel = 0;
-                ReorderCards();
-            }
-        });
-    }
-
-    /// <summary>
-    /// Reorders cards: Control agents first (with linked devices indented below), then unlinked devices.
-    /// </summary>
-    private void ReorderCards()
-    {
-        var links = AppCore.Instance.GetAgentLinks();
-
-        var controls = AgentCards.Where(c => c.IsControl).ToList();
-        var unlinkedDevices = AgentCards.Where(c => c.IsDevice && !links.ContainsKey(c.AgentId)).ToList();
-
-        var ordered = new List<ConnectedAgentCard>();
-        foreach (var control in controls)
-        {
-            ordered.Add(control);
-            var linkedDevices = AgentCards
-                .Where(c => c.IsDevice && links.TryGetValue(c.AgentId, out var cid) && cid == control.AgentId)
-                .ToList();
-            foreach (var device in linkedDevices)
-            {
-                device.IndentLevel = 1;
-                device.LinkedToControlId = control.AgentId;
-                ordered.Add(device);
-            }
-        }
-        ordered.AddRange(unlinkedDevices);
-
-        AgentCards.Clear();
-        foreach (var card in ordered)
-            AgentCards.Add(card);
     }
 
     partial void OnSelectedLanguageChanged(LanguageOption value)

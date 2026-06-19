@@ -1,12 +1,22 @@
 namespace Frisson.Core.Agent.Device;
 
-internal sealed class DeviceAgent : Agent
+public sealed class DeviceAgent : Agent
 {
-    public DeviceAgent(Agent existing) : base(existing) { }
+    // Id is the device ID (extracted from bind reply targetId)
+    public int StrengthA { get; set; }
+    public int StrengthB { get; set; }
+    public int MaxA { get; set; }
+    public int MaxB { get; set; }
 
-    protected override async Task HandleProtocolMessage(string json)
+    public DeviceAgent(Guid id, Action? onDisposing = null) : base(id, onDisposing) { }
+
+    public override async Task HandleMessage(string json)
     {
         var scheme = Scheme.Scheme.Parse(json);
-        // Device-specific protocol (msg etc.)
+        if (scheme is Scheme.Device.MsgScheme msg)
+        {
+            // Parse feedback/status from the message field
+        }
+        await Task.CompletedTask;
     }
 }
