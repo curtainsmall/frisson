@@ -45,6 +45,39 @@
             <Setter Property="CornerRadius" Value="12" />
         </Style>
 
+        <Style Selector="Button.nav-btn-text">
+            <Setter Property="Width" Value="155" />
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Margin" Value="0,3" />
+            <Setter Property="Padding" Value="12,0" />
+
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentMuted}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+
+        <Style Selector="Button.nav-btn-text:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+
+        <Style Selector="Button.nav-btn-text.selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource Black}" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+
         <Style Selector="Border.selected">
             <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
         </Style>
@@ -56,7 +89,7 @@
             <Border
                 Grid.Row="0"
                 Background="{DynamicResource Black}"
-                Padding="10,8,140,8"
+                Padding="10,8,175,8"
                 PointerPressed="OnTitleBarPointerPressed">
                 <TextBlock Text="{loc:Loc AppTitle}" HorizontalAlignment="Left" VerticalAlignment="Center"
                            Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
@@ -66,43 +99,40 @@
             <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
 
                 <!-- ===== Column 0: Nav Bar ===== -->
-                <Grid Grid.Column="0" Width="60" Background="Transparent">
+                <Border Grid.Column="0" Width="175" Background="Transparent"
+                        BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,1,0">
+                    <Grid Background="Transparent">
                     <!-- Top: Page nav buttons -->
-                    <StackPanel Spacing="10" Margin="5" VerticalAlignment="Top">
-                        <Button Classes="nav-btn"
+                    <StackPanel Spacing="6" Margin="0,8" VerticalAlignment="Top">
+                        <Button Classes="nav-btn-text"
                                 Classes.selected="{Binding IsControlDeskSelected}"
-                                ToolTip.Tip="{loc:Loc NavControlDesk}"
+                                Content="{loc:Loc NavControlDesk}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.ControlDesk}">
-                            <i:Icon Value="fa-solid fa-sliders" FontSize="20" />
-                        </Button>
-                        <Button Classes="nav-btn"
+                                CommandParameter="{x:Static vm:NavPage.ControlDesk}" />
+                        <Button Classes="nav-btn-text"
                                 Classes.selected="{Binding IsControlSourcesSelected}"
-                                ToolTip.Tip="{loc:Loc NavControlSources}"
+                                Content="{loc:Loc NavControlSources}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.ControlSources}">
-                            <i:Icon Value="fa-solid fa-diagram-project" FontSize="20" />
-                        </Button>
+                                CommandParameter="{x:Static vm:NavPage.ControlSources}" />
                     </StackPanel>
 
-                    <!-- Bottom: Settings gear -->
-                    <Button Classes="nav-btn"
+                    <!-- Bottom: Settings -->
+                    <Button Classes="nav-btn-text"
                             Classes.selected="{Binding IsSettingsSelected}"
-                            ToolTip.Tip="{loc:Loc NavSettings}"
+                            Content="{loc:Loc NavSettings}"
                             Command="{Binding SelectPageCommand}"
                             CommandParameter="{x:Static vm:NavPage.Settings}"
                             VerticalAlignment="Bottom"
-                            Margin="5,0,5,5">
-                        <i:Icon Value="fa-solid fa-gear" FontSize="20" />
-                    </Button>
-                </Grid>
+                            Margin="0,0,0,12" />
+                    </Grid>
+                </Border>
 
                 <!-- ===== Column 1: Center Content ===== -->
                 <Border Grid.Column="1" Padding="16" Background="Transparent">
                     <Panel>
                         <!-- Control Desk Page -->
                         <Grid IsVisible="{Binding IsControlDeskSelected}">
-                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="24"
+                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="14"
                                        Foreground="{DynamicResource SecondaryText}"
                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
                         </Grid>
@@ -165,7 +195,7 @@
                             <Border Grid.Column="2"
                                     Background="{DynamicResource Black}"
                                     Padding="20">
-                                <TextBlock Text="Source Details"
+                                <TextBlock Text="{loc:Loc SourceDetails}"
                                            Foreground="{DynamicResource SecondaryText}"
                                            FontSize="14"
                                            VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -183,13 +213,17 @@
                             </StackPanel>
 
                             <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
-                                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="20">
+                                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="20" ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Row="0" Grid.Column="0"
                                                Text="{loc:Loc Language}"
                                                Foreground="{DynamicResource PrimaryText}"
                                                FontSize="14"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,20,0" />
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center" />
                                     <ComboBox Grid.Row="0" Grid.Column="1"
                                               ItemsSource="{Binding AvailableLanguages}"
                                               SelectedItem="{Binding SelectedLanguage}"
@@ -210,8 +244,8 @@
                                                Text="{loc:Loc LogLabel}"
                                                Foreground="{DynamicResource PrimaryText}"
                                                FontSize="14"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,20,0" />
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center" />
                                     <StackPanel Grid.Row="1" Grid.Column="1"
                                                 Orientation="Horizontal"
                                                 Spacing="8">

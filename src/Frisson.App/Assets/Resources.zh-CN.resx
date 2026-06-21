@@ -75,73 +75,9 @@
   <data name="DevicesTitle" xml:space="preserve">
     <value>设备</value>
   </data>
-  <!-- 混音器页面 -->
-  <data name="ChannelA" xml:space="preserve">
-    <value>通道 A</value>
-  </data>
-  <data name="ChannelB" xml:space="preserve">
-    <value>通道 B</value>
-  </data>
-  <data name="SetAccessoryMode" xml:space="preserve">
-    <value>设置配件玩法</value>
-  </data>
-  <data name="ABChannelSync" xml:space="preserve">
-    <value>AB 通道同步</value>
-  </data>
-  <data name="CustomCombination" xml:space="preserve">
-    <value>自选组合</value>
-  </data>
-  <!-- 已连接客户端 -->
-  <data name="ConnectedClients" xml:space="preserve">
-    <value>已连接客户端</value>
-  </data>
-  <!-- 占位符 -->
-  <data name="WaveformPlaceholder" xml:space="preserve">
-    <value>波形可视化占位符...</value>
-  </data>
-  <data name="SettingsPlaceholder" xml:space="preserve">
-    <value>应用程序设置占位符...</value>
-  </data>
-  <!-- 客户端状态 -->
-  <data name="StatusConnected" xml:space="preserve">
-    <value>已连接</value>
-  </data>
-  <data name="StatusBound" xml:space="preserve">
-    <value>已绑定</value>
-  </data>
-  <data name="StatusPending" xml:space="preserve">
-    <value>等待中</value>
-  </data>
-  <!-- 客户端类型 -->
-  <data name="WebSocketClientKindDevice" xml:space="preserve">
-    <value>设备端</value>
-  </data>
-  <data name="WebSocketClientKindRemote" xml:space="preserve">
-    <value>遥控端</value>
-  </data>
-  <data name="WebSocketClientKindUnknown" xml:space="preserve">
-    <value>未知</value>
-  </data>
-  <!-- 菜单项 -->
-  <data name="MenuItem1" xml:space="preserve">
-    <value>占位选项 1</value>
-  </data>
-  <data name="MenuItem2" xml:space="preserve">
-    <value>占位选项 2</value>
-  </data>
-  <data name="MenuItem3" xml:space="preserve">
-    <value>占位选项 3</value>
-  </data>
-  <!-- 设备选择 -->
-  <data name="NoDeviceSelected" xml:space="preserve">
-    <value>未选择设备</value>
-  </data>
   <!-- 设置页面 -->
   <data name="Language" xml:space="preserve">
     <value>语言</value>
-  </data>
-  <data name="SelectLanguage" xml:space="preserve">
-    <value>选择语言</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
     <value>打开</value>
@@ -152,14 +88,14 @@
   <data name="LogLabel" xml:space="preserve">
     <value>日志</value>
   </data>
-  <!-- 连接页面 -->
-  <data name="AgentsListTitle" xml:space="preserve">
-    <value>代理</value>
+  <!-- 控制台与状态 -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>源详情</value>
   </data>
   <data name="NoAgent" xml:space="preserve">
-    <value>无代理</value>
+    <value>无</value>
   </data>
   <data name="LocalControlPlaceholder" xml:space="preserve">
-    <value>本地控制</value>
+    <value>控制台</value>
   </data>
 </root>

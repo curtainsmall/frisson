@@ -75,73 +75,9 @@
   <data name="DevicesTitle" xml:space="preserve">
     <value>Devices</value>
   </data>
-  <!-- Control Panel Page -->
-  <data name="ChannelA" xml:space="preserve">
-    <value>Channel A</value>
-  </data>
-  <data name="ChannelB" xml:space="preserve">
-    <value>Channel B</value>
-  </data>
-  <data name="SetAccessoryMode" xml:space="preserve">
-    <value>Set Accessory Mode</value>
-  </data>
-  <data name="ABChannelSync" xml:space="preserve">
-    <value>AB Channel Sync</value>
-  </data>
-  <data name="CustomCombination" xml:space="preserve">
-    <value>Custom Combination</value>
-  </data>
-  <!-- Connected Clients -->
-  <data name="ConnectedClients" xml:space="preserve">
-    <value>CONNECTED CLIENTS</value>
-  </data>
-  <!-- Placeholders -->
-  <data name="WaveformPlaceholder" xml:space="preserve">
-    <value>Waveform visualization placeholder...</value>
-  </data>
-  <data name="SettingsPlaceholder" xml:space="preserve">
-    <value>Application settings placeholder...</value>
-  </data>
-  <!-- Client Status -->
-  <data name="StatusConnected" xml:space="preserve">
-    <value>Connected</value>
-  </data>
-  <data name="StatusBound" xml:space="preserve">
-    <value>Bound</value>
-  </data>
-  <data name="StatusPending" xml:space="preserve">
-    <value>Pending</value>
-  </data>
-  <!-- Client Types -->
-  <data name="WebSocketClientKindDevice" xml:space="preserve">
-    <value>Device</value>
-  </data>
-  <data name="WebSocketClientKindRemote" xml:space="preserve">
-    <value>Remote</value>
-  </data>
-  <data name="WebSocketClientKindUnknown" xml:space="preserve">
-    <value>Unknown</value>
-  </data>
-  <!-- Menu Items -->
-  <data name="MenuItem1" xml:space="preserve">
-    <value>Placeholder Item 1</value>
-  </data>
-  <data name="MenuItem2" xml:space="preserve">
-    <value>Placeholder Item 2</value>
-  </data>
-  <data name="MenuItem3" xml:space="preserve">
-    <value>Placeholder Item 3</value>
-  </data>
-  <!-- Device Selection -->
-  <data name="NoDeviceSelected" xml:space="preserve">
-    <value>No Device Selected</value>
-  </data>
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
     <value>Language</value>
-  </data>
-  <data name="SelectLanguage" xml:space="preserve">
-    <value>Select Language</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
     <value>Open</value>
@@ -152,14 +88,14 @@
   <data name="LogLabel" xml:space="preserve">
     <value>Log</value>
   </data>
-  <!-- Connections Page -->
-  <data name="AgentsListTitle" xml:space="preserve">
-    <value>Agents</value>
+  <!-- Control Desk & Status -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>Source Details</value>
   </data>
   <data name="NoAgent" xml:space="preserve">
-    <value>No Agent</value>
+    <value>None</value>
   </data>
   <data name="LocalControlPlaceholder" xml:space="preserve">
-    <value>Local Control</value>
+    <value>Control Desk</value>
   </data>
 </root>

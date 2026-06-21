@@ -111,7 +111,7 @@ internal class AgentManager
         SourceDeactivated?.Invoke();
     }
 
-    public Agent? Get(Guid id)
+    public Agent? GetAgent(Guid id)
     {
         _agents.TryGetValue(id, out var agent);
         return agent;

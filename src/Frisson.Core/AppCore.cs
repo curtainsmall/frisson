@@ -77,5 +77,5 @@ public class AppCore : IDisposable
     public void DeactivateDevice(Guid id) => _agentManager.DeactivateDevice(id);
     public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
     public void ClearActiveSource() => _agentManager.ClearActiveSource();
-    public Agent.Agent? GetAgent(Guid id) => _agentManager.Get(id);
+    public Agent.Agent? GetAgent(Guid id) => _agentManager.GetAgent(id);
 }

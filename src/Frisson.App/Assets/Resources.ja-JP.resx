@@ -75,73 +75,9 @@
   <data name="DevicesTitle" xml:space="preserve">
     <value>デバイス</value>
   </data>
-  <!-- Control Panel Page -->
-  <data name="ChannelA" xml:space="preserve">
-    <value>チャンネル A</value>
-  </data>
-  <data name="ChannelB" xml:space="preserve">
-    <value>チャンネル B</value>
-  </data>
-  <data name="SetAccessoryMode" xml:space="preserve">
-    <value>アクセサリーモード設定</value>
-  </data>
-  <data name="ABChannelSync" xml:space="preserve">
-    <value>AB チャンネル同期</value>
-  </data>
-  <data name="CustomCombination" xml:space="preserve">
-    <value>カスタム組み合わせ</value>
-  </data>
-  <!-- Connected Clients -->
-  <data name="ConnectedClients" xml:space="preserve">
-    <value>接続済みクライアント</value>
-  </data>
-  <!-- Placeholders -->
-  <data name="WaveformPlaceholder" xml:space="preserve">
-    <value>波形表示プレースホルダー...</value>
-  </data>
-  <data name="SettingsPlaceholder" xml:space="preserve">
-    <value>アプリ設定プレースホルダー...</value>
-  </data>
-  <!-- Client Status -->
-  <data name="StatusConnected" xml:space="preserve">
-    <value>接続済み</value>
-  </data>
-  <data name="StatusBound" xml:space="preserve">
-    <value>バインド済み</value>
-  </data>
-  <data name="StatusPending" xml:space="preserve">
-    <value>待機中</value>
-  </data>
-  <!-- Client Types -->
-  <data name="WebSocketClientKindDevice" xml:space="preserve">
-    <value>デバイス</value>
-  </data>
-  <data name="WebSocketClientKindRemote" xml:space="preserve">
-    <value>リモート</value>
-  </data>
-  <data name="WebSocketClientKindUnknown" xml:space="preserve">
-    <value>不明</value>
-  </data>
-  <!-- Menu Items -->
-  <data name="MenuItem1" xml:space="preserve">
-    <value>プレースホルダー項目 1</value>
-  </data>
-  <data name="MenuItem2" xml:space="preserve">
-    <value>プレースホルダー項目 2</value>
-  </data>
-  <data name="MenuItem3" xml:space="preserve">
-    <value>プレースホルダー項目 3</value>
-  </data>
-  <!-- Device Selection -->
-  <data name="NoDeviceSelected" xml:space="preserve">
-    <value>デバイス未選択</value>
-  </data>
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
     <value>言語</value>
-  </data>
-  <data name="SelectLanguage" xml:space="preserve">
-    <value>言語を選択</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
     <value>開く</value>
@@ -152,14 +88,14 @@
   <data name="LogLabel" xml:space="preserve">
     <value>ログ</value>
   </data>
-  <!-- Connections Page -->
-  <data name="AgentsListTitle" xml:space="preserve">
-    <value>エージェント</value>
+  <!-- Control Desk & Status -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>ソース詳細</value>
   </data>
   <data name="NoAgent" xml:space="preserve">
-    <value>エージェントなし</value>
+    <value>なし</value>
   </data>
   <data name="LocalControlPlaceholder" xml:space="preserve">
-    <value>ローカルコントロール</value>
+    <value>コントロールデスク</value>
   </data>
 </root>
