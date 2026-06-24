@@ -107,4 +107,7 @@
   <data name="Close" xml:space="preserve">
     <value>閉じる</value>
   </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>切断</value>
+  </data>
 </root>

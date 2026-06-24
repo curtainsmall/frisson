@@ -107,4 +107,7 @@
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
 </root>

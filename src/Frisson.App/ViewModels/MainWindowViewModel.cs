@@ -135,6 +135,12 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void DisconnectAgent(Guid agentId)
+    {
+        AppCore.Instance.DisconnectAgent(agentId);
+    }
+
+    [RelayCommand]
     private void ShowLogWindow()
     {
         var window = new Views.LogWindow();

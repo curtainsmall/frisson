@@ -22,13 +22,6 @@ internal class WebSocketServer : IDisposable
 
     public void Start(int port)
     {
-        var initialMsg = new Scheme.Device.BindScheme
-        {
-            ClientId = AppCore.DummyFrontendId,
-            TargetId = Guid.Empty,
-            Message = "targetId"
-        }.ToJson();
-
         _server = new FleckServer($"ws://0.0.0.0:{port}");
         _server.Start(socket =>
         {
@@ -39,7 +32,12 @@ internal class WebSocketServer : IDisposable
                 var client = new WebSocketClient(wsId, socket);
                 _clients.TryAdd(wsId, client);
                 LoggerService.Instance.Log($"[Server] Client connected: {wsId}");
-                client.Send(initialMsg);
+                client.Send(new Scheme.Device.BindScheme
+                {
+                    ClientId = wsId,
+                    TargetId = Guid.Empty,
+                    Message = "targetId"
+                }.ToJson());
             };
 
             socket.OnClose = () => TryRemove(wsId);
@@ -77,7 +75,7 @@ internal class WebSocketServer : IDisposable
         if (scheme == null) return null;
         client.Send(new Scheme.Device.BindScheme
         {
-            ClientId = AppCore.DummyFrontendId,
+            ClientId = wsId,
             TargetId = wsId,
             Message = "200"
         }.ToJson());

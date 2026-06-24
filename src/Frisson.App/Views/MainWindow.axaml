@@ -319,7 +319,7 @@
                                                         Margin="0,0,0,6"
                                                         Classes.selected="{Binding IsSelected}"
                                                         PointerPressed="OnAgentCardPointerPressed">
-                                                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
+                                                    <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto">
                                                         <i:Icon Grid.Column="0" Grid.RowSpan="2"
                                                                 Value="fa-solid fa-microchip"
                                                                 FontSize="16"
@@ -334,6 +334,35 @@
                                                                    Text="{Binding AgentId, StringFormat='{}{0}'}"
                                                                    Foreground="{DynamicResource SecondaryText}"
                                                                    FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                        <Button Grid.Column="2" Grid.Row="0"
+                                                                Content="×" FontSize="14"
+                                                                Width="18" Height="18" Padding="0"
+                                                                CornerRadius="4"
+                                                                HorizontalContentAlignment="Center"
+                                                                VerticalContentAlignment="Center"
+                                                                Background="Transparent" BorderThickness="0"
+                                                                Foreground="{DynamicResource SecondaryText}"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip.Tip="{loc:Loc Disconnect}"
+                                                                Command="{Binding DataContext.DisconnectAgentCommand, ElementName=Root}"
+                                                                CommandParameter="{Binding AgentId}">
+                                                            <Button.Resources>
+                                                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
+                                                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
+                                                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                                                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
+                                                            </Button.Resources>
+                                                            <Button.Styles>
+                                                                <Style Selector="Button:pointerover">
+                                                                    <Setter Property="Background" Value="#E53935" />
+                                                                    <Setter Property="Foreground" Value="White" />
+                                                                </Style>
+                                                                <Style Selector="Button:pressed">
+                                                                    <Setter Property="Background" Value="#C62828" />
+                                                                    <Setter Property="Foreground" Value="White" />
+                                                                </Style>
+                                                            </Button.Styles>
+                                                        </Button>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>

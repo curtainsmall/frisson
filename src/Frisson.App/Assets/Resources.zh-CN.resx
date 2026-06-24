@@ -107,4 +107,7 @@
   <data name="Close" xml:space="preserve">
     <value>关闭</value>
   </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>断开连接</value>
+  </data>
 </root>
