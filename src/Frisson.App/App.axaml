@@ -31,6 +31,10 @@
                     <SolidColorBrush x:Key="PrimaryText" Color="#f5f5f5" />
                     <SolidColorBrush x:Key="SecondaryText" Color="#a0a0a0" />
                     <SolidColorBrush x:Key="DisabledText" Color="#666666" />
+
+                    <!-- 标题栏按钮 hover/pressed 压低亮度 -->
+                    <SolidColorBrush x:Key="CaptionButtonBackground" Color="#25FFFFFF" />
+                    <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#15FFFFFF" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>

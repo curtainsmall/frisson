@@ -4,6 +4,10 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+
+using Avalonia.Controls;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -105,6 +109,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
+    private Window? _qrCodeWindow;
+
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
     public bool IsControlSourcesSelected => CurrentPage == NavPage.ControlSources;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
@@ -139,6 +145,28 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ClearLogs() => LoggerService.Instance.Clear();
 
+    private static string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                return ip.ToString();
+        }
+        return "127.0.0.1";
+    }
+
+    [RelayCommand]
+    private void ShowQrCodeWindow()
+    {
+        var lanIP = GetLocalIPAddress();
+        var clientId = AppCore.DummyFrontendId;
+        var qrContent = $"https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://{lanIP}:6969/{clientId}";
+        _qrCodeWindow = new Views.QrCodeWindow(qrContent);
+        if (App.MainWindow is not null)
+            _qrCodeWindow.Show(App.MainWindow);
+    }
+
     public MainWindowViewModel()
     {
         var currentCulture = LocalizationService.Instance.CurrentCulture.Name;
@@ -169,6 +197,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 StatusColor = "#00FF00"
             };
             AgentCards.Add(card);
+
+            // Auto-close QR window when a Device connects
+            if (e.AgentType == typeof(DeviceAgent) && _qrCodeWindow is not null)
+            {
+                _qrCodeWindow.Close();
+                _qrCodeWindow = null;
+            }
         });
     }
 

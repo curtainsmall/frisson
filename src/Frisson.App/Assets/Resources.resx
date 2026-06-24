@@ -98,4 +98,13 @@
   <data name="LocalControlPlaceholder" xml:space="preserve">
     <value>Control Desk</value>
   </data>
+  <data name="AddDevice" xml:space="preserve">
+    <value>Add Device</value>
+  </data>
+  <data name="QrCodeTitle" xml:space="preserve">
+    <value>Connect Device</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

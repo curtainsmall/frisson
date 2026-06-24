@@ -78,10 +78,10 @@ internal class WebSocketServer : IDisposable
         client.Send(new Scheme.Device.BindScheme
         {
             ClientId = AppCore.DummyFrontendId,
-            TargetId = scheme.TargetId,
+            TargetId = wsId,
             Message = "200"
         }.ToJson());
-        return new DeviceAgent(scheme.TargetId, () => TryRemove(wsId));
+        return new DeviceAgent(wsId, () => TryRemove(wsId));
     }
 
     private Agent.Agent? CreateControlSource(Guid wsId, string msg, WebSocketClient client)

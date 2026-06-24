@@ -4,10 +4,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:vm="clr-namespace:Frisson.App.ViewModels"
+        xmlns:loc="using:Frisson.App.MarkupExtensions"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
         x:Class="Frisson.App.Views.QrCodeWindow"
         x:DataType="vm:QrCodeWindowViewModel"
-        Title="Connect Device"
+        Title="{loc:Loc QrCodeTitle}"
         Width="400" Height="500"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
@@ -23,7 +24,7 @@
                     Background="{DynamicResource Black}"
                     Padding="10,8,100,0"
                     PointerPressed="OnTitleBarPointerPressed">
-                <TextBlock Text="Connect Device"
+                <TextBlock Text="{loc:Loc QrCodeTitle}"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource PrimaryText}"
@@ -68,7 +69,7 @@
                             <i:Icon Value="{Binding EyeIconValue}" FontSize="16" Foreground="{DynamicResource SecondaryText}"/>
                         </Button>
                     </Grid>
-                    <Button Content="Close"
+                    <Button Content="{loc:Loc Close}"
                             HorizontalAlignment="Center"
                             Width="120"
                             HorizontalContentAlignment="Center"
