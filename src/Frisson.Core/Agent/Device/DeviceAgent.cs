@@ -15,7 +15,18 @@ public sealed class DeviceAgent : Agent
         var scheme = Scheme.Scheme.Parse(json);
         if (scheme is Scheme.Device.MsgScheme msg)
         {
-            // Parse feedback/status from the message field
+            switch (msg.Kind)
+            {
+                case Scheme.Device.MsgKind.StrengthStatus:
+                    StrengthA = msg.StrengthA;
+                    StrengthB = msg.StrengthB;
+                    MaxA = msg.MaxA;
+                    MaxB = msg.MaxB;
+                    break;
+                case Scheme.Device.MsgKind.Feedback:
+                    // Future: fire event to notify UI
+                    break;
+            }
         }
         await Task.CompletedTask;
     }

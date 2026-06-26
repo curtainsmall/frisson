@@ -33,16 +33,17 @@ public sealed class BindScheme : SchemeBase
 
     /// <summary>
     /// Parses a Control bind message from a JsonElement.
-    /// Returns null if the "id" field is missing.
+    /// "id" is optional — Remote may not send it; Frisson assigns the UUID.
     /// </summary>
     public static BindScheme? FromJson(JsonElement root)
     {
-        if (!root.TryGetProperty("id", out var idProp))
-            return null;
-
-        var idStr = idProp.GetString() ?? string.Empty;
-        if (!Guid.TryParse(idStr, out var id))
-            return null;
+        Guid id = Guid.Empty;
+        if (root.TryGetProperty("id", out var idProp))
+        {
+            var idStr = idProp.GetString() ?? string.Empty;
+            if (!Guid.TryParse(idStr, out id))
+                return null;
+        }
 
         root.TryGetProperty("name", out var nameProp);
 

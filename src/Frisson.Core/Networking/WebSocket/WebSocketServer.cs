@@ -25,38 +25,38 @@ internal class WebSocketServer : IDisposable
         _server = new FleckServer($"ws://0.0.0.0:{port}");
         _server.Start(socket =>
         {
-            var wsId = Guid.NewGuid();
+            var id = Guid.NewGuid();
 
             socket.OnOpen = () =>
             {
-                var client = new WebSocketClient(wsId, socket);
-                _clients.TryAdd(wsId, client);
-                LoggerService.Instance.Log($"[Server] Client connected: {wsId}");
+                var client = new WebSocketClient(id, socket);
+                _clients.TryAdd(id, client);
+                LoggerService.Instance.Log($"[Server] Client connected: {id}");
                 client.Send(new Scheme.Device.BindScheme
                 {
-                    ClientId = wsId,
+                    ClientId = id,
                     TargetId = Guid.Empty,
                     Message = "targetId"
                 }.ToJson());
             };
 
-            socket.OnClose = () => TryRemove(wsId);
+            socket.OnClose = () => TryRemove(id);
 
             socket.OnMessage = msg =>
             {
-                LoggerService.Instance.Log($"[Server] Received from {wsId}: {msg}");
-                if (!_clients.TryGetValue(wsId, out var client)) return;
+                LoggerService.Instance.Log($"[Server] Received from {id}: {msg}");
+                if (!_clients.TryGetValue(id, out var client)) return;
 
                 if (!client.IsBound)
                 {
                     Agent.Agent? agent = msg switch
                     {
-                        _ when msg.Contains("\"clientId\"") => CreateDevice(wsId, msg, client),
-                        _ when msg.Contains("\"id\"") && msg.Contains("\"name\"") => CreateControlSource(wsId, msg, client),
+                        _ when msg.Contains("\"clientId\"") => CreateDevice(id, msg, client),
+                        _ when msg.Contains("\"name\"") && !msg.Contains("\"clientId\"") => CreateControlSource(id, msg, client),
                         _ => null
                     };
 
-                    if (agent == null) { TryRemove(wsId); return; }
+                    if (agent == null) { TryRemove(id); return; }
                     agent.SendFunc = client.Send;
                     client.MessageHandler = json => agent.HandleMessage(json);
                     client.IsBound = true;
@@ -69,25 +69,25 @@ internal class WebSocketServer : IDisposable
         LoggerService.Instance.Log($"[Server] Started on port {port}");
     }
 
-    private Agent.Agent? CreateDevice(Guid wsId, string msg, WebSocketClient client)
+    private Agent.Agent? CreateDevice(Guid id, string msg, WebSocketClient client)
     {
         var scheme = Scheme.Device.BindScheme.TryParseDeviceBind(msg);
         if (scheme == null) return null;
         client.Send(new Scheme.Device.BindScheme
         {
-            ClientId = wsId,
-            TargetId = wsId,
+            ClientId = AppCore.DummyFrontendId,
+            TargetId = id,
             Message = "200"
         }.ToJson());
-        return new DeviceAgent(wsId, () => TryRemove(wsId));
+        return new DeviceAgent(id, () => TryRemove(id));
     }
 
-    private Agent.Agent? CreateControlSource(Guid wsId, string msg, WebSocketClient client)
+    private Agent.Agent? CreateControlSource(Guid id, string msg, WebSocketClient client)
     {
         var scheme = Scheme.Control.BindScheme.TryParse(msg);
         if (scheme == null) return null;
-        client.Send(new Scheme.Control.BindScheme { Id = wsId, Name = scheme.Name }.ToJson());
-        return new ControlSourceAgent(wsId, scheme.Name, () => TryRemove(wsId));
+        client.Send(new Scheme.Control.BindScheme { Id = id, Name = scheme.Name }.ToJson());
+        return new ControlSourceAgent(id, scheme.Name, () => TryRemove(id));
     }
 
     public void TryRemove(Guid id)

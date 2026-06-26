@@ -14,6 +14,10 @@
 !setup.iss
 !publish.py
 
+# Demo scripts
+!demo/
+!demo/**
+
 # Build outputs (re-ignore)
 src/**/bin/
 src/**/obj/

@@ -31,6 +31,7 @@ public abstract class Scheme
             return type switch
             {
                 "bind" => TryParseBind(root),
+                "msg"  => Device.MsgScheme.FromJson(root),
                 _ => null
             };
         }
