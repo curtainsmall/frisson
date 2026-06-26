@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Frisson.App.ViewModels;
+using Frisson.Desktop.ViewModels;
 
-namespace Frisson.App;
+namespace Frisson.Desktop;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.

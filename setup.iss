@@ -19,16 +19,17 @@
 #endif
 
 #if BuildKind == "selfcontained"
-  #define SourceDir "src\Frisson.App\publish\win-x64-selfcontained"
-  #define OutputName "Frisson-Setup-SelfContained"
+  #define SourceDir "src\Frisson.Desktop\publish\win-x64-selfcontained"
   #define AppSuffix " (Self-Contained)"
+  #define OutputSuffix "-SelfContained"
 #else
-  #define SourceDir "src\Frisson.App\publish\win-x64-framework"
-  #define OutputName "Frisson-Setup"
+  #define SourceDir "src\Frisson.Desktop\publish\win-x64-framework"
   #define AppSuffix ""
+  #define OutputSuffix ""
 #endif
 
-#define FrissonVersion GetVersionNumbersString(SourceDir + "\Frisson.App.exe")
+#define FrissonVersion GetVersionNumbersString(SourceDir + "\Frisson.Desktop.exe")
+#define OutputName "Frisson-Setup-" + FrissonVersion + OutputSuffix
 
 [Setup]
 AppName=Frisson{#AppSuffix}
@@ -47,8 +48,12 @@ SolidCompression=yes
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\Frisson.App.exe
+UninstallDisplayIcon={app}\Frisson.Desktop.exe
 UsedUserAreasWarning=no
+DisableDirPage=auto
+CloseApplications=yes
+RestartApplications=no
+DisableProgramGroupPage=yes
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
@@ -59,21 +64,26 @@ Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
 [InstallDelete]
 ; Clean old files before installing new version to prevent residue
 Type: filesandordirs; Name: "{app}\*"
+; Clean old Start Menu shortcuts from previous install location
+Type: files; Name: "{autoprograms}\(Default)\Frisson.lnk"
+Type: files; Name: "{group}\Frisson.lnk"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Run]
+; Clean old start menu shortcuts from previous installs
+Filename: "powershell.exe"; Parameters: "-NoProfile -Command Remove-Item -Force -ErrorAction SilentlyContinue ([Environment]::GetFolderPath('CommonPrograms') + '\(Default)\Frisson.lnk'), ([Environment]::GetFolderPath('CommonPrograms') + '\Frisson\Frisson.lnk')"; Flags: runhidden
 ; Add Windows Firewall inbound rule for Frisson on install
-Filename: "netsh.exe"; Parameters: "advfirewall firewall add rule name=""Frisson"" dir=in action=allow program=""{app}\Frisson.App.exe"" enable=yes"; Flags: runhidden;
+Filename: "netsh.exe"; Parameters: "advfirewall firewall add rule name=""Frisson"" dir=in action=allow program=""{app}\Frisson.Desktop.exe"" enable=yes"; Flags: runhidden;
 
 [UninstallRun]
 ; Remove Windows Firewall rule for Frisson on uninstall
 Filename: "netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Frisson"""; Flags: runhidden; RunOnceId: "RemoveFrissonFirewallRule"
 
 [Icons]
-Name: "{group}\Frisson"; Filename: "{app}\Frisson.App.exe"
-Name: "{autodesktop}\Frisson"; Filename: "{app}\Frisson.App.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Frisson"; Filename: "{app}\Frisson.Desktop.exe"
+Name: "{autodesktop}\Frisson"; Filename: "{app}\Frisson.Desktop.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked

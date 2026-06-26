@@ -7,7 +7,7 @@ using System.Threading;
 using Avalonia.Data.Converters;
 using System.Collections.Generic;
 
-namespace Frisson.App.Services;
+namespace Frisson.Desktop.Services;
 
 public class LocalizationService : INotifyPropertyChanged
 {
@@ -21,7 +21,7 @@ public class LocalizationService : INotifyPropertyChanged
 
     private LocalizationService()
     {
-        _resourceManager = new ResourceManager("Frisson.App.Assets.Resources", typeof(LocalizationService).Assembly);
+        _resourceManager = new ResourceManager("Frisson.Desktop.Assets.Resources", typeof(LocalizationService).Assembly);
         
         // Try to read language from installer registry setting first
         var installerLanguage = GetInstallerLanguage();

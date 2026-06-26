@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -12,13 +12,13 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using Frisson.App.Services;
+using Frisson.Desktop.Services;
 using Frisson.Core;
 using Frisson.Core.Agent;
 using Frisson.Core.Agent.Control;
 using Frisson.Core.Agent.Device;
 
-namespace Frisson.App.ViewModels;
+namespace Frisson.Desktop.ViewModels;
 
 public enum NavPage
 {
@@ -86,18 +86,18 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> AvailableLanguages { get; } = new()
     {
         new LanguageOption { Code = "en-US", DisplayName = "English" },
-        new LanguageOption { Code = "zh-CN", DisplayName = "ÁÆÄ‰Ωì‰∏≠Êñá" },
-        new LanguageOption { Code = "zh-TW", DisplayName = "ÁπÅÈ´î‰∏≠Êñá" },
-        new LanguageOption { Code = "ja-JP", DisplayName = "Êó•Êú¨Ë™û" }
+        new LanguageOption { Code = "zh-CN", DisplayName = "ºÚÃÂ÷–Œƒ" },
+        new LanguageOption { Code = "zh-TW", DisplayName = "∑±Ûw÷–Œƒ" },
+        new LanguageOption { Code = "ja-JP", DisplayName = "»’±æ’Z" }
     };
 
     /// <summary>All connected agents (for internal tracking).</summary>
     public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
 
-    /// <summary>Only Device agents ‚Äî shown in the global right panel.</summary>
+    /// <summary>Only Device agents °™ shown in the global right panel.</summary>
     public IEnumerable<ConnectedAgentCard> DeviceCards => AgentCards.Where(c => c.IsDevice);
 
-    /// <summary>Only ControlSource agents ‚Äî shown on the Sources page.</summary>
+    /// <summary>Only ControlSource agents °™ shown on the Sources page.</summary>
     public IEnumerable<ConnectedAgentCard> SourceCards => AgentCards.Where(c => c.IsControl);
 
     [ObservableProperty]

@@ -3,9 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 
-using Frisson.App.ViewModels;
+using Frisson.Desktop.ViewModels;
 
-namespace Frisson.App.Views;
+namespace Frisson.Desktop.Views;
 
 public partial class QrCodeWindow : Window
 {

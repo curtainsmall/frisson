@@ -1,6 +1,11 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Frisson.App/Frisson.App.csproj" />
-    <Project Path="src/Frisson.Core/Frisson.Core.csproj" />
-  </Folder>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Build Type="Debug" />
+    <Build Type="Release" />
+    <Project Project="src/Frisson.Desktop/Frisson.Desktop.csproj" />
+    <Project Project="src/Frisson.Core/Frisson.Core.csproj" />
+  </Configurations>
+  <Project Path="src/Frisson.Desktop/Frisson.Desktop.csproj" />
+  <Project Path="src/Frisson.Core/Frisson.Core.csproj" />
 </Solution>

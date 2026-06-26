@@ -10,13 +10,13 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
-using Frisson.App.Services;
-using Frisson.App.ViewModels;
-using Frisson.App.Views;
+using Frisson.Desktop.Services;
+using Frisson.Desktop.ViewModels;
+using Frisson.Desktop.Views;
 using Frisson.Core;
 using Frisson.Core.Error;
 
-namespace Frisson.App;
+namespace Frisson.Desktop;
 
 public partial class App : Application
 {

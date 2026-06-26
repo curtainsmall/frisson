@@ -5,10 +5,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 
-using Frisson.App.ViewModels;
+using Frisson.Desktop.ViewModels;
 using Frisson.Core;
 
-namespace Frisson.App.Views;
+namespace Frisson.Desktop.Views;
 
 public partial class MainWindow : Window
 {

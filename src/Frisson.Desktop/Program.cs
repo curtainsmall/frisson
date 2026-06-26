@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 
 using Avalonia;
 
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 
-namespace Frisson.App;
+namespace Frisson.Desktop;
 
 sealed class Program
 {

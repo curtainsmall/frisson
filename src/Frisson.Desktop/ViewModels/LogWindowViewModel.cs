@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 using Frisson.Core;
 
-namespace Frisson.App.ViewModels;
+namespace Frisson.Desktop.ViewModels;
 
 public partial class LogWindowViewModel : ViewModelBase
 {

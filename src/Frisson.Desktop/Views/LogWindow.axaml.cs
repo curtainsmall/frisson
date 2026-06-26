@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 
-using Frisson.App.ViewModels;
+using Frisson.Desktop.ViewModels;
 
-namespace Frisson.App.Views;
+namespace Frisson.Desktop.Views;
 
 public partial class LogWindow : Window
 {

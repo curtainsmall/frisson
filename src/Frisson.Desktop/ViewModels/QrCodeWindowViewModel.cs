@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using QRCoder;
 
-namespace Frisson.App.ViewModels;
+namespace Frisson.Desktop.ViewModels;
 
 public partial class QrCodeWindowViewModel : ViewModelBase
 {

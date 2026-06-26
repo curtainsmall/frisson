@@ -8,6 +8,7 @@
     <EnableDefaultEmbeddedResourceItems>true</EnableDefaultEmbeddedResourceItems>
     <NeutralLanguage>en-US</NeutralLanguage>
     <ApplicationIcon>Assets\Frisson.ico</ApplicationIcon>
+    <AssemblyName>Frisson.Desktop</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using System.Globalization;
 
 using Avalonia.Data.Converters;
 
-namespace Frisson.App.Converters;
+namespace Frisson.Desktop.Converters;
 
 /// <summary>
 /// Converts a boolean value to a width value (double).

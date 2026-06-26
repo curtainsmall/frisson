@@ -3,7 +3,7 @@ using System.Globalization;
 
 using Avalonia.Data.Converters;
 
-namespace Frisson.App.Converters;
+namespace Frisson.Desktop.Converters;
 
 /// <summary>
 /// Converts an indent level (int) to a left margin (double) for visual indentation.

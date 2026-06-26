@@ -3,9 +3,9 @@ using System;
 using Avalonia.Data;
 using Avalonia.Markup.Xaml;
 
-using Frisson.App.Services;
+using Frisson.Desktop.Services;
 
-namespace Frisson.App.MarkupExtensions;
+namespace Frisson.Desktop.MarkupExtensions;
 
 public class LocExtension : MarkupExtension
 {

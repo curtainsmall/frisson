@@ -14,9 +14,11 @@
 !setup.iss
 !publish.py
 
-# Demo scripts
+# Demo (only track these)
 !demo/
-!demo/**
+!demo/ctrl.py
+!demo/input.json
+!demo/output.json
 
 # Build outputs (re-ignore)
 src/**/bin/

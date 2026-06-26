@@ -86,7 +86,7 @@ def build_windows(tag):
         print(f"Error: Invalid version tag '{tag}'")
         sys.exit(1)
 
-    csproj = "src/Frisson.App/Frisson.App.csproj"
+    csproj = "src/Frisson.Desktop/Frisson.Desktop.csproj"
     common_props = [
         f"-p:Version={semver_ver}",
         f"-p:AssemblyVersion={numeric_ver}",
@@ -95,8 +95,8 @@ def build_windows(tag):
     ]
 
     # Two configurations driven by .NET PublishProfiles (the official way):
-    #   src/Frisson.App/Properties/PublishProfiles/win-x64-framework.pubxml
-    #   src/Frisson.App/Properties/PublishProfiles/win-x64-selfcontained.pubxml
+    #   src/Frisson.Desktop/Properties/PublishProfiles/win-x64-framework.pubxml
+    #   src/Frisson.Desktop/Properties/PublishProfiles/win-x64-selfcontained.pubxml
     #
     # Each profile owns its own PublishDir, so outputs do not collide and
     # MSBuild keeps separate obj/ folders per RID/Configuration combination.
@@ -104,13 +104,13 @@ def build_windows(tag):
         {
             "kind": "framework",
             "profile": "win-x64-framework",
-            "exe_path": "src/Frisson.App/publish/win-x64-framework/Frisson.App.exe",
+            "exe_path": "src/Frisson.Desktop/publish/win-x64-framework/Frisson.Desktop.exe",
             "installer_name": "Frisson-Setup.exe",
         },
         {
             "kind": "selfcontained",
             "profile": "win-x64-selfcontained",
-            "exe_path": "src/Frisson.App/publish/win-x64-selfcontained/Frisson.App.exe",
+            "exe_path": "src/Frisson.Desktop/publish/win-x64-selfcontained/Frisson.Desktop.exe",
             "installer_name": "Frisson-Setup-SelfContained.exe",
         },
     ]
