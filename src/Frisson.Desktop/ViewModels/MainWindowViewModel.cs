@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -86,18 +86,18 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> AvailableLanguages { get; } = new()
     {
         new LanguageOption { Code = "en-US", DisplayName = "English" },
-        new LanguageOption { Code = "zh-CN", DisplayName = "ºÚÃÂ÷–Œƒ" },
-        new LanguageOption { Code = "zh-TW", DisplayName = "∑±Ûw÷–Œƒ" },
-        new LanguageOption { Code = "ja-JP", DisplayName = "»’±æ’Z" }
+        new LanguageOption { Code = "zh-CN", DisplayName = "ÁÆÄ‰Ωì‰∏≠Êñá" },
+        new LanguageOption { Code = "zh-TW", DisplayName = "ÁπÅÈ´î‰∏≠Êñá" },
+        new LanguageOption { Code = "ja-JP", DisplayName = "Êó•Êú¨Ë™û" }
     };
 
     /// <summary>All connected agents (for internal tracking).</summary>
     public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
 
-    /// <summary>Only Device agents °™ shown in the global right panel.</summary>
+    /// <summary>Only Device agents ‚Äî shown in the global right panel.</summary>
     public IEnumerable<ConnectedAgentCard> DeviceCards => AgentCards.Where(c => c.IsDevice);
 
-    /// <summary>Only ControlSource agents °™ shown on the Sources page.</summary>
+    /// <summary>Only ControlSource agents ‚Äî shown on the Sources page.</summary>
     public IEnumerable<ConnectedAgentCard> SourceCards => AgentCards.Where(c => c.IsControl);
 
     [ObservableProperty]
@@ -144,8 +144,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ShowLogWindow()
     {
         var window = new Views.LogWindow();
-        if (App.MainWindow is not null)
-            window.Show(App.MainWindow);
+        if (Desktop.MainWindow is not null)
+            window.Show(Desktop.MainWindow);
     }
 
     [RelayCommand]
@@ -169,8 +169,8 @@ public partial class MainWindowViewModel : ViewModelBase
         var clientId = AppCore.DummyFrontendId;
         var qrContent = $"https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://{lanIP}:6969/{clientId}";
         _qrCodeWindow = new Views.QrCodeWindow(qrContent);
-        if (App.MainWindow is not null)
-            _qrCodeWindow.Show(App.MainWindow);
+        if (Desktop.MainWindow is not null)
+            _qrCodeWindow.Show(Desktop.MainWindow);
     }
 
     public MainWindowViewModel()

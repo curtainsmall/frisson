@@ -1,6 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Frisson.Desktop.App"
+             x:Class="Frisson.Desktop.Desktop"
              xmlns:local="using:Frisson.Desktop"
              RequestedThemeVariant="Dark">
 
@@ -32,7 +32,7 @@
                     <SolidColorBrush x:Key="SecondaryText" Color="#a0a0a0" />
                     <SolidColorBrush x:Key="DisabledText" Color="#666666" />
 
-                    <!-- 标题栏按�?hover/pressed 压低亮度 -->
+                    <!-- 标题栏按�?hover/pressed 压低亮度 -->
                     <SolidColorBrush x:Key="CaptionButtonBackground" Color="#25FFFFFF" />
                     <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#15FFFFFF" />
                 </ResourceDictionary>

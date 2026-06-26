@@ -18,7 +18,7 @@ using Frisson.Core.Error;
 
 namespace Frisson.Desktop;
 
-public partial class App : Application
+public partial class Desktop : Application
 {
     private AppCore? _appCore;
     public static Window? MainWindow { get; private set; }
