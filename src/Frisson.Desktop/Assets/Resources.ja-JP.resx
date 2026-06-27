@@ -110,4 +110,10 @@
   <data name="Disconnect" xml:space="preserve">
     <value>切断</value>
   </data>
+  <data name="Version" xml:space="preserve">
+    <value>バージョン</value>
+  </data>
+  <data name="VersionUnknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
 </root>

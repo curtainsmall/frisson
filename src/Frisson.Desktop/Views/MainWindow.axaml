@@ -214,7 +214,7 @@
                             </StackPanel>
 
                             <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
-                                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="20" ColumnSpacing="16">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="20" ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="*" />
@@ -269,6 +269,23 @@
                                                 BorderBrush="{DynamicResource AccentMuted}"
                                                 Command="{Binding ClearLogsCommand}" />
                                     </StackPanel>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0"
+                                               Text="{loc:Loc Version}"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               FontSize="13"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               FontSize="13"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <Binding Source="{x:Static services:LocalizationService.Instance}"
+                                                     Path="CurrentCulture"
+                                                     Converter="{x:Static converters:VersionConverter.Instance}" />
+                                        </TextBlock.Text>
+                                    </TextBlock>
                                 </Grid>
                             </ScrollViewer>
                         </Grid>
