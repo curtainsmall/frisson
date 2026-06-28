@@ -5,8 +5,8 @@ public sealed class DeviceAgent : Agent
     // Id is the device ID (extracted from bind reply targetId)
     public int StrengthA { get; set; }
     public int StrengthB { get; set; }
-    public int MaxA { get; set; }
-    public int MaxB { get; set; }
+    public int MaxA { get; set; } = 100;
+    public int MaxB { get; set; } = 100;
 
     /// <summary>
     /// Fired when device reports updated state (StrengthStatus from APP).

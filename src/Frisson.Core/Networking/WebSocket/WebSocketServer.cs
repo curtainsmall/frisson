@@ -62,7 +62,10 @@ internal class WebSocketServer : IDisposable
                     client.IsBound = true;
                     AgentCreated?.Invoke(agent);
                 }
-                // Subsequent messages handled by client.MessageHandler via client.OnMessage
+                else
+                {
+                    client.OnMessage(msg);
+                }
             };
         });
 
