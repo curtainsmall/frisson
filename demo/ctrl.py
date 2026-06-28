@@ -16,6 +16,8 @@ If WebSocket fails at any point, prints error to stdout and exits with code 1.
 import json
 import os
 import sys
+import threading
+import time
 
 try:
     import websocket
@@ -61,6 +63,23 @@ def main():
         ws.close()
         sys.exit(1)
 
+    # Watchdog thread: exit when WebSocket disconnects
+    disconnected = threading.Event()
+
+    def watch_ws():
+        while not disconnected.is_set():
+            time.sleep(1)
+            try:
+                ws.ping()
+            except Exception:
+                if not disconnected.is_set():
+                    disconnected.set()
+                    print("\n[!] WebSocket disconnected. Exiting...")
+                    os._exit(0)
+
+    watcher = threading.Thread(target=watch_ws, daemon=True)
+    watcher.start()
+
     # Interactive loop
     print("Ready. Commands: s/send  q/quit")
     try:
@@ -87,6 +106,7 @@ def main():
                     ws.close()
                     sys.exit(1)
     finally:
+        disconnected.set()
         ws.close()
 
 

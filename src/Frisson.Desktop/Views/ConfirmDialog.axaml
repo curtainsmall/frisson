@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Frisson.Desktop.ViewModels"
+        xmlns:loc="using:Frisson.Desktop.MarkupExtensions"
+        mc:Ignorable="d" d:DesignWidth="360" d:DesignHeight="200"
+        x:Class="Frisson.Desktop.Views.ConfirmDialog"
+        x:DataType="vm:ConfirmDialogViewModel"
+        Title="{CompiledBinding Title}"
+        Width="360" Height="200"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        ExtendClientAreaChromeHints="Default"
+        Background="{DynamicResource Black}">
+
+    <Border BorderThickness="1" BorderBrush="{DynamicResource AccentMuted}"
+            Background="Transparent" Padding="8,0,8,8">
+        <Grid RowDefinitions="Auto, *, Auto" Background="Transparent">
+            <!-- Title Bar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Black}"
+                    Padding="10,8,100,0"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="{CompiledBinding Title}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryText}"
+                           FontWeight="SemiBold"
+                           FontSize="14"/>
+            </Border>
+
+            <!-- Message -->
+            <TextBlock Grid.Row="1"
+                       Text="{CompiledBinding Message}"
+                       Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="24,0"/>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Spacing="16"
+                        Margin="0,0,0,16">
+                <Button Content="{CompiledBinding CancelText}"
+                        Width="100" Height="32"
+                        CornerRadius="6"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="13"
+                        Background="{DynamicResource SurfaceLight}"
+                        Foreground="{DynamicResource PrimaryText}"
+                        BorderBrush="{DynamicResource AccentMuted}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Content="{CompiledBinding ConfirmText}"
+                        Width="100" Height="32"
+                        CornerRadius="6"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="13"
+                        Background="#D93030"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Command="{Binding ConfirmCommand}">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
+                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
+                    </Button.Resources>
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover">
+                            <Setter Property="Background" Value="#E53935" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Style>
+                        <Style Selector="Button:pressed">
+                            <Setter Property="Background" Value="#C62828" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

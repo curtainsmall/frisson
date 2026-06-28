@@ -137,4 +137,29 @@
   <data name="NoSourceSelected" xml:space="preserve">
     <value>選擇一個控制源查看詳情</value>
   </data>
+  <!-- Confirm Dialogs -->
+  <data name="ConfirmDisconnectTitle" xml:space="preserve">
+    <value>中斷連線</value>
+  </data>
+  <data name="ConfirmDisconnectDeviceMsg" xml:space="preserve">
+    <value>確定要中斷此裝置的連線嗎？</value>
+  </data>
+  <data name="ConfirmDisconnectSourceMsg" xml:space="preserve">
+    <value>確定要中斷此控制源的連線嗎？</value>
+  </data>
+  <data name="ConfirmConnectTitle" xml:space="preserve">
+    <value>連線請求</value>
+  </data>
+  <data name="ConfirmConnectMsg" xml:space="preserve">
+    <value>是否允許此控制源連線？</value>
+  </data>
+  <data name="ConfirmConnectWarning" xml:space="preserve">
+    <value>請僅接受來自可信來源的連線。</value>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="ConfirmNo" xml:space="preserve">
+    <value>取消</value>
+  </data>
 </root>

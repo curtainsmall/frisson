@@ -137,4 +137,29 @@
   <data name="NoSourceSelected" xml:space="preserve">
     <value>Select a source to view details</value>
   </data>
+  <!-- Confirm Dialogs -->
+  <data name="ConfirmDisconnectTitle" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="ConfirmDisconnectDeviceMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this device?</value>
+  </data>
+  <data name="ConfirmDisconnectSourceMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this control source?</value>
+  </data>
+  <data name="ConfirmConnectTitle" xml:space="preserve">
+    <value>Connection Request</value>
+  </data>
+  <data name="ConfirmConnectMsg" xml:space="preserve">
+    <value>Allow this control source to connect?</value>
+  </data>
+  <data name="ConfirmConnectWarning" xml:space="preserve">
+    <value>Only accept connections from sources you trust.</value>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ConfirmNo" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

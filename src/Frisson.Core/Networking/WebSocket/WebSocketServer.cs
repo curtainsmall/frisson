@@ -16,9 +16,13 @@ internal class WebSocketServer : IDisposable
 
     private FleckServer? _server;
     private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
+    private readonly ConcurrentDictionary<Guid, PendingBind> _pendingBinds = new();
 
     public event Action<Agent.Agent>? AgentCreated;
     public event Action<Guid>? ClientDisconnected;
+    public event Action<Guid, string>? ControlSourceBindingRequested;
+
+    private record PendingBind(Guid ClientId, string SourceName, WebSocketClient Client);
 
     public void Start(int port)
     {
@@ -49,18 +53,28 @@ internal class WebSocketServer : IDisposable
 
                 if (!client.IsBound)
                 {
-                    Agent.Agent? agent = msg switch
+                    // Device bind: auto-accept and reply immediately
+                    if (msg.Contains("\"clientId\""))
                     {
-                        _ when msg.Contains("\"clientId\"") => CreateDevice(id, msg, client),
-                        _ when msg.Contains("\"name\"") && !msg.Contains("\"clientId\"") => CreateControlSource(id, msg, client),
-                        _ => null
-                    };
-
-                    if (agent == null) { TryRemove(id); return; }
-                    agent.SendFunc = client.Send;
-                    client.MessageHandler = json => agent.HandleMessage(json);
-                    client.IsBound = true;
-                    AgentCreated?.Invoke(agent);
+                        var deviceAgent = CreateDevice(id, msg, client);
+                        if (deviceAgent == null) { TryRemove(id); return; }
+                        deviceAgent.SendFunc = client.Send;
+                        client.MessageHandler = json => deviceAgent.HandleMessage(json);
+                        client.IsBound = true;
+                        AgentCreated?.Invoke(deviceAgent);
+                    }
+                    // Control Source bind: pend and wait for user trust confirmation
+                    else if (msg.Contains("\"name\""))
+                    {
+                        var scheme = Scheme.Control.BindScheme.TryParse(msg);
+                        if (scheme == null) { TryRemove(id); return; }
+                        _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, client));
+                        ControlSourceBindingRequested?.Invoke(id, scheme.Name);
+                    }
+                    else
+                    {
+                        TryRemove(id);
+                    }
                 }
                 else
                 {
@@ -85,12 +99,23 @@ internal class WebSocketServer : IDisposable
         return new DeviceAgent(id, () => TryRemove(id));
     }
 
-    private Agent.Agent? CreateControlSource(Guid id, string msg, WebSocketClient client)
+    public void AcceptControlSource(Guid clientId)
     {
-        var scheme = Scheme.Control.BindScheme.TryParse(msg);
-        if (scheme == null) return null;
-        client.Send(new Scheme.Control.BindScheme { Id = id, Name = scheme.Name }.ToJson());
-        return new ControlSourceAgent(id, scheme.Name, () => TryRemove(id));
+        if (!_pendingBinds.TryRemove(clientId, out var pending)) return;
+        if (!_clients.TryGetValue(clientId, out var client)) return;
+
+        client.Send(new Scheme.Control.BindScheme { Id = clientId, Name = pending.SourceName }.ToJson());
+        var agent = new ControlSourceAgent(clientId, pending.SourceName, () => TryRemove(clientId));
+        agent.SendFunc = client.Send;
+        client.MessageHandler = json => agent.HandleMessage(json);
+        client.IsBound = true;
+        AgentCreated?.Invoke(agent);
+    }
+
+    public void RejectControlSource(Guid clientId)
+    {
+        _pendingBinds.TryRemove(clientId, out _);
+        TryRemove(clientId);
     }
 
     public void TryRemove(Guid id)

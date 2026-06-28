@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 using Avalonia.Controls;
 
@@ -207,9 +208,19 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void DisconnectAgent(Guid agentId)
+    private async Task DisconnectAgent(Guid agentId)
     {
-        AppCore.Instance.DisconnectAgent(agentId);
+        var card = AgentCards.FirstOrDefault(c => c.AgentId == agentId);
+        if (card == null) return;
+
+        var title = LocalizationService.Instance["ConfirmDisconnectTitle"];
+        var message = card.IsDevice
+            ? LocalizationService.Instance["ConfirmDisconnectDeviceMsg"]
+            : LocalizationService.Instance["ConfirmDisconnectSourceMsg"];
+
+        var confirmed = await ShowConfirmDialogAsync(title, message);
+        if (confirmed)
+            AppCore.Instance.DisconnectAgent(agentId);
     }
 
     [RelayCommand]
@@ -258,6 +269,7 @@ public partial class MainWindowViewModel : ViewModelBase
         AppCore.Instance.SourceActivated += OnSourceActivated;
         AppCore.Instance.SourceDeactivated += OnSourceDeactivated;
         AppCore.Instance.DeviceStateUpdated += OnDeviceStateUpdated;
+        AppCore.Instance.ControlSourceBindingRequested += OnControlSourceBindingRequested;
 
         AgentCards.CollectionChanged += (_, _) =>
         {
@@ -349,6 +361,46 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (SelectedCard == card)
                     SelectedCard = null;
             }
+        });
+    }
+
+    private async Task<bool> ShowConfirmDialogAsync(string title, string message)
+    {
+        var vm = new ConfirmDialogViewModel
+        {
+            Title = title,
+            Message = message,
+            ConfirmText = LocalizationService.Instance["ConfirmYes"],
+            CancelText = LocalizationService.Instance["ConfirmNo"]
+        };
+        var dialog = new Views.ConfirmDialog(vm);
+        if (Desktop.MainWindow is not null)
+            await dialog.ShowDialog<bool>(Desktop.MainWindow);
+        return await vm.Completion.Task;
+    }
+
+    private void OnControlSourceBindingRequested(Guid clientId, string sourceName)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+        {
+            var vm = new ConfirmConnectDialogViewModel
+            {
+                Title = LocalizationService.Instance["ConfirmConnectTitle"],
+                SourceName = sourceName,
+                SourceId = clientId.ToString(),
+                Message = LocalizationService.Instance["ConfirmConnectMsg"],
+                Warning = LocalizationService.Instance["ConfirmConnectWarning"],
+                ConfirmText = LocalizationService.Instance["ConfirmYes"],
+                CancelText = LocalizationService.Instance["ConfirmNo"]
+            };
+            var dialog = new Views.ConfirmConnectDialog(vm);
+            if (Desktop.MainWindow is not null)
+                await dialog.ShowDialog<bool>(Desktop.MainWindow);
+            var confirmed = await vm.Completion.Task;
+            if (confirmed)
+                AppCore.Instance.AcceptControlSource(clientId);
+            else
+                AppCore.Instance.RejectControlSource(clientId);
         });
     }
 

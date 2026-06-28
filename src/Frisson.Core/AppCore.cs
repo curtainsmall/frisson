@@ -29,6 +29,7 @@ public class AppCore : IDisposable
     public event Action<Guid>? SourceActivated;
     public event Action? SourceDeactivated;
     public event Action<Guid>? DeviceStateUpdated;
+    public event Action<Guid, string>? ControlSourceBindingRequested;
 
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
@@ -41,6 +42,10 @@ public class AppCore : IDisposable
         // WebSocketServer → AgentManager
         _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
         _wsServer.ClientDisconnected += id => _agentManager.RemoveAgent(id);
+
+        // WebSocketServer → forward Control Source bind requests to UI
+        _wsServer.ControlSourceBindingRequested += (id, name) =>
+            ControlSourceBindingRequested?.Invoke(id, name);
 
         // Forward AgentManager events to AppCore consumers
         _agentManager.AgentConnected += (_, e) => AgentConnected?.Invoke(this, e);
@@ -77,6 +82,9 @@ public class AppCore : IDisposable
 
     public void ActivateDevice(Guid id) => _agentManager.ActivateDevice(id);
     public void DeactivateDevice(Guid id) => _agentManager.DeactivateDevice(id);
+    public void AcceptControlSource(Guid clientId) => _wsServer.AcceptControlSource(clientId);
+    public void RejectControlSource(Guid clientId) => _wsServer.RejectControlSource(clientId);
+
     public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
     public void ClearActiveSource() => _agentManager.ClearActiveSource();
     public Agent.Agent? GetAgent(Guid id) => _agentManager.GetAgent(id);
