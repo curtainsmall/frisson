@@ -8,6 +8,11 @@ public sealed class DeviceAgent : Agent
     public int MaxA { get; set; }
     public int MaxB { get; set; }
 
+    /// <summary>
+    /// Fired when device reports updated state (StrengthStatus from APP).
+    /// </summary>
+    public event Action? StateUpdated;
+
     public DeviceAgent(Guid id, Action? onDisposing = null) : base(id, onDisposing) { }
 
     public override async Task HandleMessage(string json)
@@ -22,6 +27,7 @@ public sealed class DeviceAgent : Agent
                     StrengthB = msg.StrengthB;
                     MaxA = msg.MaxA;
                     MaxB = msg.MaxB;
+                    StateUpdated?.Invoke();
                     break;
                 case Scheme.Device.MsgKind.Feedback:
                     // Future: fire event to notify UI

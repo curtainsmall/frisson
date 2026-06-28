@@ -37,12 +37,10 @@ public class ConnectedAgentCard : INotifyPropertyChanged
 {
     public Guid AgentId { get; init; }
     public Type AgentType { get; init; } = typeof(Agent);
+    public string DisplayName { get; set; } = "";
 
     public bool IsDevice => AgentType == typeof(DeviceAgent);
     public bool IsControl => AgentType == typeof(ControlSourceAgent);
-    public string AgentKindLabel => IsDevice ? "Device" : IsControl ? "Control" : "?";
-
-    public string StatusColor { get; set; } = "#888888";
 
     private bool _isActive;
     public bool IsActive
@@ -54,6 +52,20 @@ public class ConnectedAgentCard : INotifyPropertyChanged
             {
                 _isActive = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActive)));
+            }
+        }
+    }
+
+    private bool _isActiveSource;
+    public bool IsActiveSource
+    {
+        get => _isActiveSource;
+        set
+        {
+            if (_isActiveSource != value)
+            {
+                _isActiveSource = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActiveSource)));
             }
         }
     }
@@ -70,6 +82,57 @@ public class ConnectedAgentCard : INotifyPropertyChanged
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
             }
         }
+    }
+
+    private bool _isExpanded;
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded != value)
+            {
+                _isExpanded = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsExpanded)));
+            }
+        }
+    }
+
+    // --- Device state (updated from DeviceAgent.StateUpdated) ---
+
+    private int _strengthA;
+    public int StrengthA
+    {
+        get => _strengthA;
+        set { if (_strengthA != value) { _strengthA = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StrengthA))); } }
+    }
+
+    private int _strengthB;
+    public int StrengthB
+    {
+        get => _strengthB;
+        set { if (_strengthB != value) { _strengthB = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StrengthB))); } }
+    }
+
+    private int _maxA;
+    public int MaxA
+    {
+        get => _maxA;
+        set { if (_maxA != value) { _maxA = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxA))); } }
+    }
+
+    private int _maxB;
+    public int MaxB
+    {
+        get => _maxB;
+        set { if (_maxB != value) { _maxB = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxB))); } }
+    }
+
+    private int _waveQueueCount;
+    public int WaveQueueCount
+    {
+        get => _waveQueueCount;
+        set { if (_waveQueueCount != value) { _waveQueueCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WaveQueueCount))); } }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -102,6 +165,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private ConnectedAgentCard? _selectedCard;
+
+    public bool HasSelectedCard => SelectedCard != null;
+    public bool HasNoSelectedCard => SelectedCard == null;
+
+    partial void OnSelectedCardChanged(ConnectedAgentCard? value)
+    {
+        OnPropertyChanged(nameof(HasSelectedCard));
+        OnPropertyChanged(nameof(HasNoSelectedCard));
+    }
 
     [ObservableProperty]
     private NavPage _currentPage = NavPage.ControlDesk;
@@ -183,6 +255,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
         AppCore.Instance.AgentConnected += OnAgentConnected;
         AppCore.Instance.AgentClosing += OnAgentClosing;
+        AppCore.Instance.SourceActivated += OnSourceActivated;
+        AppCore.Instance.SourceDeactivated += OnSourceDeactivated;
+        AppCore.Instance.DeviceStateUpdated += OnDeviceStateUpdated;
 
         AgentCards.CollectionChanged += (_, _) =>
         {
@@ -192,15 +267,65 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
+    private Guid? _activeSourceId;
+
+    private void OnSourceActivated(Guid agentId)
+    {
+        _activeSourceId = agentId;
+        foreach (var card in AgentCards)
+            card.IsActiveSource = card.AgentId == agentId;
+    }
+
+    private void OnSourceDeactivated()
+    {
+        _activeSourceId = null;
+        foreach (var card in AgentCards)
+            card.IsActiveSource = false;
+    }
+
+    private void OnDeviceStateUpdated(Guid agentId)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var agent = AppCore.Instance.GetAgent(agentId);
+            if (agent is DeviceAgent da)
+            {
+                var card = AgentCards.FirstOrDefault(c => c.AgentId == agentId);
+                if (card != null)
+                {
+                    card.StrengthA = da.StrengthA;
+                    card.StrengthB = da.StrengthB;
+                    card.MaxA = da.MaxA;
+                    card.MaxB = da.MaxB;
+                }
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void ToggleActiveSource(Guid agentId)
+    {
+        if (_activeSourceId == agentId)
+            AppCore.Instance.ClearActiveSource();
+        else
+        {
+            AppCore.Instance.ClearActiveSource();
+            AppCore.Instance.SetActiveSource(agentId);
+        }
+    }
+
     private void OnAgentConnected(object? sender, AgentEventArgs e)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
+            var agent = AppCore.Instance.GetAgent(e.AgentId);
             var card = new ConnectedAgentCard
             {
                 AgentId = e.AgentId,
                 AgentType = e.AgentType,
-                StatusColor = "#00FF00"
+                DisplayName = (agent as ControlSourceAgent)?.SourceName
+                              ?? (agent as DeviceAgent)?.Id.ToString("N")[..8].ToUpper()
+                              ?? e.AgentId.ToString()
             };
             AgentCards.Add(card);
 

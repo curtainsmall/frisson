@@ -32,7 +32,7 @@ public sealed class BindScheme : SchemeBase
         {
             type = Type,
             clientId = ClientId.ToString(),
-            targetId = TargetId.ToString(),
+            targetId = TargetId == Guid.Empty ? "" : TargetId.ToString(),
             message = Message
         });
     }
@@ -48,9 +48,13 @@ public sealed class BindScheme : SchemeBase
             !root.TryGetProperty("message", out var messageProp))
             return null;
 
-        if (!Guid.TryParse(clientIdProp.GetString(), out var clientId) ||
-            !Guid.TryParse(targetIdProp.GetString(), out var targetId))
+        if (!Guid.TryParse(clientIdProp.GetString(), out var clientId))
             return null;
+
+        var targetIdStr = targetIdProp.GetString() ?? string.Empty;
+        var targetId = string.IsNullOrEmpty(targetIdStr)
+            ? Guid.Empty
+            : Guid.TryParse(targetIdStr, out var tid) ? tid : Guid.Empty;
 
         return new BindScheme
         {

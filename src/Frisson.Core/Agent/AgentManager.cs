@@ -33,6 +33,7 @@ internal class AgentManager
     public event Action<Guid>? DeviceDeactivated;
     public event Action<Guid>? SourceActivated;
     public event Action? SourceDeactivated;
+    public event Action<Guid>? DeviceStateUpdated;
 
     public AgentManager(ControlDesk desk, Action<Guid> closeClient)
     {
@@ -55,6 +56,9 @@ internal class AgentManager
 
         if (agent is ControlSourceAgent csa)
             csa.ForwardToControlDesk = _desk.ApplyFromSource;
+
+        if (agent is DeviceAgent da)
+            da.StateUpdated += () => DeviceStateUpdated?.Invoke(da.Id);
 
         AgentConnected?.Invoke(this, new AgentEventArgs(agent.Id, agent.GetType()));
     }

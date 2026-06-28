@@ -28,6 +28,7 @@ public class AppCore : IDisposable
     public event Action<Guid>? DeviceDeactivated;
     public event Action<Guid>? SourceActivated;
     public event Action? SourceDeactivated;
+    public event Action<Guid>? DeviceStateUpdated;
 
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
@@ -48,6 +49,7 @@ public class AppCore : IDisposable
         _agentManager.DeviceDeactivated += id => DeviceDeactivated?.Invoke(id);
         _agentManager.SourceActivated += id => SourceActivated?.Invoke(id);
         _agentManager.SourceDeactivated += () => SourceDeactivated?.Invoke();
+        _agentManager.DeviceStateUpdated += id => DeviceStateUpdated?.Invoke(id);
     }
 
     public void Startup(int port)

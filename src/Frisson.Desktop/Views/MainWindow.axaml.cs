@@ -3,6 +3,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Platform;
 
 using Frisson.Desktop.ViewModels;
@@ -34,5 +35,23 @@ public partial class MainWindow : Window
         // Update selection
         if (DataContext is MainWindowViewModel vm)
             vm.SelectedCard = card;
+    }
+
+    private void OnDeviceCardPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
+            return;
+
+        // Toggle expansion for device cards
+        card.IsExpanded = !card.IsExpanded;
+    }
+
+    private void OnAgentCardDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
+            return;
+
+        if (DataContext is MainWindowViewModel vm)
+            vm.ToggleActiveSourceCommand.Execute(card.AgentId);
     }
 }

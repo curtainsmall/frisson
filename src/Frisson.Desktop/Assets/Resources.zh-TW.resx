@@ -116,4 +116,25 @@
   <data name="VersionUnknown" xml:space="preserve">
     <value>未知</value>
   </data>
+  <data name="SourceName" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="SourceId" xml:space="preserve">
+    <value>識別碼</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="ConnectionStatusConnected" xml:space="preserve">
+    <value>已連線</value>
+  </data>
+  <data name="ActionSetActive" xml:space="preserve">
+    <value>設為活躍</value>
+  </data>
+  <data name="ActionSetInactive" xml:space="preserve">
+    <value>取消活躍</value>
+  </data>
+  <data name="NoSourceSelected" xml:space="preserve">
+    <value>選擇一個控制源查看詳情</value>
+  </data>
 </root>

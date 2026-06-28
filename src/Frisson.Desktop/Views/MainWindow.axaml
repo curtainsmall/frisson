@@ -157,26 +157,67 @@
                                             <ItemsControl ItemsSource="{Binding SourceCards}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="{DynamicResource SurfaceDark}"
+                                                        <Border Background="{DynamicResource Black}"
                                                                 CornerRadius="6"
                                                                 Padding="12"
-                                                                Margin="0,0,0,4"
-                                                                PointerPressed="OnAgentCardPointerPressed">
-                                                            <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto">
-                                                                <i:Icon Grid.Column="0" Grid.RowSpan="2"
-                                                                        Value="fa-solid fa-diagram-project"
-                                                                        FontSize="16"
-                                                                        Foreground="{DynamicResource AccentBrush}"
+                                                                Margin="0,0,0,6"
+                                                                BorderBrush="{DynamicResource AccentMuted}"
+                                                                BorderThickness="1"
+                                                                Classes.source-card="True"
+                                                                PointerPressed="OnAgentCardPointerPressed"
+                                                                DoubleTapped="OnAgentCardDoubleTapped">
+                                                            <Border.Styles>
+                                                                <Style Selector="Border.source-card:pointerover">
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                                </Style>
+                                                            </Border.Styles>
+                                                            <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, *, Auto">
+                                                                <!-- Status dot -->
+                                                                <Border Grid.Column="0" Grid.RowSpan="2"
+                                                                        Width="8" Height="8"
+                                                                        CornerRadius="4"
                                                                         VerticalAlignment="Center"
-                                                                        Margin="0,0,10,0" />
+                                                                        HorizontalAlignment="Center"
+                                                                        Margin="0,0,10,0"
+                                                                        Background="{Binding IsActiveSource,
+                                                                            Converter={x:Static converters:BoolToBrushConverter.Instance},
+                                                                            ConverterParameter='#D4AF37;#555555'}" />
+                                                                <!-- Source name -->
                                                                 <TextBlock Grid.Column="1" Grid.Row="0"
-                                                                           Text="{Binding AgentKindLabel}"
+                                                                           Text="{Binding DisplayName}"
                                                                            Foreground="{DynamicResource AccentBrush}"
-                                                                           FontWeight="SemiBold" FontSize="12" />
-                                                                <TextBlock Grid.Column="1" Grid.Row="1"
-                                                                           Text="{Binding AgentId, StringFormat='{}{0}'}"
-                                                                           Foreground="{DynamicResource SecondaryText}"
-                                                                           FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                                           FontWeight="SemiBold" FontSize="13"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                                <!-- Disconnect button -->
+                                                                <Button Grid.Column="2" Grid.Row="0"
+                                                                        Content="×" FontSize="14"
+                                                                        Width="18" Height="18" Padding="0"
+                                                                        CornerRadius="4"
+                                                                        HorizontalContentAlignment="Center"
+                                                                        VerticalContentAlignment="Center"
+                                                                        Background="Transparent" BorderThickness="0"
+                                                                        Foreground="{DynamicResource SecondaryText}"
+                                                                        VerticalAlignment="Center"
+                                                                        ToolTip.Tip="{loc:Loc Disconnect}"
+                                                                        Command="{Binding DataContext.DisconnectAgentCommand, ElementName=Root}"
+                                                                        CommandParameter="{Binding AgentId}">
+                                                                    <Button.Resources>
+                                                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
+                                                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
+                                                                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                                                                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
+                                                                    </Button.Resources>
+                                                                    <Button.Styles>
+                                                                        <Style Selector="Button:pointerover">
+                                                                            <Setter Property="Background" Value="#E53935" />
+                                                                            <Setter Property="Foreground" Value="White" />
+                                                                        </Style>
+                                                                        <Style Selector="Button:pressed">
+                                                                            <Setter Property="Background" Value="#C62828" />
+                                                                            <Setter Property="Foreground" Value="White" />
+                                                                        </Style>
+                                                                    </Button.Styles>
+                                                                </Button>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>
@@ -192,15 +233,123 @@
                                 </Border>
                             </Grid>
 
-                            <!-- Right: Detail Panel (placeholder) -->
+                            <!-- Right: Detail Panel -->
                             <Border Grid.Column="2"
                                     Background="{DynamicResource Black}"
                                     Padding="20">
-                                <TextBlock Text="{loc:Loc SourceDetails}"
+                                <Panel>
+                                <!-- Empty state: no card selected -->
+                                <TextBlock Text="{loc:Loc NoSourceSelected}"
                                            Foreground="{DynamicResource SecondaryText}"
                                            FontSize="14"
                                            VerticalAlignment="Center" HorizontalAlignment="Center"
-                                           Opacity="0.5" />
+                                           Opacity="0.5"
+                                           IsVisible="{Binding HasNoSelectedCard}" />
+                                <!-- Detail content: card selected -->
+                                <Grid IsVisible="{Binding HasSelectedCard}"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="16">
+                                    <!-- Source Name -->
+                                    <StackPanel Grid.Row="0">
+                                        <TextBlock Text="{loc:Loc SourceName}"
+                                                   Foreground="{DynamicResource SecondaryText}" FontSize="11"
+                                                   Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding SelectedCard.DisplayName}"
+                                                   Foreground="{DynamicResource PrimaryText}"
+                                                   FontSize="24" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <!-- ID -->
+                                    <StackPanel Grid.Row="1">
+                                        <TextBlock Text="{loc:Loc SourceId}"
+                                                   Foreground="{DynamicResource SecondaryText}" FontSize="11"
+                                                   Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding SelectedCard.AgentId}"
+                                                   Foreground="{DynamicResource PrimaryText}"
+                                                   FontSize="13"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <!-- Connection Status -->
+                                    <StackPanel Grid.Row="2">
+                                        <TextBlock Text="{loc:Loc ConnectionStatus}"
+                                                   Foreground="{DynamicResource SecondaryText}" FontSize="11"
+                                                   Margin="0,0,0,4" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Width="8" Height="8" CornerRadius="4"
+                                                    Background="#00FF00"
+                                                    VerticalAlignment="Center" />
+                                            <TextBlock Text="{loc:Loc ConnectionStatusConnected}"
+                                                       Foreground="{DynamicResource PrimaryText}"
+                                                       FontSize="13" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <!-- Toggle Button -->
+                                    <Button Grid.Row="3"
+                                            Command="{Binding ToggleActiveSourceCommand}"
+                                            CommandParameter="{Binding SelectedCard.AgentId}"
+                                            HorizontalAlignment="Stretch" Height="36"
+                                            CornerRadius="4"
+                                            Padding="16,0"
+                                            Margin="0,8,0,0">
+                                        <Grid>
+                                            <!-- Inactive state: Set Active -->
+                                            <TextBlock Text="{loc:Loc ActionSetActive}"
+                                                       IsVisible="{Binding SelectedCard.IsActiveSource,
+                                                           Converter={x:Static converters:InvertBoolConverter.Instance}}"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <!-- Active state: Set Inactive -->
+                                            <TextBlock Text="{loc:Loc ActionSetInactive}"
+                                                       IsVisible="{Binding SelectedCard.IsActiveSource}"
+                                                       FontSize="13" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        </Grid>
+                                        <Button.Styles>
+                                            <Style Selector="Button">
+                                                <Setter Property="Background"
+                                                        Value="{Binding SelectedCard.IsActiveSource,
+                                                            Converter={x:Static converters:BoolToBrushConverter.Instance},
+                                                            ConverterParameter='#2d2d2d;#D4AF37'}" />
+                                                <Setter Property="Foreground"
+                                                        Value="{Binding SelectedCard.IsActiveSource,
+                                                            Converter={x:Static converters:BoolToBrushConverter.Instance},
+                                                            ConverterParameter='#D4AF37;#1a1a1a'}" />
+                                            </Style>
+                                        </Button.Styles>
+                                    </Button>
+                                    <!-- Disconnect Button -->
+                                    <Button Grid.Row="4"
+                                            Content="{loc:Loc Disconnect}"
+                                            Command="{Binding DisconnectAgentCommand}"
+                                            CommandParameter="{Binding SelectedCard.AgentId}"
+                                            HorizontalAlignment="Stretch" Height="36"
+                                            HorizontalContentAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            CornerRadius="4"
+                                            Padding="16,0"
+                                            Margin="0,4,0,0"
+                                            FontSize="13" FontWeight="SemiBold">
+                                        <Button.Resources>
+                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
+                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
+                                        </Button.Resources>
+                                        <Button.Styles>
+                                            <Style Selector="Button">
+                                                <Setter Property="Background" Value="#D93030" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Style>
+                                            <Style Selector="Button:pointerover">
+                                                <Setter Property="Background" Value="#E53935" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Style>
+                                            <Style Selector="Button:pressed">
+                                                <Setter Property="Background" Value="#C62828" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Style>
+                                        </Button.Styles>
+                                    </Button>
+                                </Grid>
+                                </Panel>
                             </Border>
                         </Grid>
 
@@ -330,56 +479,173 @@
                                     <ItemsControl ItemsSource="{Binding DeviceCards}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="{DynamicResource SurfaceDark}"
+                                                <Border Background="{DynamicResource Black}"
                                                         CornerRadius="6"
                                                         Padding="10"
                                                         Margin="0,0,0,6"
+                                                        BorderBrush="{DynamicResource AccentMuted}"
+                                                        BorderThickness="1"
+                                                        Classes.device-card="{Binding IsDevice}"
                                                         Classes.selected="{Binding IsSelected}"
-                                                        PointerPressed="OnAgentCardPointerPressed">
-                                                    <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto">
-                                                        <i:Icon Grid.Column="0" Grid.RowSpan="2"
-                                                                Value="fa-solid fa-microchip"
-                                                                FontSize="16"
-                                                                Foreground="{DynamicResource AccentBrush}"
-                                                                VerticalAlignment="Center"
-                                                                Margin="0,0,10,0" />
-                                                        <TextBlock Grid.Column="1" Grid.Row="0"
-                                                                   Text="{Binding AgentKindLabel}"
-                                                                   Foreground="{DynamicResource AccentBrush}"
-                                                                   FontWeight="SemiBold" FontSize="12" />
-                                                        <TextBlock Grid.Column="1" Grid.Row="1"
-                                                                   Text="{Binding AgentId, StringFormat='{}{0}'}"
+                                                        PointerPressed="OnDeviceCardPointerPressed">
+                                                    <Border.Styles>
+                                                        <Style Selector="Border.device-card:pointerover">
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="4">
+                                                        <!-- Row 0: status dot + name + disconnect button -->
+                                                        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
+                                                            <Border Grid.Column="0"
+                                                                    Width="8" Height="8"
+                                                                    CornerRadius="4"
+                                                                    VerticalAlignment="Center"
+                                                                    HorizontalAlignment="Center"
+                                                                    Margin="0,0,8,0"
+                                                                    Background="{Binding IsActive,
+                                                                        Converter={x:Static converters:BoolToBrushConverter.Instance},
+                                                                        ConverterParameter='#00FF00;#555555'}" />
+                                                            <TextBlock Grid.Column="1"
+                                                                       Text="{Binding DisplayName}"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontWeight="SemiBold" FontSize="12"
+                                                                       VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <Button Grid.Column="2"
+                                                                    Content="×" FontSize="14"
+                                                                    Width="18" Height="18" Padding="0"
+                                                                    CornerRadius="4"
+                                                                    HorizontalContentAlignment="Center"
+                                                                    VerticalContentAlignment="Center"
+                                                                    Background="Transparent" BorderThickness="0"
+                                                                    Foreground="{DynamicResource SecondaryText}"
+                                                                    VerticalAlignment="Center"
+                                                                    ToolTip.Tip="{loc:Loc Disconnect}"
+                                                                    Command="{Binding DataContext.DisconnectAgentCommand, ElementName=Root}"
+                                                                    CommandParameter="{Binding AgentId}">
+                                                                <Button.Resources>
+                                                                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
+                                                                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
+                                                                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                                                                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
+                                                                </Button.Resources>
+                                                                <Button.Styles>
+                                                                    <Style Selector="Button:pointerover">
+                                                                        <Setter Property="Background" Value="#E53935" />
+                                                                        <Setter Property="Foreground" Value="White" />
+                                                                    </Style>
+                                                                    <Style Selector="Button:pressed">
+                                                                        <Setter Property="Background" Value="#C62828" />
+                                                                        <Setter Property="Foreground" Value="White" />
+                                                                    </Style>
+                                                                </Button.Styles>
+                                                            </Button>
+                                                        </Grid>
+                                                        <!-- Row 1: Channel A/B strength numbers -->
+                                                        <TextBlock Grid.Row="1"
                                                                    Foreground="{DynamicResource SecondaryText}"
-                                                                   FontSize="10" TextTrimming="CharacterEllipsis" />
-                                                        <Button Grid.Column="2" Grid.Row="0"
-                                                                Content="×" FontSize="14"
-                                                                Width="18" Height="18" Padding="0"
-                                                                CornerRadius="4"
-                                                                HorizontalContentAlignment="Center"
-                                                                VerticalContentAlignment="Center"
-                                                                Background="Transparent" BorderThickness="0"
-                                                                Foreground="{DynamicResource SecondaryText}"
-                                                                VerticalAlignment="Center"
-                                                                ToolTip.Tip="{loc:Loc Disconnect}"
-                                                                Command="{Binding DataContext.DisconnectAgentCommand, ElementName=Root}"
-                                                                CommandParameter="{Binding AgentId}">
-                                                            <Button.Resources>
-                                                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E53935" />
-                                                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C62828" />
-                                                                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
-                                                                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
-                                                            </Button.Resources>
-                                                            <Button.Styles>
-                                                                <Style Selector="Button:pointerover">
-                                                                    <Setter Property="Background" Value="#E53935" />
-                                                                    <Setter Property="Foreground" Value="White" />
-                                                                </Style>
-                                                                <Style Selector="Button:pressed">
-                                                                    <Setter Property="Background" Value="#C62828" />
-                                                                    <Setter Property="Foreground" Value="White" />
-                                                                </Style>
-                                                            </Button.Styles>
-                                                        </Button>
+                                                                   FontSize="11"
+                                                                   Margin="16,0,0,0">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="A: {0} / {1}">
+                                                                    <Binding Path="StrengthA" />
+                                                                    <Binding Path="MaxA" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                        <TextBlock Grid.Row="1"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   FontSize="11"
+                                                                   Margin="82,0,0,0">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="B: {0} / {1}">
+                                                                    <Binding Path="StrengthB" />
+                                                                    <Binding Path="MaxB" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                        <!-- Row 2: Wave queue info -->
+                                                        <TextBlock Grid.Row="2"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   FontSize="11"
+                                                                   Margin="16,0,0,0"
+                                                                   Text="{Binding WaveQueueCount, StringFormat='Wave: {0} patterns'}" />
+                                                        <!-- Row 3: Expanded detail (fade animation) -->
+                                                        <Grid Grid.Row="3"
+                                                              IsVisible="{Binding IsExpanded}"
+                                                              RowDefinitions="Auto, Auto"
+                                                              RowSpacing="6"
+                                                              Margin="4,6,4,4">
+                                                            <Grid.Transitions>
+                                                                <Transitions>
+                                                                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+                                                                </Transitions>
+                                                            </Grid.Transitions>
+                                                            <!-- Channel A -->
+                                                            <Grid Grid.Row="0" RowDefinitions="Auto, Auto" RowSpacing="3">
+                                                                <!-- Name (left) + Strength (right) -->
+                                                                <Grid ColumnDefinitions="*, Auto">
+                                                                    <TextBlock Text="A"
+                                                                               Foreground="{DynamicResource AccentBrush}"
+                                                                               FontWeight="Bold" FontSize="11"
+                                                                               VerticalAlignment="Center"
+                                                                               HorizontalAlignment="Left" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Foreground="{DynamicResource SecondaryText}"
+                                                                               FontSize="11"
+                                                                               VerticalAlignment="Center"
+                                                                               HorizontalAlignment="Right">
+                                                                        <TextBlock.Text>
+                                                                            <MultiBinding StringFormat="{}{0} / {1}">
+                                                                                <Binding Path="StrengthA" />
+                                                                                <Binding Path="MaxA" />
+                                                                            </MultiBinding>
+                                                                        </TextBlock.Text>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                                <!-- Progress bar -->
+                                                                <Border Grid.Row="1"
+                                                                        BorderBrush="{DynamicResource AccentBrush}"
+                                                                        BorderThickness="0.5" CornerRadius="2">
+                                                                    <ProgressBar Value="{Binding StrengthA}"
+                                                                                 Maximum="{Binding MaxA}" Height="6"
+                                                                                 Foreground="{DynamicResource AccentBrush}"
+                                                                                 Background="{DynamicResource Black}" />
+                                                                </Border>
+                                                            </Grid>
+                                                            <!-- Channel B -->
+                                                            <Grid Grid.Row="1" RowDefinitions="Auto, Auto" RowSpacing="3">
+                                                                <!-- Name (left) + Strength (right) -->
+                                                                <Grid ColumnDefinitions="*, Auto">
+                                                                    <TextBlock Text="B"
+                                                                               Foreground="{DynamicResource AccentBrush}"
+                                                                               FontWeight="Bold" FontSize="11"
+                                                                               VerticalAlignment="Center"
+                                                                               HorizontalAlignment="Left" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Foreground="{DynamicResource SecondaryText}"
+                                                                               FontSize="11"
+                                                                               VerticalAlignment="Center"
+                                                                               HorizontalAlignment="Right">
+                                                                        <TextBlock.Text>
+                                                                            <MultiBinding StringFormat="{}{0} / {1}">
+                                                                                <Binding Path="StrengthB" />
+                                                                                <Binding Path="MaxB" />
+                                                                            </MultiBinding>
+                                                                        </TextBlock.Text>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                                <!-- Progress bar -->
+                                                                <Border Grid.Row="1"
+                                                                        BorderBrush="{DynamicResource AccentBrush}"
+                                                                        BorderThickness="0.5" CornerRadius="2">
+                                                                    <ProgressBar Value="{Binding StrengthB}"
+                                                                                 Maximum="{Binding MaxB}" Height="6"
+                                                                                 Foreground="{DynamicResource AccentBrush}"
+                                                                                 Background="{DynamicResource Black}" />
+                                                                </Border>
+                                                            </Grid>
+                                                        </Grid>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>

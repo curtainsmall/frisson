@@ -116,4 +116,25 @@
   <data name="VersionUnknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="SourceName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="SourceId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="ConnectionStatusConnected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="ActionSetActive" xml:space="preserve">
+    <value>Set Active</value>
+  </data>
+  <data name="ActionSetInactive" xml:space="preserve">
+    <value>Set Inactive</value>
+  </data>
+  <data name="NoSourceSelected" xml:space="preserve">
+    <value>Select a source to view details</value>
+  </data>
 </root>
