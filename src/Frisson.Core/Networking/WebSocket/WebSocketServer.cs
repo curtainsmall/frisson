@@ -114,7 +114,14 @@ internal class WebSocketServer : IDisposable
 
     public void RejectControlSource(Guid clientId)
     {
-        _pendingBinds.TryRemove(clientId, out _);
+        if (!_pendingBinds.TryRemove(clientId, out var pending)) return;
+
+        pending.Client.Send(JsonSerializer.Serialize(new
+        {
+            type = "error",
+            message = "Connection rejected by user."
+        }));
+
         TryRemove(clientId);
     }
 

@@ -22,7 +22,7 @@ import time
 try:
     import websocket
 except ImportError:
-    print("Error: websocket-client not installed. Run: pip install websocket-client")
+    print("[ERROR] websocket-client not installed. Run: pip install websocket-client")
     sys.exit(1)
 
 
@@ -38,7 +38,7 @@ def main():
     try:
         ws = websocket.create_connection(WS_URL)
     except Exception as e:
-        print(f"Error: Failed to connect to {WS_URL}: {e}")
+        print(f"[ERROR] Failed to connect to {WS_URL}: {e}")
         sys.exit(1)
 
     try:
@@ -56,10 +56,16 @@ def main():
         raw = ws.recv()
         reply = json.loads(raw)
         print(f"[Frisson] bind reply: {json.dumps(reply)}")
+
+        if reply.get("type") == "error":
+            print(f"[ERROR] {reply.get('message', 'unknown')}")
+            ws.close()
+            sys.exit(1)
+
         assigned_id = reply.get("id", "?")
         print(f"Connected as '{name}' (id={assigned_id})")
     except Exception as e:
-        print(f"Error: Bind handshake failed: {e}")
+        print(f"[ERROR] Bind handshake failed: {e}")
         ws.close()
         sys.exit(1)
 
@@ -102,7 +108,7 @@ def main():
                         json.dump(reply, f, indent=2)
                     print("OK")
                 except Exception as e:
-                    print(f"Error: {e}")
+                    print(f"[ERROR] {e}")
                     ws.close()
                     sys.exit(1)
     finally:
