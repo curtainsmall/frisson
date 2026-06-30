@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 
 using Frisson.Core.Agent.Control;
 using Frisson.Core.Agent.Device;
-using Frisson.Core.Frisson;
 
 namespace Frisson.Core.Agent;
 

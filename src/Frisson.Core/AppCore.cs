@@ -1,6 +1,5 @@
 ﻿using Frisson.Core.Agent;
 using Frisson.Core.Error;
-using Frisson.Core.Frisson;
 using Frisson.Core.Networking.WebSocket;
 
 namespace Frisson.Core;

@@ -3,7 +3,7 @@ using System.Text.Json;
 using Frisson.Core.Agent.Device;
 using Frisson.Core.Scheme.Device;
 
-namespace Frisson.Core.Frisson;
+namespace Frisson.Core;
 
 internal class ControlDesk
 {
