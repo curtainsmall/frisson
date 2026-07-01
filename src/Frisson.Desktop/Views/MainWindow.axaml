@@ -82,6 +82,29 @@
             <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
         </Style>
 
+        <!-- Strength control buttons (+/−) -->
+        <Style Selector="Border.strength-btn">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceLight}" />
+        </Style>
+        <Style Selector="Border.strength-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
+        </Style>
+
+        <!-- Strength value number (scrollable) — fixed-size rounded square highlight -->
+        <Style Selector="Border.strength-value-bg">
+            <Setter Property="Width" Value="140" />
+            <Setter Property="Height" Value="90" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="ToolTip.Tip" Value="{loc:Loc ControlDeskScrollTip}" />
+        </Style>
+        <Style Selector="Border.strength-value-bg:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
+        </Style>
+
     </Window.Styles>
 
     <Border BorderThickness="4" Background="Transparent" Padding="8,0,8,8">
@@ -132,10 +155,93 @@
                 <Border Grid.Column="1" Padding="16" Background="Transparent">
                     <Panel>
                         <!-- Control Desk Page -->
-                        <Grid IsVisible="{Binding IsControlDeskSelected}">
-                            <TextBlock Text="{loc:Loc LocalControlPlaceholder}" FontSize="14"
-                                       Foreground="{DynamicResource SecondaryText}"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <Grid IsVisible="{Binding IsControlDeskSelected}"
+                              RowDefinitions="Auto, Auto, *">
+
+                            <!-- Row 0: Strength Controls (Channel A left, Channel B right) -->
+                            <Grid Grid.Row="0" ColumnDefinitions="*, 16, *" Margin="24,0">
+
+                                <!-- Channel A (left) -->
+                                <StackPanel Grid.Column="0"
+                                            VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Spacing="4">
+                                    <TextBlock Text="A" FontSize="14"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               HorizontalAlignment="Center" />
+                                    <!-- Strength value with fixed-size rounded hover -->
+                                    <Border Classes="strength-value-bg"
+                                            PointerWheelChanged="OnChannelAWheel">
+                                        <TextBlock Text="{Binding ControlDeskViewModel.StrengthA}" FontSize="56" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{Binding ControlDeskViewModel.MaxA, StringFormat='/ {0}'}" FontSize="13"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               HorizontalAlignment="Center" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                                HorizontalAlignment="Center">
+                                        <Border Classes="strength-btn"
+                                                PointerPressed="OnChannelADecrease">
+                                            <TextBlock Text="−" FontSize="18"
+                                                       Foreground="{DynamicResource PrimaryText}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                        <Border Classes="strength-btn"
+                                                PointerPressed="OnChannelAIncrease">
+                                            <TextBlock Text="+" FontSize="18"
+                                                       Foreground="{DynamicResource PrimaryText}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Channel B (right) -->
+                                <StackPanel Grid.Column="2"
+                                            VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Spacing="4">
+                                    <TextBlock Text="B" FontSize="14"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               HorizontalAlignment="Center" />
+                                    <!-- Strength value with fixed-size rounded hover -->
+                                    <Border Classes="strength-value-bg"
+                                            PointerWheelChanged="OnChannelBWheel">
+                                        <TextBlock Text="{Binding ControlDeskViewModel.StrengthB}" FontSize="56" FontWeight="Bold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{Binding ControlDeskViewModel.MaxB, StringFormat='/ {0}'}" FontSize="13"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               HorizontalAlignment="Center" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                                HorizontalAlignment="Center">
+                                        <Border Classes="strength-btn"
+                                                PointerPressed="OnChannelBDecrease">
+                                            <TextBlock Text="−" FontSize="18"
+                                                       Foreground="{DynamicResource PrimaryText}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                        <Border Classes="strength-btn"
+                                                PointerPressed="OnChannelBIncrease">
+                                            <TextBlock Text="+" FontSize="18"
+                                                       Foreground="{DynamicResource PrimaryText}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Row 1: Separator line -->
+                            <Border Grid.Row="1" Height="1" Margin="0,12,0,0"
+                                    Background="{DynamicResource AccentMuted}" />
+
+                            <!-- Row 2: Bottom placeholder (layout TBD later) -->
+                            <Border Grid.Row="2" Background="Transparent" />
                         </Grid>
 
                         <!-- Control Sources Page -->

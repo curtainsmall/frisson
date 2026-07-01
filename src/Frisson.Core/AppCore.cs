@@ -30,6 +30,8 @@ public class AppCore : IDisposable
     public event Action<Guid>? DeviceStateUpdated;
     public event Action<Guid, string>? ControlSourceBindingRequested;
 
+    public event Action? ControlDeskStateChanged;
+
     public ErrorMessager ErrorMessager { get; private init; } = new();
 
     private AppCore()
@@ -54,6 +56,9 @@ public class AppCore : IDisposable
         _agentManager.SourceActivated += id => SourceActivated?.Invoke(id);
         _agentManager.SourceDeactivated += () => SourceDeactivated?.Invoke();
         _agentManager.DeviceStateUpdated += id => DeviceStateUpdated?.Invoke(id);
+
+        // Forward ControlDesk state changes to UI layer
+        _controlDesk.StateChanged += () => ControlDeskStateChanged?.Invoke();
     }
 
     public void Startup(int port)
@@ -87,4 +92,8 @@ public class AppCore : IDisposable
     public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
     public void ClearActiveSource() => _agentManager.ClearActiveSource();
     public Agent.Agent? GetAgent(Guid id) => _agentManager.GetAgent(id);
+
+    public int GetControlDeskStrengthA() => _controlDesk.StrengthA;
+    public int GetControlDeskStrengthB() => _controlDesk.StrengthB;
+    public void SetControlDeskStrength(int a, int b) => _controlDesk.SetLocalStrength(a, b);
 }

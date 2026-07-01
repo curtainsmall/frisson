@@ -98,6 +98,9 @@
   <data name="LocalControlPlaceholder" xml:space="preserve">
     <value>控制台</value>
   </data>
+  <data name="ControlDeskScrollTip" xml:space="preserve">
+    <value>滚轮调节强度</value>
+  </data>
   <data name="AddDevice" xml:space="preserve">
     <value>添加设备</value>
   </data>

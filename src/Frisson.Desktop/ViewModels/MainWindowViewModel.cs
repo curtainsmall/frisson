@@ -182,6 +182,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
+    public ControlDeskViewModel ControlDeskViewModel { get; } = new();
+
     private Window? _qrCodeWindow;
 
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;

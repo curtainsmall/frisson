@@ -54,4 +54,65 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
             vm.ToggleActiveSourceCommand.Execute(card.AgentId);
     }
+
+    // === Control Desk strength control handlers ===
+
+    private ControlDeskViewModel? GetControlDeskVM()
+    {
+        return (DataContext as MainWindowViewModel)?.ControlDeskViewModel;
+    }
+
+    private void OnChannelAWheel(object? sender, PointerWheelEventArgs e)
+    {
+        if (sender is Control ctrl)
+            ToolTip.SetIsOpen(ctrl, false);
+
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.OnScrollA(e.Delta.Y > 0 ? 1 : -1, shift);
+    }
+
+    private void OnChannelAIncrease(object? sender, PointerPressedEventArgs e)
+    {
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.AdjustA(shift ? 10 : 1);
+    }
+
+    private void OnChannelADecrease(object? sender, PointerPressedEventArgs e)
+    {
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.AdjustA(shift ? -10 : -1);
+    }
+
+    private void OnChannelBWheel(object? sender, PointerWheelEventArgs e)
+    {
+        if (sender is Control ctrl)
+            ToolTip.SetIsOpen(ctrl, false);
+
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.OnScrollB(e.Delta.Y > 0 ? 1 : -1, shift);
+    }
+
+    private void OnChannelBIncrease(object? sender, PointerPressedEventArgs e)
+    {
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.AdjustB(shift ? 10 : 1);
+    }
+
+    private void OnChannelBDecrease(object? sender, PointerPressedEventArgs e)
+    {
+        var vm = GetControlDeskVM();
+        if (vm == null) return;
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        vm.AdjustB(shift ? -10 : -1);
+    }
 }
