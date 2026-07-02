@@ -16,15 +16,15 @@ using CommunityToolkit.Mvvm.Input;
 using Frisson.Desktop.Services;
 using Frisson.Core;
 using Frisson.Core.Agent;
-using Frisson.Core.Agent.Control;
-using Frisson.Core.Agent.Device;
+using Frisson.Core.Agent.Remote;
+using Frisson.Core.Agent.Actuator;
 
 namespace Frisson.Desktop.ViewModels;
 
 public enum NavPage
 {
     ControlDesk,
-    ControlSources,
+    Remotes,
     Settings,
 }
 
@@ -40,8 +40,8 @@ public class ConnectedAgentCard : INotifyPropertyChanged
     public Type AgentType { get; init; } = typeof(Agent);
     public string DisplayName { get; set; } = "";
 
-    public bool IsDevice => AgentType == typeof(DeviceAgent);
-    public bool IsControl => AgentType == typeof(ControlSourceAgent);
+    public bool IsActuator => AgentType == typeof(ActuatorAgent);
+    public bool IsRemote => AgentType == typeof(RemoteAgent);
 
     private bool _isActive;
     public bool IsActive
@@ -99,7 +99,7 @@ public class ConnectedAgentCard : INotifyPropertyChanged
         }
     }
 
-    // --- Device state (updated from DeviceAgent.StateUpdated) ---
+    // --- Actuator state (updated from ActuatorAgent.StateUpdated) ---
 
     private int _strengthA;
     public int StrengthA
@@ -140,8 +140,8 @@ public class ConnectedAgentCard : INotifyPropertyChanged
 
     public void NotifyLayoutChanged()
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDevice)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsControl)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActuator)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsRemote)));
     }
 }
 
@@ -158,11 +158,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>All connected agents (for internal tracking).</summary>
     public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
 
-    /// <summary>Only Device agents — shown in the global right panel.</summary>
-    public IEnumerable<ConnectedAgentCard> DeviceCards => AgentCards.Where(c => c.IsDevice);
+    /// <summary>Only Actuator agents — shown in the global right panel.</summary>
+    public IEnumerable<ConnectedAgentCard> ActuatorCards => AgentCards.Where(c => c.IsActuator);
 
-    /// <summary>Only ControlSource agents — shown on the Sources page.</summary>
-    public IEnumerable<ConnectedAgentCard> SourceCards => AgentCards.Where(c => c.IsControl);
+    /// <summary>Only Remote agents — shown on the Remotes page.</summary>
+    public IEnumerable<ConnectedAgentCard> RemoteCards => AgentCards.Where(c => c.IsRemote);
 
     [ObservableProperty]
     private ConnectedAgentCard? _selectedCard;
@@ -187,14 +187,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private Window? _qrCodeWindow;
 
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
-    public bool IsControlSourcesSelected => CurrentPage == NavPage.ControlSources;
+    public bool IsRemotesSelected => CurrentPage == NavPage.Remotes;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
     public bool HasAgents => AgentCards.Count > 0;
 
     partial void OnCurrentPageChanged(NavPage value)
     {
         OnPropertyChanged(nameof(IsControlDeskSelected));
-        OnPropertyChanged(nameof(IsControlSourcesSelected));
+        OnPropertyChanged(nameof(IsRemotesSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
@@ -216,9 +216,9 @@ public partial class MainWindowViewModel : ViewModelBase
         if (card == null) return;
 
         var title = LocalizationService.Instance["ConfirmDisconnectTitle"];
-        var message = card.IsDevice
-            ? LocalizationService.Instance["ConfirmDisconnectDeviceMsg"]
-            : LocalizationService.Instance["ConfirmDisconnectSourceMsg"];
+        var message = card.IsActuator
+            ? LocalizationService.Instance["ConfirmDisconnectActuatorMsg"]
+            : LocalizationService.Instance["ConfirmDisconnectRemoteMsg"];
 
         var confirmed = await ShowConfirmDialogAsync(title, message);
         if (confirmed)
@@ -270,14 +270,14 @@ public partial class MainWindowViewModel : ViewModelBase
         AppCore.Instance.AgentClosing += OnAgentClosing;
         AppCore.Instance.SourceActivated += OnSourceActivated;
         AppCore.Instance.SourceDeactivated += OnSourceDeactivated;
-        AppCore.Instance.DeviceStateUpdated += OnDeviceStateUpdated;
-        AppCore.Instance.ControlSourceBindingRequested += OnControlSourceBindingRequested;
+        AppCore.Instance.ActuatorStateUpdated += OnActuatorStateUpdated;
+        AppCore.Instance.RemoteBindingRequested += OnRemoteBindingRequested;
 
         AgentCards.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(HasAgents));
-            OnPropertyChanged(nameof(DeviceCards));
-            OnPropertyChanged(nameof(SourceCards));
+            OnPropertyChanged(nameof(ActuatorCards));
+            OnPropertyChanged(nameof(RemoteCards));
         };
     }
 
@@ -297,12 +297,12 @@ public partial class MainWindowViewModel : ViewModelBase
             card.IsActiveSource = false;
     }
 
-    private void OnDeviceStateUpdated(Guid agentId)
+    private void OnActuatorStateUpdated(Guid agentId)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             var agent = AppCore.Instance.GetAgent(agentId);
-            if (agent is DeviceAgent da)
+            if (agent is ActuatorAgent da)
             {
                 var card = AgentCards.FirstOrDefault(c => c.AgentId == agentId);
                 if (card != null)
@@ -337,14 +337,14 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 AgentId = e.AgentId,
                 AgentType = e.AgentType,
-                DisplayName = (agent as ControlSourceAgent)?.SourceName
-                              ?? (agent as DeviceAgent)?.Id.ToString("N")[..8].ToUpper()
+                DisplayName = (agent as RemoteAgent)?.Name
+                              ?? (agent as ActuatorAgent)?.Id.ToString("N")[..8].ToUpper()
                               ?? e.AgentId.ToString()
             };
             AgentCards.Add(card);
 
-            // Auto-close QR window when a Device connects
-            if (e.AgentType == typeof(DeviceAgent) && _qrCodeWindow is not null)
+            // Auto-close QR window when an Actuator connects
+            if (e.AgentType == typeof(RemoteAgent) && _qrCodeWindow is not null)
             {
                 _qrCodeWindow.Close();
                 _qrCodeWindow = null;
@@ -381,15 +381,15 @@ public partial class MainWindowViewModel : ViewModelBase
         return await vm.Completion.Task;
     }
 
-    private void OnControlSourceBindingRequested(Guid clientId, string sourceName)
+    private void OnRemoteBindingRequested(Guid clientId, string name)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
         {
             var vm = new ConfirmConnectDialogViewModel
             {
                 Title = LocalizationService.Instance["ConfirmConnectTitle"],
-                SourceName = sourceName,
-                SourceId = clientId.ToString(),
+                Name = name,
+                Id = clientId.ToString(),
                 Message = LocalizationService.Instance["ConfirmConnectMsg"],
                 Warning = LocalizationService.Instance["ConfirmConnectWarning"],
                 ConfirmText = LocalizationService.Instance["ConfirmYes"],
@@ -400,9 +400,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 await dialog.ShowDialog<bool>(Desktop.MainWindow);
             var confirmed = await vm.Completion.Task;
             if (confirmed)
-                AppCore.Instance.AcceptControlSource(clientId);
+                AppCore.Instance.AcceptRemote(clientId);
             else
-                AppCore.Instance.RejectControlSource(clientId);
+                AppCore.Instance.RejectRemote(clientId);
         });
     }
 

@@ -66,8 +66,8 @@
   <data name="NavControlDesk" xml:space="preserve">
     <value>Control Desk</value>
   </data>
-  <data name="NavControlSources" xml:space="preserve">
-    <value>Control Sources</value>
+  <data name="NavRemotes" xml:space="preserve">
+    <value>Remotes</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>Settings</value>
@@ -119,10 +119,10 @@
   <data name="VersionUnknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
-  <data name="SourceName" xml:space="preserve">
+  <data name="RemoteName" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="SourceId" xml:space="preserve">
+  <data name="RemoteId" xml:space="preserve">
     <value>ID</value>
   </data>
   <data name="ConnectionStatus" xml:space="preserve">
@@ -144,11 +144,11 @@
   <data name="ConfirmDisconnectTitle" xml:space="preserve">
     <value>Disconnect</value>
   </data>
-  <data name="ConfirmDisconnectDeviceMsg" xml:space="preserve">
-    <value>Are you sure you want to disconnect this device?</value>
+  <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this actuator?</value>
   </data>
-  <data name="ConfirmDisconnectSourceMsg" xml:space="preserve">
-    <value>Are you sure you want to disconnect this control source?</value>
+  <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this remote?</value>
   </data>
   <data name="ConfirmConnectTitle" xml:space="preserve">
     <value>Connection Request</value>

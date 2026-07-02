@@ -1,7 +1,7 @@
 using System.Text.Json;
 using SchemeBase = Frisson.Core.Scheme.Scheme;
 
-namespace Frisson.Core.Scheme.Device;
+namespace Frisson.Core.Scheme.Actuator;
 
 /// <summary>
 /// DG-LAB bind request/confirm scheme.
@@ -17,7 +17,7 @@ public sealed class BindScheme : SchemeBase
     public Guid ClientId { get; set; }
 
     /// <summary>
-    /// Device UUID (in DG-LAB convention, always the device).
+    /// Actuator UUID (in DG-LAB convention, always the actuator).
     /// </summary>
     public Guid TargetId { get; set; }
 
@@ -65,8 +65,8 @@ public sealed class BindScheme : SchemeBase
     }
 
     /// <summary>
-    /// Attempts to parse a raw JSON string as a Device bind message.
-    /// Returns null if it doesn't match the Device bind format (missing clientId/targetId).
+    /// Attempts to parse a raw JSON string as an Actuator bind message.
+    /// Returns null if it doesn't match the Actuator bind format (missing clientId/targetId).
     /// </summary>
     public static BindScheme? TryParseDeviceBind(string json)
     {

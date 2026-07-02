@@ -39,15 +39,15 @@
                         Spacing="12"
                         Margin="32,0">
 
-                <!-- Source Name -->
+                <!-- Name -->
                 <Grid ColumnDefinitions="80, *">
                     <TextBlock Grid.Column="0"
-                               Text="{loc:Loc SourceName}"
+                               Text="{loc:Loc RemoteName}"
                                Foreground="{DynamicResource SecondaryText}"
                                FontSize="12"
                                VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="1"
-                               Text="{CompiledBinding SourceName}"
+                               Text="{CompiledBinding Name}"
                                Foreground="{DynamicResource PrimaryText}"
                                FontSize="13"
                                FontWeight="SemiBold"
@@ -55,15 +55,15 @@
                                VerticalAlignment="Center"/>
                 </Grid>
 
-                <!-- Source ID -->
+                <!-- ID -->
                 <Grid ColumnDefinitions="80, *">
                     <TextBlock Grid.Column="0"
-                               Text="{loc:Loc SourceId}"
+                               Text="{loc:Loc RemoteId}"
                                Foreground="{DynamicResource SecondaryText}"
                                FontSize="12"
                                VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="1"
-                               Text="{CompiledBinding SourceId}"
+                               Text="{CompiledBinding Id}"
                                Foreground="{DynamicResource PrimaryText}"
                                FontSize="13"
                                TextTrimming="CharacterEllipsis"

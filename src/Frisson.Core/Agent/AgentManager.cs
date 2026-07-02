@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 
-using Frisson.Core.Agent.Control;
-using Frisson.Core.Agent.Device;
+using Frisson.Core.Agent.Remote;
+using Frisson.Core.Agent.Actuator;
 
 namespace Frisson.Core.Agent;
 
@@ -23,16 +23,16 @@ internal class AgentManager
     Action<Guid> _closeClient;
     HashSet<Guid> _removing = new();
     ConcurrentDictionary<Guid, Agent> _agents = new();
-    HashSet<Guid> _activeDevices = new();
+    HashSet<Guid> _activeActuators = new();
     Guid? _activeSource;
 
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
-    public event Action<Guid>? DeviceActivated;
-    public event Action<Guid>? DeviceDeactivated;
+    public event Action<Guid>? ActuatorActivated;
+    public event Action<Guid>? ActuatorDeactivated;
     public event Action<Guid>? SourceActivated;
     public event Action? SourceDeactivated;
-    public event Action<Guid>? DeviceStateUpdated;
+    public event Action<Guid>? ActuatorStateUpdated;
 
     public AgentManager(ControlDesk desk, Action<Guid> closeClient)
     {
@@ -42,9 +42,9 @@ internal class AgentManager
         // Subscribe to ControlDesk state changes — broadcast to all active devices
         _desk.StateChanged += () =>
         {
-            var msg = _desk.ToPulseMessage();
-            foreach (var id in _activeDevices)
-                if (_agents.TryGetValue(id, out var a) && a is DeviceAgent)
+            var msg = _desk.ToStrengthMessage();
+            foreach (var id in _activeActuators)
+                if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent)
                     a.SendFunc?.Invoke(msg);
         };
     }
@@ -53,11 +53,11 @@ internal class AgentManager
     {
         _agents[agent.Id] = agent;
 
-        if (agent is ControlSourceAgent csa)
-            csa.ForwardToControlDesk = _desk.ApplyFromSource;
+        if (agent is RemoteAgent remote)
+            remote.ForwardToControlDesk = _desk.ApplyFromSource;
 
-        if (agent is DeviceAgent da)
-            da.StateUpdated += () => DeviceStateUpdated?.Invoke(da.Id);
+        if (agent is ActuatorAgent da)
+            da.StateUpdated += () => ActuatorStateUpdated?.Invoke(da.Id);
 
         AgentConnected?.Invoke(this, new AgentEventArgs(agent.Id, agent.GetType()));
     }
@@ -76,7 +76,7 @@ internal class AgentManager
             {
                 AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
                 _agents.TryRemove(id, out _);
-                _activeDevices.Remove(id);
+                _activeActuators.Remove(id);
                 if (_activeSource == id) _activeSource = null;
                 agent.Dispose();
                 _closeClient?.Invoke(id);
@@ -85,19 +85,19 @@ internal class AgentManager
         finally { _removing.Remove(id); }
     }
 
-    public void ActivateDevice(Guid id)
+    public void ActivateActuator(Guid id)
     {
-        _activeDevices.Add(id);
+        _activeActuators.Add(id);
         // Immediately sync current ControlDesk state
-        if (_agents.TryGetValue(id, out var a) && a is DeviceAgent da)
-            da.SendFunc?.Invoke(_desk.ToPulseMessage());
-        DeviceActivated?.Invoke(id);
+        if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent da)
+            da.SendFunc?.Invoke(_desk.ToStrengthMessage());
+        ActuatorActivated?.Invoke(id);
     }
 
-    public void DeactivateDevice(Guid id)
+    public void DeactivateActuator(Guid id)
     {
-        _activeDevices.Remove(id);
-        DeviceDeactivated?.Invoke(id);
+        _activeActuators.Remove(id);
+        ActuatorDeactivated?.Invoke(id);
     }
 
     public void SetActiveSource(Guid id)

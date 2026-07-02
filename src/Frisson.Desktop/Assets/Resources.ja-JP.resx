@@ -66,8 +66,8 @@
   <data name="NavControlDesk" xml:space="preserve">
     <value>コントロールデスク</value>
   </data>
-  <data name="NavControlSources" xml:space="preserve">
-    <value>コントロールソース</value>
+  <data name="NavRemotes" xml:space="preserve">
+    <value>リモート</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
@@ -119,10 +119,10 @@
   <data name="VersionUnknown" xml:space="preserve">
     <value>不明</value>
   </data>
-  <data name="SourceName" xml:space="preserve">
+  <data name="RemoteName" xml:space="preserve">
     <value>名前</value>
   </data>
-  <data name="SourceId" xml:space="preserve">
+  <data name="RemoteId" xml:space="preserve">
     <value>識別子</value>
   </data>
   <data name="ConnectionStatus" xml:space="preserve">
@@ -144,11 +144,11 @@
   <data name="ConfirmDisconnectTitle" xml:space="preserve">
     <value>切断</value>
   </data>
-  <data name="ConfirmDisconnectDeviceMsg" xml:space="preserve">
-    <value>このデバイスを切断しますか？</value>
+  <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
+    <value>このアクチュエーターを切断しますか？</value>
   </data>
-  <data name="ConfirmDisconnectSourceMsg" xml:space="preserve">
-    <value>このコントロールソースを切断しますか？</value>
+  <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
+    <value>このリモートを切断しますか？</value>
   </data>
   <data name="ConfirmConnectTitle" xml:space="preserve">
     <value>接続リクエスト</value>

@@ -1,8 +1,8 @@
 using System;
 using System.Text.Json;
 
-using Frisson.Core.Agent.Device;
-using Frisson.Core.Scheme.Device;
+using Frisson.Core.Agent.Actuator;
+using Frisson.Core.Scheme.Actuator;
 
 namespace Frisson.Core;
 
@@ -55,11 +55,10 @@ internal class ControlDesk
     }
 
     /// <summary>
-    /// Serialize current control state to a pulse message for devices.
+    /// Serialize current strength state to a strength-set message for devices.
     /// </summary>
-    public string ToPulseMessage()
+    public string ToStrengthMessage()
     {
-        // TODO: implement waveform/pulse message generation
         return JsonSerializer.Serialize(new
         {
             type = "msg",
@@ -67,5 +66,14 @@ internal class ControlDesk
             targetId = "",
             message = $"strength-1+2+{StrengthA}+2+2+{StrengthB}"
         });
+    }
+
+    /// <summary>
+    /// Serialize current pulse/waveform state to a pulse message for devices.
+    /// </summary>
+    public string ToPulseMessage()
+    {
+        // TODO: implement waveform/pulse message generation
+        return string.Empty;
     }
 }

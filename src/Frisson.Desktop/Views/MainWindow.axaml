@@ -134,10 +134,10 @@
                                 Command="{Binding SelectPageCommand}"
                                 CommandParameter="{x:Static vm:NavPage.ControlDesk}" />
                         <Button Classes="nav-btn-text"
-                                Classes.selected="{Binding IsControlSourcesSelected}"
-                                Content="{loc:Loc NavControlSources}"
+                                Classes.selected="{Binding IsRemotesSelected}"
+                                Content="{loc:Loc NavRemotes}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.ControlSources}" />
+                                CommandParameter="{x:Static vm:NavPage.Remotes}" />
                     </StackPanel>
 
                     <!-- Bottom: Settings -->
@@ -245,10 +245,10 @@
                         </Grid>
 
                         <!-- Control Sources Page -->
-                        <Grid IsVisible="{Binding IsControlSourcesSelected}" ColumnDefinitions="260, 8, *">
+                        <Grid IsVisible="{Binding IsRemotesSelected}" ColumnDefinitions="260, 8, *">
                             <!-- Left: Source Card List -->
                             <Grid Grid.Column="0" RowDefinitions="Auto, *">
-                                <TextBlock Grid.Row="0" Text="{loc:Loc NavControlSources}"
+                                <TextBlock Grid.Row="0" Text="{loc:Loc NavRemotes}"
                                            Foreground="{DynamicResource PrimaryText}"
                                            FontWeight="SemiBold" FontSize="14"
                                            Margin="4,0,0,8" />
@@ -260,7 +260,7 @@
                                         Padding="8">
                                     <Panel>
                                         <ScrollViewer>
-                                            <ItemsControl ItemsSource="{Binding SourceCards}">
+                                            <ItemsControl ItemsSource="{Binding RemoteCards}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Background="{DynamicResource Black}"
@@ -582,7 +582,7 @@
                                 Padding="4">
                             <Panel>
                                 <ScrollViewer>
-                                    <ItemsControl ItemsSource="{Binding DeviceCards}">
+                                    <ItemsControl ItemsSource="{Binding ActuatorCards}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Border Background="{DynamicResource Black}"
@@ -591,9 +591,9 @@
                                                         Margin="0,0,0,6"
                                                         BorderBrush="{DynamicResource AccentMuted}"
                                                         BorderThickness="1"
-                                                        Classes.device-card="{Binding IsDevice}"
+                                                        Classes.device-card="{Binding IsActuator}"
                                                         Classes.selected="{Binding IsSelected}"
-                                                        PointerPressed="OnDeviceCardPointerPressed">
+                                                        PointerPressed="OnActuatorCardPointerPressed">
                                                     <Border.Styles>
                                                         <Style Selector="Border.device-card:pointerover">
                                                             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />

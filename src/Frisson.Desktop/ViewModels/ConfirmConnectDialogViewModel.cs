@@ -12,10 +12,10 @@ public partial class ConfirmConnectDialogViewModel : ViewModelBase
     private string _title = string.Empty;
 
     [ObservableProperty]
-    private string _sourceName = string.Empty;
+    private string _name = string.Empty;
 
     [ObservableProperty]
-    private string _sourceId = string.Empty;
+    private string _id = string.Empty;
 
     [ObservableProperty]
     private string _message = string.Empty;

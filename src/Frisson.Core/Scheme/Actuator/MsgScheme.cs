@@ -1,7 +1,7 @@
 using System.Text.Json;
 using SchemeBase = Frisson.Core.Scheme.Scheme;
 
-namespace Frisson.Core.Scheme.Device;
+namespace Frisson.Core.Scheme.Actuator;
 
 public enum MsgKind
 {

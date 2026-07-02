@@ -37,12 +37,12 @@ public partial class MainWindow : Window
             vm.SelectedCard = card;
     }
 
-    private void OnDeviceCardPointerPressed(object? sender, PointerPressedEventArgs e)
+    private void OnActuatorCardPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
             return;
 
-        // Toggle expansion for device cards
+        // Toggle expansion for actuator cards
         card.IsExpanded = !card.IsExpanded;
     }
 

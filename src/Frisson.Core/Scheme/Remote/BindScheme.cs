@@ -1,7 +1,7 @@
 using System.Text.Json;
 using SchemeBase = Frisson.Core.Scheme.Scheme;
 
-namespace Frisson.Core.Scheme.Control;
+namespace Frisson.Core.Scheme.Remote;
 
 /// <summary>
 /// Control bind reply/confirm scheme.
@@ -55,8 +55,8 @@ public sealed class BindScheme : SchemeBase
     }
 
     /// <summary>
-    /// Attempts to parse a raw JSON string as a Control bind message.
-    /// Returns null if it doesn't match the Control bind format.
+    /// Attempts to parse a raw JSON string as a Remote bind message.
+    /// Returns null if it doesn't match the Remote bind format.
     /// </summary>
     public static BindScheme? TryParse(string json)
     {
@@ -70,7 +70,7 @@ public sealed class BindScheme : SchemeBase
             if (typeProp.GetString() != "bind")
                 return null;
 
-            // Control bind has "id" and "name" but NOT "clientId"/"targetId"
+            // Remote bind has "id" and "name" but NOT "clientId"/"targetId"
             if (root.TryGetProperty("clientId", out _))
                 return null;
 

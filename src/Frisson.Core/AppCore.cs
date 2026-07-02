@@ -23,12 +23,12 @@ public class AppCore : IDisposable
     // Forwarded from AgentManager
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
-    public event Action<Guid>? DeviceActivated;
-    public event Action<Guid>? DeviceDeactivated;
+    public event Action<Guid>? ActuatorActivated;
+    public event Action<Guid>? ActuatorDeactivated;
     public event Action<Guid>? SourceActivated;
     public event Action? SourceDeactivated;
-    public event Action<Guid>? DeviceStateUpdated;
-    public event Action<Guid, string>? ControlSourceBindingRequested;
+    public event Action<Guid>? ActuatorStateUpdated;
+    public event Action<Guid, string>? RemoteBindingRequested;
 
     public event Action? ControlDeskStateChanged;
 
@@ -44,18 +44,18 @@ public class AppCore : IDisposable
         _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
         _wsServer.ClientDisconnected += id => _agentManager.RemoveAgent(id);
 
-        // WebSocketServer → forward Control Source bind requests to UI
-        _wsServer.ControlSourceBindingRequested += (id, name) =>
-            ControlSourceBindingRequested?.Invoke(id, name);
+        // WebSocketServer → forward Remote bind requests to UI
+        _wsServer.RemoteBindingRequested += (id, name) =>
+            RemoteBindingRequested?.Invoke(id, name);
 
         // Forward AgentManager events to AppCore consumers
         _agentManager.AgentConnected += (_, e) => AgentConnected?.Invoke(this, e);
         _agentManager.AgentClosing += (_, e) => AgentClosing?.Invoke(this, e);
-        _agentManager.DeviceActivated += id => DeviceActivated?.Invoke(id);
-        _agentManager.DeviceDeactivated += id => DeviceDeactivated?.Invoke(id);
+        _agentManager.ActuatorActivated += id => ActuatorActivated?.Invoke(id);
+        _agentManager.ActuatorDeactivated += id => ActuatorDeactivated?.Invoke(id);
         _agentManager.SourceActivated += id => SourceActivated?.Invoke(id);
         _agentManager.SourceDeactivated += () => SourceDeactivated?.Invoke();
-        _agentManager.DeviceStateUpdated += id => DeviceStateUpdated?.Invoke(id);
+        _agentManager.ActuatorStateUpdated += id => ActuatorStateUpdated?.Invoke(id);
 
         // Forward ControlDesk state changes to UI layer
         _controlDesk.StateChanged += () => ControlDeskStateChanged?.Invoke();
@@ -84,10 +84,10 @@ public class AppCore : IDisposable
         _wsServer.TryRemove(agentId);
     }
 
-    public void ActivateDevice(Guid id) => _agentManager.ActivateDevice(id);
-    public void DeactivateDevice(Guid id) => _agentManager.DeactivateDevice(id);
-    public void AcceptControlSource(Guid clientId) => _wsServer.AcceptControlSource(clientId);
-    public void RejectControlSource(Guid clientId) => _wsServer.RejectControlSource(clientId);
+    public void ActivateActuator(Guid id) => _agentManager.ActivateActuator(id);
+    public void DeactivateActuator(Guid id) => _agentManager.DeactivateActuator(id);
+    public void AcceptRemote(Guid clientId) => _wsServer.AcceptRemote(clientId);
+    public void RejectRemote(Guid clientId) => _wsServer.RejectRemote(clientId);
 
     public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
     public void ClearActiveSource() => _agentManager.ClearActiveSource();

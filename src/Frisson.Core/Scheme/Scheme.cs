@@ -31,7 +31,7 @@ public abstract class Scheme
             return type switch
             {
                 "bind" => TryParseBind(root),
-                "msg"  => Device.MsgScheme.FromJson(root),
+                "msg"  => Actuator.MsgScheme.FromJson(root),
                 _ => null
             };
         }
@@ -47,13 +47,13 @@ public abstract class Scheme
     public abstract string ToJson();
 
     /// <summary>
-    /// Tries to parse a bind message — dispatches to Device or Control based on fields.
-    /// Device bind has clientId/targetId; Control bind has id/name.
+    /// Tries to parse a bind message — dispatches to Actuator or Remote based on fields.
+    /// Actuator bind has clientId/targetId; Remote bind has id/name.
     /// </summary>
     private static Scheme? TryParseBind(JsonElement root)
     {
         if (root.TryGetProperty("clientId", out _))
-            return Device.BindScheme.FromJson(root);
-        return Control.BindScheme.FromJson(root);
+            return Actuator.BindScheme.FromJson(root);
+        return Remote.BindScheme.FromJson(root);
     }
 }

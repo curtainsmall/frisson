@@ -5,8 +5,8 @@ using FleckServer = global::Fleck.WebSocketServer;
 using FleckSocket = global::Fleck.IWebSocketConnection;
 
 using Frisson.Core.Agent;
-using Frisson.Core.Agent.Control;
-using Frisson.Core.Agent.Device;
+using Frisson.Core.Agent.Remote;
+using Frisson.Core.Agent.Actuator;
 
 namespace Frisson.Core.Networking.WebSocket;
 
@@ -20,7 +20,7 @@ internal class WebSocketServer : IDisposable
 
     public event Action<Agent.Agent>? AgentCreated;
     public event Action<Guid>? ClientDisconnected;
-    public event Action<Guid, string>? ControlSourceBindingRequested;
+    public event Action<Guid, string>? RemoteBindingRequested;
 
     private record PendingBind(Guid ClientId, string SourceName, WebSocketClient Client);
 
@@ -36,7 +36,7 @@ internal class WebSocketServer : IDisposable
                 var client = new WebSocketClient(id, socket);
                 _clients.TryAdd(id, client);
                 LoggerService.Instance.Log($"[Server] Client connected: {id}");
-                client.Send(new Scheme.Device.BindScheme
+                client.Send(new Scheme.Actuator.BindScheme
                 {
                     ClientId = id,
                     TargetId = Guid.Empty,
@@ -56,20 +56,20 @@ internal class WebSocketServer : IDisposable
                     // Device bind: auto-accept and reply immediately
                     if (msg.Contains("\"clientId\""))
                     {
-                        var deviceAgent = CreateDevice(id, msg, client);
-                        if (deviceAgent == null) { TryRemove(id); return; }
-                        deviceAgent.SendFunc = client.Send;
-                        client.MessageHandler = json => deviceAgent.HandleMessage(json);
+                        var actuatorAgent = CreateActuator(id, msg, client);
+                        if (actuatorAgent == null) { TryRemove(id); return; }
+                        actuatorAgent.SendFunc = client.Send;
+                        client.MessageHandler = json => actuatorAgent.HandleMessage(json);
                         client.IsBound = true;
-                        AgentCreated?.Invoke(deviceAgent);
+                        AgentCreated?.Invoke(actuatorAgent);
                     }
-                    // Control Source bind: pend and wait for user trust confirmation
+                    // Remote bind: pend and wait for user trust confirmation
                     else if (msg.Contains("\"name\""))
                     {
-                        var scheme = Scheme.Control.BindScheme.TryParse(msg);
+                        var scheme = Scheme.Remote.BindScheme.TryParse(msg);
                         if (scheme == null) { TryRemove(id); return; }
                         _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, client));
-                        ControlSourceBindingRequested?.Invoke(id, scheme.Name);
+                        RemoteBindingRequested?.Invoke(id, scheme.Name);
                     }
                     else
                     {
@@ -86,33 +86,33 @@ internal class WebSocketServer : IDisposable
         LoggerService.Instance.Log($"[Server] Started on port {port}");
     }
 
-    private Agent.Agent? CreateDevice(Guid id, string msg, WebSocketClient client)
+    private Agent.Agent? CreateActuator(Guid id, string msg, WebSocketClient client)
     {
-        var scheme = Scheme.Device.BindScheme.TryParseDeviceBind(msg);
+        var scheme = Scheme.Actuator.BindScheme.TryParseDeviceBind(msg);
         if (scheme == null) return null;
-        client.Send(new Scheme.Device.BindScheme
+        client.Send(new Scheme.Actuator.BindScheme
         {
             ClientId = AppCore.DummyFrontendId,
             TargetId = id,
             Message = "200"
         }.ToJson());
-        return new DeviceAgent(id, () => TryRemove(id));
+        return new ActuatorAgent(id, () => TryRemove(id));
     }
 
-    public void AcceptControlSource(Guid clientId)
+    public void AcceptRemote(Guid clientId)
     {
         if (!_pendingBinds.TryRemove(clientId, out var pending)) return;
         if (!_clients.TryGetValue(clientId, out var client)) return;
 
-        client.Send(new Scheme.Control.BindScheme { Id = clientId, Name = pending.SourceName }.ToJson());
-        var agent = new ControlSourceAgent(clientId, pending.SourceName, () => TryRemove(clientId));
+        client.Send(new Scheme.Remote.BindScheme { Id = clientId, Name = pending.SourceName }.ToJson());
+        var agent = new RemoteAgent(clientId, pending.SourceName, () => TryRemove(clientId));
         agent.SendFunc = client.Send;
         client.MessageHandler = json => agent.HandleMessage(json);
         client.IsBound = true;
         AgentCreated?.Invoke(agent);
     }
 
-    public void RejectControlSource(Guid clientId)
+    public void RejectRemote(Guid clientId)
     {
         if (!_pendingBinds.TryRemove(clientId, out var pending)) return;
 
