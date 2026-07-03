@@ -24,7 +24,7 @@
         <Style Selector="Button.nav-btn">
             <Setter Property="Width" Value ="48" />
             <Setter Property="Height" Value="48" />
-            <Setter Property="Margin" Value="0.5" />
+            <Setter Property="Margin" Value="0" />
             <Setter Property="Padding" Value="0" />
 
             <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -107,7 +107,7 @@
 
     </Window.Styles>
 
-    <Border BorderThickness="4" Background="Transparent" Padding="8,0,8,8">
+    <Border BorderThickness="4" Background="Transparent">
         <Grid RowDefinitions="Auto, *" Background="Transparent">
             <!-- Title Bar -->
             <Border
@@ -123,31 +123,34 @@
             <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" Background="Transparent">
 
                 <!-- ===== Column 0: Nav Bar ===== -->
-                <Border Grid.Column="0" Width="175" Background="Transparent"
-                        BorderBrush="{DynamicResource AccentMuted}" BorderThickness="0,0,1,0">
-                    <Grid Background="Transparent">
+                <Border Grid.Column="0" Width="64" Background="Transparent">
+                    <Grid Background="Transparent" HorizontalAlignment="Center">
                     <!-- Top: Page nav buttons -->
-                    <StackPanel Spacing="6" Margin="0,8" VerticalAlignment="Top">
-                        <Button Classes="nav-btn-text"
+                    <StackPanel Spacing="6" Margin="0,8" VerticalAlignment="Top" HorizontalAlignment="Center">
+                        <Button Classes="nav-btn"
                                 Classes.selected="{Binding IsControlDeskSelected}"
-                                Content="{loc:Loc NavControlDesk}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.ControlDesk}" />
-                        <Button Classes="nav-btn-text"
+                                CommandParameter="{x:Static vm:NavPage.ControlDesk}">
+                            <i:Icon Value="fa-solid fa-sliders" FontSize="20" />
+                        </Button>
+                        <Button Classes="nav-btn"
                                 Classes.selected="{Binding IsRemotesSelected}"
-                                Content="{loc:Loc NavRemotes}"
                                 Command="{Binding SelectPageCommand}"
-                                CommandParameter="{x:Static vm:NavPage.Remotes}" />
+                                CommandParameter="{x:Static vm:NavPage.Remotes}">
+                            <i:Icon Value="fa-solid fa-gamepad" FontSize="20" />
+                        </Button>
                     </StackPanel>
 
                     <!-- Bottom: Settings -->
-                    <Button Classes="nav-btn-text"
+                    <Button Classes="nav-btn"
                             Classes.selected="{Binding IsSettingsSelected}"
-                            Content="{loc:Loc NavSettings}"
                             Command="{Binding SelectPageCommand}"
                             CommandParameter="{x:Static vm:NavPage.Settings}"
                             VerticalAlignment="Bottom"
-                            Margin="0,0,0,12" />
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,12">
+                        <i:Icon Value="fa-solid fa-gear" FontSize="20" />
+                    </Button>
                     </Grid>
                 </Border>
 
@@ -550,8 +553,6 @@
                 <!-- ===== Column 2: Global Right Device Panel ===== -->
                 <Border Grid.Column="2" Width="260"
                         Background="{DynamicResource Black}"
-                        BorderBrush="{DynamicResource AccentMuted}"
-                        BorderThickness="2,0,0,0"
                         Padding="12">
                     <Grid RowDefinitions="Auto, Auto, *">
                         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="4,8,4,4">
@@ -688,68 +689,44 @@
                                                                 </Transitions>
                                                             </Grid.Transitions>
                                                             <!-- Channel A -->
-                                                            <Grid Grid.Row="0" RowDefinitions="Auto, Auto" RowSpacing="3">
-                                                                <!-- Name (left) + Strength (right) -->
-                                                                <Grid ColumnDefinitions="*, Auto">
-                                                                    <TextBlock Text="A"
-                                                                               Foreground="{DynamicResource AccentBrush}"
-                                                                               FontWeight="Bold" FontSize="11"
-                                                                               VerticalAlignment="Center"
-                                                                               HorizontalAlignment="Left" />
-                                                                    <TextBlock Grid.Column="1"
-                                                                               Foreground="{DynamicResource SecondaryText}"
-                                                                               FontSize="11"
-                                                                               VerticalAlignment="Center"
-                                                                               HorizontalAlignment="Right">
-                                                                        <TextBlock.Text>
-                                                                            <MultiBinding StringFormat="{}{0} / {1}">
-                                                                                <Binding Path="StrengthA" />
-                                                                                <Binding Path="MaxA" />
-                                                                            </MultiBinding>
-                                                                        </TextBlock.Text>
-                                                                    </TextBlock>
-                                                                </Grid>
-                                                                <!-- Progress bar -->
-                                                                <Border Grid.Row="1"
-                                                                        BorderBrush="{DynamicResource AccentBrush}"
-                                                                        BorderThickness="0.5" CornerRadius="2">
-                                                                    <ProgressBar Value="{Binding StrengthA}"
-                                                                                 Maximum="{Binding MaxA}" Height="6"
-                                                                                 Foreground="{DynamicResource AccentBrush}"
-                                                                                 Background="{DynamicResource Black}" />
-                                                                </Border>
+                                                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                                                <TextBlock Text="A"
+                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           FontWeight="Bold" FontSize="11"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Left" />
+                                                                <TextBlock Grid.Column="1"
+                                                                           Foreground="{DynamicResource SecondaryText}"
+                                                                           FontSize="11"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Right">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding StringFormat="{}{0} / {1}">
+                                                                            <Binding Path="StrengthA" />
+                                                                            <Binding Path="MaxA" />
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
                                                             </Grid>
                                                             <!-- Channel B -->
-                                                            <Grid Grid.Row="1" RowDefinitions="Auto, Auto" RowSpacing="3">
-                                                                <!-- Name (left) + Strength (right) -->
-                                                                <Grid ColumnDefinitions="*, Auto">
-                                                                    <TextBlock Text="B"
-                                                                               Foreground="{DynamicResource AccentBrush}"
-                                                                               FontWeight="Bold" FontSize="11"
-                                                                               VerticalAlignment="Center"
-                                                                               HorizontalAlignment="Left" />
-                                                                    <TextBlock Grid.Column="1"
-                                                                               Foreground="{DynamicResource SecondaryText}"
-                                                                               FontSize="11"
-                                                                               VerticalAlignment="Center"
-                                                                               HorizontalAlignment="Right">
-                                                                        <TextBlock.Text>
-                                                                            <MultiBinding StringFormat="{}{0} / {1}">
-                                                                                <Binding Path="StrengthB" />
-                                                                                <Binding Path="MaxB" />
-                                                                            </MultiBinding>
-                                                                        </TextBlock.Text>
-                                                                    </TextBlock>
-                                                                </Grid>
-                                                                <!-- Progress bar -->
-                                                                <Border Grid.Row="1"
-                                                                        BorderBrush="{DynamicResource AccentBrush}"
-                                                                        BorderThickness="0.5" CornerRadius="2">
-                                                                    <ProgressBar Value="{Binding StrengthB}"
-                                                                                 Maximum="{Binding MaxB}" Height="6"
-                                                                                 Foreground="{DynamicResource AccentBrush}"
-                                                                                 Background="{DynamicResource Black}" />
-                                                                </Border>
+                                                            <Grid Grid.Row="1" ColumnDefinitions="*, Auto">
+                                                                <TextBlock Text="B"
+                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           FontWeight="Bold" FontSize="11"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Left" />
+                                                                <TextBlock Grid.Column="1"
+                                                                           Foreground="{DynamicResource SecondaryText}"
+                                                                           FontSize="11"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Right">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding StringFormat="{}{0} / {1}">
+                                                                            <Binding Path="StrengthB" />
+                                                                            <Binding Path="MaxB" />
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
                                                             </Grid>
                                                         </Grid>
                                                     </Grid>
