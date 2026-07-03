@@ -72,8 +72,8 @@
   <data name="NavSettings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="DevicesTitle" xml:space="preserve">
-    <value>Devices</value>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>Actuators</value>
   </data>
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
@@ -101,8 +101,8 @@
   <data name="ControlDeskScrollTip" xml:space="preserve">
     <value>Scroll to adjust strength</value>
   </data>
-  <data name="AddDevice" xml:space="preserve">
-    <value>Add Device</value>
+  <data name="AddActuator" xml:space="preserve">
+    <value>Add Actuator</value>
   </data>
   <data name="QrCodeTitle" xml:space="preserve">
     <value>Connect Device</value>
@@ -164,5 +164,24 @@
   </data>
   <data name="ConfirmNo" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <!-- Settings Sections -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsSectionDevice" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>Strength Limit</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
   </data>
 </root>

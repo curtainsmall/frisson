@@ -67,13 +67,13 @@
     <value>控制台</value>
   </data>
   <data name="NavRemotes" xml:space="preserve">
-    <value>遥控器</value>
+    <value>遥控端</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>设置</value>
   </data>
-  <data name="DevicesTitle" xml:space="preserve">
-    <value>设备</value>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>执行端</value>
   </data>
   <!-- 设置页面 -->
   <data name="Language" xml:space="preserve">
@@ -101,8 +101,8 @@
   <data name="ControlDeskScrollTip" xml:space="preserve">
     <value>滚轮调节强度</value>
   </data>
-  <data name="AddDevice" xml:space="preserve">
-    <value>添加设备</value>
+  <data name="AddActuator" xml:space="preserve">
+    <value>添加执行端</value>
   </data>
   <data name="QrCodeTitle" xml:space="preserve">
     <value>连接设备</value>
@@ -145,10 +145,10 @@
     <value>断开连接</value>
   </data>
   <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
-    <value>确定要断开此执行器吗？</value>
+    <value>确定要断开此执行端吗？</value>
   </data>
   <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
-    <value>确定要断开此遥控器吗？</value>
+    <value>确定要断开此遥控端吗？</value>
   </data>
   <data name="ConfirmConnectTitle" xml:space="preserve">
     <value>连接请求</value>
@@ -164,5 +164,24 @@
   </data>
   <data name="ConfirmNo" xml:space="preserve">
     <value>取消</value>
+  </data>
+  <!-- 设置分区 -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="SettingsSectionDevice" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>强度上限</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
   </data>
 </root>

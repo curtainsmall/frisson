@@ -28,6 +28,13 @@ public enum NavPage
     Settings,
 }
 
+public enum SettingsSection
+{
+    General,
+    Device,
+    About,
+}
+
 public class LanguageOption
 {
     public required string Code { get; init; }
@@ -180,6 +187,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private NavPage _currentPage = NavPage.ControlDesk;
 
     [ObservableProperty]
+    private SettingsSection _selectedSettingsSection = SettingsSection.General;
+
+    [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
     public ControlDeskViewModel ControlDeskViewModel { get; } = new();
@@ -189,6 +199,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
     public bool IsRemotesSelected => CurrentPage == NavPage.Remotes;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
+    public bool IsGeneralSelected => SelectedSettingsSection == SettingsSection.General;
+    public bool IsDeviceSelected => SelectedSettingsSection == SettingsSection.Device;
+    public bool IsAboutSelected => SelectedSettingsSection == SettingsSection.About;
     public bool HasAgents => AgentCards.Count > 0;
 
     partial void OnCurrentPageChanged(NavPage value)
@@ -198,8 +211,18 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
+    partial void OnSelectedSettingsSectionChanged(SettingsSection value)
+    {
+        OnPropertyChanged(nameof(IsGeneralSelected));
+        OnPropertyChanged(nameof(IsDeviceSelected));
+        OnPropertyChanged(nameof(IsAboutSelected));
+    }
+
     [RelayCommand]
     private void SelectPage(NavPage page) => CurrentPage = page;
+
+    [RelayCommand]
+    private void SelectSettingsSection(SettingsSection section) => SelectedSettingsSection = section;
 
     [RelayCommand]
     private void SelectAgent(Guid agentId)
@@ -410,5 +433,51 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (value != null)
             LocalizationService.Instance.SetLanguage(value.Code);
+    }
+
+    // === Max value editing (Settings page) ===
+
+    [ObservableProperty]
+    private string _editMaxAValue = "200";
+
+    [ObservableProperty]
+    private string _editMaxBValue = "200";
+
+    public void CommitMaxA()
+    {
+        if (int.TryParse(EditMaxAValue, out var v))
+        {
+            v = Math.Clamp(v, 0, 200);
+            ControlDeskViewModel.SetMaxA(v);
+            EditMaxAValue = v.ToString();
+        }
+        else
+        {
+            EditMaxAValue = ControlDeskViewModel.MaxA.ToString();
+        }
+    }
+
+    public void CancelMaxA()
+    {
+        EditMaxAValue = ControlDeskViewModel.MaxA.ToString();
+    }
+
+    public void CommitMaxB()
+    {
+        if (int.TryParse(EditMaxBValue, out var v))
+        {
+            v = Math.Clamp(v, 0, 200);
+            ControlDeskViewModel.SetMaxB(v);
+            EditMaxBValue = v.ToString();
+        }
+        else
+        {
+            EditMaxBValue = ControlDeskViewModel.MaxB.ToString();
+        }
+    }
+
+    public void CancelMaxB()
+    {
+        EditMaxBValue = ControlDeskViewModel.MaxB.ToString();
     }
 }

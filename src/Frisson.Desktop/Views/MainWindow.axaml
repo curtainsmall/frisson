@@ -105,10 +105,32 @@
             <Setter Property="Background" Value="{DynamicResource AccentMuted}" />
         </Style>
 
+        <!-- Settings section nav buttons -->
+        <Style Selector="Button.section-btn">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button.section-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SurfaceLight}" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button.section-btn.selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource Black}" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
     </Window.Styles>
 
     <Border BorderThickness="4" Background="Transparent">
-        <Grid RowDefinitions="Auto, *" Background="Transparent">
+        <Grid RowDefinitions="Auto, *" Background="Transparent" PointerPressed="OnMainGridPointerPressed">
             <!-- Title Bar -->
             <Border
                 Grid.Row="0"
@@ -168,7 +190,7 @@
                                 <StackPanel Grid.Column="0"
                                             VerticalAlignment="Center" HorizontalAlignment="Center"
                                             Spacing="4">
-                                    <TextBlock Text="A" FontSize="14"
+                                    <TextBlock Text="{loc:Loc ChannelA}" FontSize="14"
                                                Foreground="{DynamicResource SecondaryText}"
                                                HorizontalAlignment="Center" />
                                     <!-- Strength value with fixed-size rounded hover -->
@@ -179,6 +201,7 @@
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
                                     </Border>
+                                    <!-- Max value (read-only, edit in Settings) -->
                                     <TextBlock Text="{Binding ControlDeskViewModel.MaxA, StringFormat='/ {0}'}" FontSize="13"
                                                Foreground="{DynamicResource SecondaryText}"
                                                HorizontalAlignment="Center" />
@@ -205,7 +228,7 @@
                                 <StackPanel Grid.Column="2"
                                             VerticalAlignment="Center" HorizontalAlignment="Center"
                                             Spacing="4">
-                                    <TextBlock Text="B" FontSize="14"
+                                    <TextBlock Text="{loc:Loc ChannelB}" FontSize="14"
                                                Foreground="{DynamicResource SecondaryText}"
                                                HorizontalAlignment="Center" />
                                     <!-- Strength value with fixed-size rounded hover -->
@@ -216,6 +239,7 @@
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
                                     </Border>
+                                    <!-- Max value (read-only, edit in Settings) -->
                                     <TextBlock Text="{Binding ControlDeskViewModel.MaxB, StringFormat='/ {0}'}" FontSize="13"
                                                Foreground="{DynamicResource SecondaryText}"
                                                HorizontalAlignment="Center" />
@@ -359,7 +383,7 @@
                                       RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="16">
                                     <!-- Source Name -->
                                     <StackPanel Grid.Row="0">
-                                        <TextBlock Text="{loc:Loc SourceName}"
+                                        <TextBlock Text="{loc:Loc RemoteName}"
                                                    Foreground="{DynamicResource SecondaryText}" FontSize="11"
                                                    Margin="0,0,0,4" />
                                         <TextBlock Text="{Binding SelectedCard.DisplayName}"
@@ -368,7 +392,7 @@
                                     </StackPanel>
                                     <!-- ID -->
                                     <StackPanel Grid.Row="1">
-                                        <TextBlock Text="{loc:Loc SourceId}"
+                                        <TextBlock Text="{loc:Loc RemoteId}"
                                                    Foreground="{DynamicResource SecondaryText}" FontSize="11"
                                                    Margin="0,0,0,4" />
                                         <TextBlock Text="{Binding SelectedCard.AgentId}"
@@ -463,89 +487,190 @@
                         </Grid>
 
                         <!-- Settings Page -->
-                        <Grid IsVisible="{Binding IsSettingsSelected}" RowDefinitions="Auto,*,Auto">
-                            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,20">
-                                <i:Icon Value="fa-solid fa-gear" FontSize="48" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,20" />
-                                <TextBlock Text="{loc:Loc NavSettings}" FontSize="24"
-                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
-                                <Separator Background="{DynamicResource AccentMuted}" Margin="0,10" Width="200" Height="1" />
-                            </StackPanel>
-
-                            <ScrollViewer Grid.Row="1" MaxWidth="400" HorizontalAlignment="Center" Margin="20">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="20" ColumnSpacing="16">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="80" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0"
-                                               Text="{loc:Loc Language}"
-                                               Foreground="{DynamicResource PrimaryText}"
-                                               FontSize="14"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center" />
-                                    <ComboBox Grid.Row="0" Grid.Column="1"
-                                              ItemsSource="{Binding AvailableLanguages}"
-                                              SelectedItem="{Binding SelectedLanguage}"
-                                              HorizontalAlignment="Stretch"
-                                              Background="{DynamicResource SurfaceLight}"
-                                              Foreground="{DynamicResource PrimaryText}"
-                                              BorderBrush="{DynamicResource AccentMuted}"
-                                              CornerRadius="8"
-                                              Padding="10,5">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource PrimaryText}" />
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0"
-                                               Text="{loc:Loc LogLabel}"
-                                               Foreground="{DynamicResource PrimaryText}"
-                                               FontSize="14"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center" />
-                                    <StackPanel Grid.Row="1" Grid.Column="1"
-                                                Orientation="Horizontal"
-                                                Spacing="8">
-                                        <Button Content="{loc:Loc LogOpen}"
-                                                Width="80"
-                                                HorizontalContentAlignment="Center"
-                                                VerticalContentAlignment="Center"
-                                                CornerRadius="10"
-                                                Background="{DynamicResource SurfaceLight}"
-                                                Foreground="{DynamicResource PrimaryText}"
-                                                BorderBrush="{DynamicResource AccentMuted}"
-                                                Command="{Binding ShowLogWindowCommand}" />
-                                        <Button Content="{loc:Loc LogClearLogs}"
-                                                Width="100"
-                                                HorizontalContentAlignment="Center"
-                                                VerticalContentAlignment="Center"
-                                                CornerRadius="10"
-                                                Background="{DynamicResource SurfaceLight}"
-                                                Foreground="{DynamicResource PrimaryText}"
-                                                BorderBrush="{DynamicResource AccentMuted}"
-                                                Command="{Binding ClearLogsCommand}" />
+                        <Grid IsVisible="{Binding IsSettingsSelected}">
+                            <!-- Body: section nav + content -->
+                            <Grid ColumnDefinitions="160, *" Margin="20,0,20,20">
+                                <!-- Left: Section Directory -->
+                                <Border Grid.Column="0" Background="{DynamicResource Black}" CornerRadius="8" Padding="8">
+                                    <StackPanel Spacing="4" VerticalAlignment="Top" Margin="0,4,0,0">
+                                        <TextBlock Text="{loc:Loc NavSettings}" FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryText}" FontWeight="SemiBold"
+                                                   Margin="8,0,0,6" />
+                                        <Button Content="{loc:Loc SettingsSectionGeneral}"
+                                                Classes="section-btn"
+                                                Classes.selected="{Binding IsGeneralSelected}"
+                                                Click="OnGeneralSectionClick" />
+                                        <Button Content="{loc:Loc SettingsSectionDevice}"
+                                                Classes="section-btn"
+                                                Classes.selected="{Binding IsDeviceSelected}"
+                                                Click="OnDeviceSectionClick" />
+                                        <Button Content="{loc:Loc SettingsSectionAbout}"
+                                                Classes="section-btn"
+                                                Classes.selected="{Binding IsAboutSelected}"
+                                                Click="OnAboutSectionClick" />
                                     </StackPanel>
+                                </Border>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0"
-                                               Text="{loc:Loc Version}"
-                                               Foreground="{DynamicResource SecondaryText}"
-                                               FontSize="13"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1"
-                                               Foreground="{DynamicResource SecondaryText}"
-                                               FontSize="13"
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Text>
-                                            <Binding Source="{x:Static services:LocalizationService.Instance}"
-                                                     Path="CurrentCulture"
-                                                     Converter="{x:Static converters:VersionConverter.Instance}" />
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </Grid>
-                            </ScrollViewer>
+                                <!-- Right: Heading + Section Content -->
+                                <Grid Grid.Column="1" Margin="20,0,0,0">
+                                    <ScrollViewer x:Name="SettingsScrollViewer" MaxWidth="420" HorizontalAlignment="Center">
+                                        <StackPanel Spacing="24">
+                                            <!-- ===== General Section ===== -->
+                                            <StackPanel x:Name="GeneralSection" Spacing="16">
+                                                <!-- Section header -->
+                                                <TextBlock Text="{loc:Loc SettingsSectionGeneral}" FontSize="16"
+                                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                                <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
+                                            <!-- Language -->
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{loc:Loc Language}"
+                                                           Foreground="{DynamicResource PrimaryText}"
+                                                           FontSize="14"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Center" />
+                                                <ComboBox Grid.Column="1"
+                                                          ItemsSource="{Binding AvailableLanguages}"
+                                                          SelectedItem="{Binding SelectedLanguage}"
+                                                          HorizontalAlignment="Stretch"
+                                                          Background="{DynamicResource SurfaceLight}"
+                                                          Foreground="{DynamicResource PrimaryText}"
+                                                          BorderBrush="{DynamicResource AccentMuted}"
+                                                          CornerRadius="8"
+                                                          Padding="10,5">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource PrimaryText}" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+
+                                            <!-- Log -->
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{loc:Loc LogLabel}"
+                                                           Foreground="{DynamicResource PrimaryText}"
+                                                           FontSize="14"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Center" />
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            Spacing="8">
+                                                    <Button Content="{loc:Loc LogOpen}"
+                                                            Width="80"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center"
+                                                            CornerRadius="10"
+                                                            Background="{DynamicResource SurfaceLight}"
+                                                            Foreground="{DynamicResource PrimaryText}"
+                                                            BorderBrush="{DynamicResource AccentMuted}"
+                                                            Command="{Binding ShowLogWindowCommand}" />
+                                                    <Button Content="{loc:Loc LogClearLogs}"
+                                                            Width="100"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center"
+                                                            CornerRadius="10"
+                                                            Background="{DynamicResource SurfaceLight}"
+                                                            Foreground="{DynamicResource PrimaryText}"
+                                                            BorderBrush="{DynamicResource AccentMuted}"
+                                                            Command="{Binding ClearLogsCommand}" />
+                                                </StackPanel>
+                                            </Grid>
+                                            </StackPanel>
+
+                                        <!-- ===== Device Section ===== -->
+                                            <StackPanel x:Name="DeviceSection" Spacing="16">
+                                                <!-- Section header -->
+                                                <TextBlock Text="{loc:Loc SettingsSectionDevice}" FontSize="16"
+                                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                                <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
+                                            <!-- Strength Limit -->
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{loc:Loc SettingsStrengthLimit}"
+                                                           Foreground="{DynamicResource PrimaryText}"
+                                                           FontSize="14"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Top"
+                                                           Margin="0,4,0,0" />
+                                                <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto" ColumnSpacing="12">
+                                                    <!-- Channel A -->
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{loc:Loc ChannelA}" FontSize="13"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBlock Text=":" FontSize="13"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBox x:Name="SettingsMaxAInput"
+                                                                 Text="{Binding EditMaxAValue}"
+                                                                 FontSize="13"
+                                                                 Width="50"
+                                                                 MinHeight="0"
+                                                                 Padding="4,2"
+                                                                 Background="{DynamicResource SurfaceLight}"
+                                                                 Foreground="{DynamicResource PrimaryText}"
+                                                                 BorderBrush="{DynamicResource AccentMuted}"
+                                                                 CornerRadius="4"
+                                                                 LostFocus="OnMaxALostFocus"
+                                                                 KeyDown="OnMaxAKeyDown" />
+                                                    </StackPanel>
+                                                    <!-- Channel B -->
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{loc:Loc ChannelB}" FontSize="13"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBlock Text=":" FontSize="13"
+                                                                   Foreground="{DynamicResource SecondaryText}"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBox x:Name="SettingsMaxBInput"
+                                                                 Text="{Binding EditMaxBValue}"
+                                                                 FontSize="13"
+                                                                 Width="50"
+                                                                 MinHeight="0"
+                                                                 Padding="4,2"
+                                                                 Background="{DynamicResource SurfaceLight}"
+                                                                 Foreground="{DynamicResource PrimaryText}"
+                                                                 BorderBrush="{DynamicResource AccentMuted}"
+                                                                 CornerRadius="4"
+                                                                 LostFocus="OnMaxBLostFocus"
+                                                                 KeyDown="OnMaxBKeyDown" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+                                            </StackPanel>
+
+                                        <!-- ===== About Section ===== -->
+                                            <StackPanel x:Name="AboutSection" Spacing="16">
+                                                <!-- Section header -->
+                                                <TextBlock Text="{loc:Loc SettingsSectionAbout}" FontSize="16"
+                                                           Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                                                <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
+                                            <!-- Version -->
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{loc:Loc Version}"
+                                                           Foreground="{DynamicResource SecondaryText}"
+                                                           FontSize="13"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1"
+                                                           Foreground="{DynamicResource SecondaryText}"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Text>
+                                                        <Binding Source="{x:Static services:LocalizationService.Instance}"
+                                                                 Path="CurrentCulture"
+                                                                 Converter="{x:Static converters:VersionConverter.Instance}" />
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Grid>
+                                            </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                            </Grid>
                         </Grid>
                     </Panel>
                 </Border>
@@ -556,7 +681,7 @@
                         Padding="12">
                     <Grid RowDefinitions="Auto, Auto, *">
                         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="4,8,4,4">
-                            <TextBlock Grid.Column="0" Text="{loc:Loc DevicesTitle}"
+                            <TextBlock Grid.Column="0" Text="{loc:Loc ActuatorsTitle}"
                                        Foreground="{DynamicResource PrimaryText}"
                                        FontWeight="SemiBold" FontSize="14"
                                        VerticalAlignment="Center" />
@@ -570,7 +695,7 @@
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Foreground="{DynamicResource SecondaryText}"
-                                    ToolTip.Tip="{loc:Loc AddDevice}"
+                                    ToolTip.Tip="{loc:Loc AddActuator}"
                                     Command="{Binding ShowQrCodeWindowCommand}" />
                         </Grid>
                         <Separator Grid.Row="1"

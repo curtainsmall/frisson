@@ -48,4 +48,18 @@ public partial class ControlDeskViewModel : ViewModelBase
 
     public void OnScrollB(int delta, bool shift) =>
         AdjustB(shift ? 10 * Math.Sign(delta) : Math.Sign(delta));
+
+    public void SetMaxA(int value)
+    {
+        MaxA = value;
+        if (StrengthA > value)
+            AppCore.Instance.SetControlDeskStrength(value, StrengthB);
+    }
+
+    public void SetMaxB(int value)
+    {
+        MaxB = value;
+        if (StrengthB > value)
+            AppCore.Instance.SetControlDeskStrength(StrengthA, value);
+    }
 }

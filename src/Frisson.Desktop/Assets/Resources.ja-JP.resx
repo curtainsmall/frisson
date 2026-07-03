@@ -72,8 +72,8 @@
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
   </data>
-  <data name="DevicesTitle" xml:space="preserve">
-    <value>デバイス</value>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>アクチュエーター</value>
   </data>
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
@@ -101,8 +101,8 @@
   <data name="ControlDeskScrollTip" xml:space="preserve">
     <value>スクロールで強度を調整</value>
   </data>
-  <data name="AddDevice" xml:space="preserve">
-    <value>デバイスを追加</value>
+  <data name="AddActuator" xml:space="preserve">
+    <value>アクチュエーターを追加</value>
   </data>
   <data name="QrCodeTitle" xml:space="preserve">
     <value>デバイスに接続</value>
@@ -164,5 +164,24 @@
   </data>
   <data name="ConfirmNo" xml:space="preserve">
     <value>キャンセル</value>
+  </data>
+  <!-- Settings Sections -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="SettingsSectionDevice" xml:space="preserve">
+    <value>デバイス</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>強度上限</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
   </data>
 </root>
