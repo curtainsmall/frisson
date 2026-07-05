@@ -262,6 +262,17 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ClearLogs() => LoggerService.Instance.Clear();
 
+    [RelayCommand]
+    private void OpenLogDir()
+    {
+        var logDir = System.IO.Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Frisson", "logs");
+        if (!System.IO.Directory.Exists(logDir))
+            System.IO.Directory.CreateDirectory(logDir);
+        using var _ = System.Diagnostics.Process.Start("explorer.exe", logDir);
+    }
+
     private static string GetLocalIPAddress()
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());

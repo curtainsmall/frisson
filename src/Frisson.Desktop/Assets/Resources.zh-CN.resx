@@ -80,13 +80,16 @@
     <value>语言</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
-    <value>打开</value>
+    <value>日志控制台</value>
   </data>
   <data name="LogClearLogs" xml:space="preserve">
     <value>清除日志</value>
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>日志</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>日志文件</value>
   </data>
   <!-- 控制台与状态 -->
   <data name="SourceDetails" xml:space="preserve">

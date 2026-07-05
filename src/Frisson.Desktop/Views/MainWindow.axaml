@@ -566,8 +566,7 @@
                                                            Foreground="{DynamicResource PrimaryText}"
                                                            FontSize="14"
                                                            HorizontalAlignment="Right"
-                                                           VerticalAlignment="Top"
-                                                           Margin="0,4,0,0" />
+                                                           VerticalAlignment="Center" />
                                                 <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto" ColumnSpacing="12">
                                                     <!-- Channel A -->
                                                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
@@ -624,35 +623,44 @@
                                                            Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
                                             <!-- Log -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
-                                                <TextBlock Grid.Column="0"
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16"
+                                                  RowDefinitions="Auto, Auto, Auto" RowSpacing="8">
+                                                <TextBlock Grid.Row="0" Grid.Column="0"
                                                            Text="{loc:Loc LogLabel}"
                                                            Foreground="{DynamicResource PrimaryText}"
                                                            FontSize="14"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center" />
-                                                <StackPanel Grid.Column="1"
-                                                            Orientation="Horizontal"
-                                                            Spacing="8">
-                                                    <Button Content="{loc:Loc LogOpen}"
-                                                            Width="80"
-                                                            HorizontalContentAlignment="Center"
-                                                            VerticalContentAlignment="Center"
-                                                            CornerRadius="10"
-                                                            Background="{DynamicResource SurfaceLight}"
-                                                            Foreground="{DynamicResource PrimaryText}"
-                                                            BorderBrush="{DynamicResource AccentMuted}"
-                                                            Command="{Binding ShowLogWindowCommand}" />
-                                                    <Button Content="{loc:Loc LogClearLogs}"
-                                                            Width="100"
-                                                            HorizontalContentAlignment="Center"
-                                                            VerticalContentAlignment="Center"
-                                                            CornerRadius="10"
-                                                            Background="{DynamicResource SurfaceLight}"
-                                                            Foreground="{DynamicResource PrimaryText}"
-                                                            BorderBrush="{DynamicResource AccentMuted}"
-                                                            Command="{Binding ClearLogsCommand}" />
-                                                </StackPanel>
+                                                <Button Grid.Row="0" Grid.Column="1"
+                                                        Content="{loc:Loc LogOpen}"
+                                                        Width="140"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        CornerRadius="10"
+                                                        Background="{DynamicResource SurfaceLight}"
+                                                        Foreground="{DynamicResource PrimaryText}"
+                                                        BorderBrush="{DynamicResource AccentMuted}"
+                                                        Command="{Binding ShowLogWindowCommand}" />
+                                                <Button Grid.Row="1" Grid.Column="1"
+                                                        Content="{loc:Loc LogClearLogs}"
+                                                        Width="140"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        CornerRadius="10"
+                                                        Background="{DynamicResource SurfaceLight}"
+                                                        Foreground="{DynamicResource PrimaryText}"
+                                                        BorderBrush="{DynamicResource AccentMuted}"
+                                                        Command="{Binding ClearLogsCommand}" />
+                                                <Button Grid.Row="2" Grid.Column="1"
+                                                        Content="{loc:Loc LogOpenDir}"
+                                                        Width="140"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        CornerRadius="10"
+                                                        Background="{DynamicResource SurfaceLight}"
+                                                        Foreground="{DynamicResource PrimaryText}"
+                                                        BorderBrush="{DynamicResource AccentMuted}"
+                                                        Command="{Binding OpenLogDirCommand}" />
                                             </Grid>
                                             </StackPanel>
                                             </Border>

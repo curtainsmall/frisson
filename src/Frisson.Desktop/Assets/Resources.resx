@@ -80,13 +80,16 @@
     <value>Language</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
-    <value>Open</value>
+    <value>Log Console</value>
   </data>
   <data name="LogClearLogs" xml:space="preserve">
     <value>Clear Logs</value>
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>Log</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>Log Files</value>
   </data>
   <!-- Control Desk & Status -->
   <data name="SourceDetails" xml:space="preserve">

@@ -80,13 +80,16 @@
     <value>言語</value>
   </data>
   <data name="LogOpen" xml:space="preserve">
-    <value>開く</value>
+    <value>ログコンソール</value>
   </data>
   <data name="LogClearLogs" xml:space="preserve">
     <value>ログをクリア</value>
   </data>
   <data name="LogLabel" xml:space="preserve">
     <value>ログ</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>ログファイル</value>
   </data>
   <!-- Control Desk & Status -->
   <data name="SourceDetails" xml:space="preserve">
