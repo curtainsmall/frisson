@@ -31,7 +31,8 @@ public enum NavPage
 public enum SettingsSection
 {
     General,
-    Device,
+    Actuator,
+    Support,
     About,
 }
 
@@ -200,7 +201,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsRemotesSelected => CurrentPage == NavPage.Remotes;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
     public bool IsGeneralSelected => SelectedSettingsSection == SettingsSection.General;
-    public bool IsDeviceSelected => SelectedSettingsSection == SettingsSection.Device;
+    public bool IsActuatorSelected => SelectedSettingsSection == SettingsSection.Actuator;
+    public bool IsSupportSelected => SelectedSettingsSection == SettingsSection.Support;
     public bool IsAboutSelected => SelectedSettingsSection == SettingsSection.About;
     public bool HasAgents => AgentCards.Count > 0;
 
@@ -214,7 +216,8 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedSettingsSectionChanged(SettingsSection value)
     {
         OnPropertyChanged(nameof(IsGeneralSelected));
-        OnPropertyChanged(nameof(IsDeviceSelected));
+        OnPropertyChanged(nameof(IsActuatorSelected));
+        OnPropertyChanged(nameof(IsSupportSelected));
         OnPropertyChanged(nameof(IsAboutSelected));
     }
 

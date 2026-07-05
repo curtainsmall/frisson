@@ -169,8 +169,11 @@
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>一般</value>
   </data>
-  <data name="SettingsSectionDevice" xml:space="preserve">
-    <value>デバイス</value>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>アクチュエーター</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>サポート</value>
   </data>
   <data name="SettingsSectionAbout" xml:space="preserve">
     <value>情報</value>

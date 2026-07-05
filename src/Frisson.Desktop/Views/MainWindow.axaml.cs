@@ -4,8 +4,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform;
-using Avalonia.Threading;
+using Avalonia.Animation;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Frisson.Desktop.ViewModels;
 using Frisson.Core;
 namespace Frisson.Desktop.Views;
@@ -15,7 +16,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.Default;
+        ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.Default;
     }
 
     private void OnTitleBarPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -169,11 +170,18 @@ public partial class MainWindow : Window
         ScrollToSection(GeneralSection);
     }
 
-    private void OnDeviceSectionClick(object? sender, RoutedEventArgs e)
+    private void OnActuatorSectionClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm)
-            vm.SelectedSettingsSection = SettingsSection.Device;
-        ScrollToSection(DeviceSection);
+            vm.SelectedSettingsSection = SettingsSection.Actuator;
+        ScrollToSection(ActuatorSection);
+    }
+
+    private void OnSupportSectionClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            vm.SelectedSettingsSection = SettingsSection.Support;
+        ScrollToSection(SupportSection);
     }
 
     private void OnAboutSectionClick(object? sender, RoutedEventArgs e)
@@ -183,7 +191,7 @@ public partial class MainWindow : Window
         ScrollToSection(AboutSection);
     }
 
-    private void ScrollToSection(Control section)
+    private void ScrollToSection(Border section)
     {
         var transform = section.TransformToVisual(SettingsScrollViewer);
         if (transform.HasValue)
@@ -191,5 +199,36 @@ public partial class MainWindow : Window
             var point = transform.Value.Transform(new Point(0, 0));
             SettingsScrollViewer.Offset = new Vector(0, point.Y);
         }
+
+        var blinkColor = Color.FromArgb(90, 232, 212, 162);
+        var clearColor = Color.FromArgb(0, 232, 212, 162);
+
+        var animation = new Animation
+        {
+            Duration = TimeSpan.FromMilliseconds(1100),
+            FillMode = FillMode.None,
+            Children =
+            {
+                new KeyFrame
+                {
+                    Cue = new Cue(0.0),
+                    KeySpline = new KeySpline(0, 0, 1, 1),
+                    Setters = { new Setter(Border.BackgroundProperty, new SolidColorBrush(clearColor)) }
+                },
+                new KeyFrame
+                {
+                    Cue = new Cue(0.175),
+                    KeySpline = new KeySpline(0, 0, 1, 1),
+                    Setters = { new Setter(Border.BackgroundProperty, new SolidColorBrush(blinkColor)) }
+                },
+                new KeyFrame
+                {
+                    Cue = new Cue(1.0),
+                    KeySpline = new KeySpline(0.4, 0, 0.2, 1),
+                    Setters = { new Setter(Border.BackgroundProperty, new SolidColorBrush(clearColor)) }
+                }
+            }
+        };
+        _ = animation.RunAsync(section);
     }
 }

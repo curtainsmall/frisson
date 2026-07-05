@@ -169,8 +169,11 @@
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>General</value>
   </data>
-  <data name="SettingsSectionDevice" xml:space="preserve">
-    <value>Device</value>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>Actuator</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>Support</value>
   </data>
   <data name="SettingsSectionAbout" xml:space="preserve">
     <value>About</value>

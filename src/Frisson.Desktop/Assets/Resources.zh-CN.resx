@@ -169,8 +169,11 @@
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>通用</value>
   </data>
-  <data name="SettingsSectionDevice" xml:space="preserve">
-    <value>设备</value>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>执行端</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>支持</value>
   </data>
   <data name="SettingsSectionAbout" xml:space="preserve">
     <value>关于</value>
