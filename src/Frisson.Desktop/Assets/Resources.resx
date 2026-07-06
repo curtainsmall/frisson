@@ -157,7 +157,7 @@
     <value>Connection Request</value>
   </data>
   <data name="ConfirmConnectMsg" xml:space="preserve">
-    <value>Allow this control source to connect?</value>
+    <value>Allow this remote to connect?</value>
   </data>
   <data name="ConfirmConnectWarning" xml:space="preserve">
     <value>Only accept connections from sources you trust.</value>

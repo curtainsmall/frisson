@@ -16,10 +16,10 @@ internal class ControlDesk
     public event Action? StateChanged;
 
     /// <summary>
-    /// Update control state from external source JSON message.
+    /// Update control state from external Remote JSON message.
     /// Fires StateChanged after updating.
     /// </summary>
-    public void ApplyFromSource(string json)
+    public void ApplyFromRemote(string json)
     {
         var scheme = Scheme.Scheme.Parse(json);
         if (scheme is MsgScheme msg)
@@ -34,7 +34,7 @@ internal class ControlDesk
 
     /// <summary>
     /// Set strength values from local UI controls.
-    /// Only allowed when not blocked by active Control Source.
+    /// Only allowed when not blocked by active Remote.
     /// Clamps values to [0, max] and fires StateChanged.
     /// </summary>
     public void SetLocalStrength(int a, int b)

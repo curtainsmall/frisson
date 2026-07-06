@@ -157,7 +157,7 @@
     <value>接続リクエスト</value>
   </data>
   <data name="ConfirmConnectMsg" xml:space="preserve">
-    <value>このコントロールソースの接続を許可しますか？</value>
+    <value>このリモートの接続を許可しますか？</value>
   </data>
   <data name="ConfirmConnectWarning" xml:space="preserve">
     <value>信頼できるソースからの接続のみ許可してください。</value>

@@ -54,7 +54,7 @@ internal class AgentManager
         _agents[agent.Id] = agent;
 
         if (agent is RemoteAgent remote)
-            remote.ForwardToControlDesk = _desk.ApplyFromSource;
+            remote.ForwardToControlDesk = _desk.ApplyFromRemote;
 
         if (agent is ActuatorAgent da)
             da.StateUpdated += () => ActuatorStateUpdated?.Invoke(da.Id);

@@ -274,7 +274,7 @@
                             <Border Grid.Row="2" Background="Transparent" />
                         </Grid>
 
-                        <!-- Control Sources Page -->
+                        <!-- Remotes Page -->
                         <Grid IsVisible="{Binding IsRemotesSelected}" ColumnDefinitions="260, 8, *">
                             <!-- Left: Source Card List -->
                             <Grid Grid.Column="0" RowDefinitions="Auto, *">
