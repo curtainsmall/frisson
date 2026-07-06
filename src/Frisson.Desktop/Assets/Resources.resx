@@ -120,7 +120,7 @@
     <value>Version</value>
   </data>
   <data name="VersionUnknown" xml:space="preserve">
-    <value>Unknown</value>
+    <value>Not Specified</value>
   </data>
   <data name="RemoteName" xml:space="preserve">
     <value>Name</value>

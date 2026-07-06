@@ -89,7 +89,7 @@ def build_windows(tag):
     csproj = "src/Frisson.Desktop/Frisson.Desktop.csproj"
     common_props = [
         f"-p:Version={semver_ver}",
-        f"-p:AssemblyVersion={numeric_ver}",
+        f"-p:AssemblyVersion={numeric_ver}.1",
         f"-p:FileVersion={numeric_ver}",
         f"-p:InformationalVersion={semver_ver}",
     ]
