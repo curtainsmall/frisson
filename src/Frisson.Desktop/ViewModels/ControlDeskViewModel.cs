@@ -15,10 +15,10 @@ public partial class ControlDeskViewModel : ViewModelBase
     private int _strengthB;
 
     [ObservableProperty]
-    private int _maxA = 200;
+    private int _maxA;
 
     [ObservableProperty]
-    private int _maxB = 200;
+    private int _maxB;
 
     public ControlDeskViewModel()
     {
@@ -30,6 +30,8 @@ public partial class ControlDeskViewModel : ViewModelBase
     {
         StrengthA = AppCore.Instance.GetControlDeskStrengthA();
         StrengthB = AppCore.Instance.GetControlDeskStrengthB();
+        MaxA = AppCore.Instance.GetControlDeskMaxA();
+        MaxB = AppCore.Instance.GetControlDeskMaxB();
     }
 
     private void OnControlDeskStateChanged()
@@ -38,10 +40,10 @@ public partial class ControlDeskViewModel : ViewModelBase
     }
 
     public void AdjustA(int step) =>
-        AppCore.Instance.SetControlDeskStrength(Math.Clamp(StrengthA + step, 0, MaxA), StrengthB);
+        AppCore.Instance.SetControlDeskStrength(StrengthA + step, StrengthB);
 
     public void AdjustB(int step) =>
-        AppCore.Instance.SetControlDeskStrength(StrengthA, Math.Clamp(StrengthB + step, 0, MaxB));
+        AppCore.Instance.SetControlDeskStrength(StrengthA, StrengthB + step);
 
     public void OnScrollA(int delta, bool shift) =>
         AdjustA(shift ? 10 * Math.Sign(delta) : Math.Sign(delta));
@@ -51,15 +53,11 @@ public partial class ControlDeskViewModel : ViewModelBase
 
     public void SetMaxA(int value)
     {
-        MaxA = value;
-        if (StrengthA > value)
-            AppCore.Instance.SetControlDeskStrength(value, StrengthB);
+        AppCore.Instance.SetControlDeskMax(value, MaxB);
     }
 
     public void SetMaxB(int value)
     {
-        MaxB = value;
-        if (StrengthB > value)
-            AppCore.Instance.SetControlDeskStrength(StrengthA, value);
+        AppCore.Instance.SetControlDeskMax(MaxA, value);
     }
 }

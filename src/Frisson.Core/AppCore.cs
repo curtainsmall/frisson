@@ -96,4 +96,7 @@ public class AppCore : IDisposable
     public int GetControlDeskStrengthA() => _controlDesk.StrengthA;
     public int GetControlDeskStrengthB() => _controlDesk.StrengthB;
     public void SetControlDeskStrength(int a, int b) => _controlDesk.SetLocalStrength(a, b);
+    public int GetControlDeskMaxA() => _controlDesk.MaxA;
+    public int GetControlDeskMaxB() => _controlDesk.MaxB;
+    public void SetControlDeskMax(int a, int b) => _controlDesk.SetMax(a, b);
 }

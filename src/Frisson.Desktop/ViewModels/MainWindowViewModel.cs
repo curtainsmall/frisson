@@ -461,9 +461,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (int.TryParse(EditMaxAValue, out var v))
         {
-            v = Math.Clamp(v, 0, 200);
             ControlDeskViewModel.SetMaxA(v);
-            EditMaxAValue = v.ToString();
+            EditMaxAValue = ControlDeskViewModel.MaxA.ToString();
         }
         else
         {
@@ -480,9 +479,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (int.TryParse(EditMaxBValue, out var v))
         {
-            v = Math.Clamp(v, 0, 200);
             ControlDeskViewModel.SetMaxB(v);
-            EditMaxBValue = v.ToString();
+            EditMaxBValue = ControlDeskViewModel.MaxB.ToString();
         }
         else
         {
