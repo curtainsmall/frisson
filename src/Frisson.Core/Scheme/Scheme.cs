@@ -32,6 +32,8 @@ public abstract class Scheme
             {
                 "bind" => TryParseBind(root),
                 "msg"  => Actuator.MsgScheme.FromJson(root),
+                "set"  => Remote.SetScheme.FromJson(root),
+                "vary" => Remote.VaryScheme.FromJson(root),
                 _ => null
             };
         }

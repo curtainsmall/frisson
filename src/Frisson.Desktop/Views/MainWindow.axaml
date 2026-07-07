@@ -315,7 +315,7 @@
                                                                         VerticalAlignment="Center"
                                                                         HorizontalAlignment="Center"
                                                                         Margin="0,0,10,0"
-                                                                        Background="{Binding IsActiveSource,
+                                                                        Background="{Binding IsActiveRemote,
                                                                             Converter={x:Static converters:BoolToBrushConverter.Instance},
                                                                             ConverterParameter='#D4AF37;#555555'}" />
                                                                 <!-- Source name -->
@@ -419,7 +419,7 @@
                                     </StackPanel>
                                     <!-- Toggle Button -->
                                     <Button Grid.Row="3"
-                                            Command="{Binding ToggleActiveSourceCommand}"
+                                            Command="{Binding ToggleActiveRemoteCommand}"
                                             CommandParameter="{Binding SelectedCard.AgentId}"
                                             HorizontalAlignment="Stretch" Height="36"
                                             CornerRadius="4"
@@ -428,24 +428,24 @@
                                         <Grid>
                                             <!-- Inactive state: Set Active -->
                                             <TextBlock Text="{loc:Loc ActionSetActive}"
-                                                       IsVisible="{Binding SelectedCard.IsActiveSource,
+                                                       IsVisible="{Binding SelectedCard.IsActiveRemote,
                                                            Converter={x:Static converters:InvertBoolConverter.Instance}}"
                                                        FontSize="13" FontWeight="SemiBold"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
                                             <!-- Active state: Set Inactive -->
                                             <TextBlock Text="{loc:Loc ActionSetInactive}"
-                                                       IsVisible="{Binding SelectedCard.IsActiveSource}"
+                                                       IsVisible="{Binding SelectedCard.IsActiveRemote}"
                                                        FontSize="13" FontWeight="SemiBold"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center" />
                                         </Grid>
                                         <Button.Styles>
                                             <Style Selector="Button">
                                                 <Setter Property="Background"
-                                                        Value="{Binding SelectedCard.IsActiveSource,
+                                                        Value="{Binding SelectedCard.IsActiveRemote,
                                                             Converter={x:Static converters:BoolToBrushConverter.Instance},
                                                             ConverterParameter='#2d2d2d;#D4AF37'}" />
                                                 <Setter Property="Foreground"
-                                                        Value="{Binding SelectedCard.IsActiveSource,
+                                                        Value="{Binding SelectedCard.IsActiveRemote,
                                                             Converter={x:Static converters:BoolToBrushConverter.Instance},
                                                             ConverterParameter='#D4AF37;#1a1a1a'}" />
                                             </Style>

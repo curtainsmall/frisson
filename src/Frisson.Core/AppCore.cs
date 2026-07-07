@@ -25,8 +25,8 @@ public class AppCore : IDisposable
     public event EventHandler<AgentEventArgs>? AgentClosing;
     public event Action<Guid>? ActuatorActivated;
     public event Action<Guid>? ActuatorDeactivated;
-    public event Action<Guid>? SourceActivated;
-    public event Action? SourceDeactivated;
+    public event Action<Guid>? RemoteActivated;
+    public event Action? RemoteDeactivated;
     public event Action<Guid>? ActuatorStateUpdated;
     public event Action<Guid, string>? RemoteBindingRequested;
 
@@ -53,8 +53,8 @@ public class AppCore : IDisposable
         _agentManager.AgentClosing += (_, e) => AgentClosing?.Invoke(this, e);
         _agentManager.ActuatorActivated += id => ActuatorActivated?.Invoke(id);
         _agentManager.ActuatorDeactivated += id => ActuatorDeactivated?.Invoke(id);
-        _agentManager.SourceActivated += id => SourceActivated?.Invoke(id);
-        _agentManager.SourceDeactivated += () => SourceDeactivated?.Invoke();
+        _agentManager.RemoteActivated += id => RemoteActivated?.Invoke(id);
+        _agentManager.RemoteDeactivated += () => RemoteDeactivated?.Invoke();
         _agentManager.ActuatorStateUpdated += id => ActuatorStateUpdated?.Invoke(id);
 
         // Forward ControlDesk state changes to UI layer
@@ -89,8 +89,8 @@ public class AppCore : IDisposable
     public void AcceptRemote(Guid clientId) => _wsServer.AcceptRemote(clientId);
     public void RejectRemote(Guid clientId) => _wsServer.RejectRemote(clientId);
 
-    public void SetActiveSource(Guid id) => _agentManager.SetActiveSource(id);
-    public void ClearActiveSource() => _agentManager.ClearActiveSource();
+    public void SetActiveRemote(Guid id) => _agentManager.SetActiveRemote(id);
+    public void ClearActiveRemote() => _agentManager.ClearActiveRemote();
     public Agent.Agent? GetAgent(Guid id) => _agentManager.GetAgent(id);
 
     public int GetControlDeskStrengthA() => _controlDesk.StrengthA;

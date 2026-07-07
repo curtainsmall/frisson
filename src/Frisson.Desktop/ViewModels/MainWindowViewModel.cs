@@ -65,16 +65,16 @@ public class ConnectedAgentCard : INotifyPropertyChanged
         }
     }
 
-    private bool _isActiveSource;
-    public bool IsActiveSource
+    private bool _isActiveRemote;
+    public bool IsActiveRemote
     {
-        get => _isActiveSource;
+        get => _isActiveRemote;
         set
         {
-            if (_isActiveSource != value)
+            if (_isActiveRemote != value)
             {
-                _isActiveSource = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActiveSource)));
+                _isActiveRemote = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsActiveRemote)));
             }
         }
     }
@@ -305,8 +305,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         AppCore.Instance.AgentConnected += OnAgentConnected;
         AppCore.Instance.AgentClosing += OnAgentClosing;
-        AppCore.Instance.SourceActivated += OnSourceActivated;
-        AppCore.Instance.SourceDeactivated += OnSourceDeactivated;
+        AppCore.Instance.RemoteActivated += OnRemoteActivated;
+        AppCore.Instance.RemoteDeactivated += OnRemoteDeactivated;
         AppCore.Instance.ActuatorStateUpdated += OnActuatorStateUpdated;
         AppCore.Instance.RemoteBindingRequested += OnRemoteBindingRequested;
 
@@ -318,20 +318,20 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
-    private Guid? _activeSourceId;
+    private Guid? _activeRemoteId;
 
-    private void OnSourceActivated(Guid agentId)
+    private void OnRemoteActivated(Guid agentId)
     {
-        _activeSourceId = agentId;
+        _activeRemoteId = agentId;
         foreach (var card in AgentCards)
-            card.IsActiveSource = card.AgentId == agentId;
+            card.IsActiveRemote = card.AgentId == agentId;
     }
 
-    private void OnSourceDeactivated()
+    private void OnRemoteDeactivated()
     {
-        _activeSourceId = null;
+        _activeRemoteId = null;
         foreach (var card in AgentCards)
-            card.IsActiveSource = false;
+            card.IsActiveRemote = false;
     }
 
     private void OnActuatorStateUpdated(Guid agentId)
@@ -354,14 +354,14 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ToggleActiveSource(Guid agentId)
+    private void ToggleActiveRemote(Guid agentId)
     {
-        if (_activeSourceId == agentId)
-            AppCore.Instance.ClearActiveSource();
+        if (_activeRemoteId == agentId)
+            AppCore.Instance.ClearActiveRemote();
         else
         {
-            AppCore.Instance.ClearActiveSource();
-            AppCore.Instance.SetActiveSource(agentId);
+            AppCore.Instance.ClearActiveRemote();
+            AppCore.Instance.SetActiveRemote(agentId);
         }
     }
 

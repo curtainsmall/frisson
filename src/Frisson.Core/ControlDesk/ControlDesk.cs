@@ -2,7 +2,9 @@ using System;
 using System.Text.Json;
 
 using Frisson.Core.Agent.Actuator;
+using Frisson.Core.Scheme;
 using Frisson.Core.Scheme.Actuator;
+using Frisson.Core.Scheme.Remote;
 
 namespace Frisson.Core;
 
@@ -19,16 +21,48 @@ internal class ControlDesk
 
     /// <summary>
     /// Update control state from external Remote JSON message.
+    /// Supports SetScheme (absolute set) and VaryScheme (delta).
     /// Fires StateChanged after updating.
     /// </summary>
     public void ApplyFromRemote(string json)
     {
         var scheme = Scheme.Scheme.Parse(json);
-        if (scheme is MsgScheme msg)
+
+        bool changed = scheme switch
         {
-            // Parse message field for strength/pulse commands
-        }
-        StateChanged?.Invoke();
+            SetScheme setMsg => ApplySet(setMsg),
+            VaryScheme varyMsg => ApplyVary(varyMsg),
+            _ => false
+        };
+
+        if (changed)
+            StateChanged?.Invoke();
+    }
+
+    private bool ApplySet(SetScheme msg)
+    {
+        var ch = char.ToUpperInvariant(msg.Channel.Length > 0 ? msg.Channel[0] : '\0');
+        if (ch != 'A' && ch != 'B') return false;
+
+        var clamped = Math.Clamp(msg.Value, 0, ch == 'A' ? MaxA : MaxB);
+
+        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return true; }
+        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return true; }
+        return false;
+    }
+
+    private bool ApplyVary(VaryScheme msg)
+    {
+        var ch = char.ToUpperInvariant(msg.Channel.Length > 0 ? msg.Channel[0] : '\0');
+        if (ch != 'A' && ch != 'B') return false;
+
+        var current = ch == 'A' ? StrengthA : StrengthB;
+        var max = ch == 'A' ? MaxA : MaxB;
+        var clamped = Math.Clamp(current + msg.Value, 0, max);
+
+        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return true; }
+        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return true; }
+        return false;
     }
 
     public void SetBlocked(bool blocked) => _blocked = blocked;

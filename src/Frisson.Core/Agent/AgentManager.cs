@@ -24,14 +24,14 @@ internal class AgentManager
     HashSet<Guid> _removing = new();
     ConcurrentDictionary<Guid, Agent> _agents = new();
     HashSet<Guid> _activeActuators = new();
-    Guid? _activeSource;
+    Guid? _activeRemote;
 
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
     public event Action<Guid>? ActuatorActivated;
     public event Action<Guid>? ActuatorDeactivated;
-    public event Action<Guid>? SourceActivated;
-    public event Action? SourceDeactivated;
+    public event Action<Guid>? RemoteActivated;
+    public event Action? RemoteDeactivated;
     public event Action<Guid>? ActuatorStateUpdated;
 
     public AgentManager(ControlDesk desk, Action<Guid> closeClient)
@@ -77,7 +77,7 @@ internal class AgentManager
                 AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
                 _agents.TryRemove(id, out _);
                 _activeActuators.Remove(id);
-                if (_activeSource == id) _activeSource = null;
+                if (_activeRemote == id) _activeRemote = null;
                 agent.Dispose();
                 _closeClient?.Invoke(id);
             }
@@ -100,18 +100,18 @@ internal class AgentManager
         ActuatorDeactivated?.Invoke(id);
     }
 
-    public void SetActiveSource(Guid id)
+    public void SetActiveRemote(Guid id)
     {
-        _activeSource = id;
+        _activeRemote = id;
         _desk.SetBlocked(true);
-        SourceActivated?.Invoke(id);
+        RemoteActivated?.Invoke(id);
     }
 
-    public void ClearActiveSource()
+    public void ClearActiveRemote()
     {
-        _activeSource = null;
+        _activeRemote = null;
         _desk.SetBlocked(false);
-        SourceDeactivated?.Invoke();
+        RemoteDeactivated?.Invoke();
     }
 
     public Agent? GetAgent(Guid id)

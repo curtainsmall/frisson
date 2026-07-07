@@ -61,7 +61,7 @@ public partial class MainWindow : Window
             return;
 
         if (DataContext is MainWindowViewModel vm)
-            vm.ToggleActiveSourceCommand.Execute(card.AgentId);
+            vm.ToggleActiveRemoteCommand.Execute(card.AgentId);
     }
 
     // === Control Desk strength control handlers ===
