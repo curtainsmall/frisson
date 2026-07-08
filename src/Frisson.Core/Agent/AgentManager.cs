@@ -54,7 +54,19 @@ internal class AgentManager
         _agents[agent.Id] = agent;
 
         if (agent is RemoteAgent remote)
-            remote.ForwardToControlDesk = _desk.ApplyFromRemote;
+            remote.ForwardToControlDesk = json =>
+            {
+                // 1. Only Active Remote may write
+                if (_activeRemote != null && _activeRemote != remote.Id)
+                    return;
+
+                // 2. Apply write; reply state if changed
+                if (_desk.ApplyFromRemote(json))
+                {
+                    var state = _desk.ToRemoteStateMessage();
+                    remote.SendFunc?.Invoke(state);
+                }
+            };
 
         if (agent is ActuatorAgent da)
             da.StateUpdated += () => ActuatorStateUpdated?.Invoke(da.Id);
@@ -77,7 +89,7 @@ internal class AgentManager
                 AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
                 _agents.TryRemove(id, out _);
                 _activeActuators.Remove(id);
-                if (_activeRemote == id) _activeRemote = null;
+                if (_activeRemote == id) ClearActiveRemote();
                 agent.Dispose();
                 _closeClient?.Invoke(id);
             }

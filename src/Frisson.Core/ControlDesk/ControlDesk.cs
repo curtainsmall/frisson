@@ -23,8 +23,9 @@ internal class ControlDesk
     /// Update control state from external Remote JSON message.
     /// Supports SetScheme (absolute set) and VaryScheme (delta).
     /// Fires StateChanged after updating.
+    /// Returns true if any strength value changed.
     /// </summary>
-    public void ApplyFromRemote(string json)
+    public bool ApplyFromRemote(string json)
     {
         var scheme = Scheme.Scheme.Parse(json);
 
@@ -37,6 +38,8 @@ internal class ControlDesk
 
         if (changed)
             StateChanged?.Invoke();
+
+        return changed;
     }
 
     private bool ApplySet(SetScheme msg)
@@ -111,6 +114,21 @@ internal class ControlDesk
 
         if (changed)
             StateChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Serialize current strength state to a state message for Remote.
+    /// </summary>
+    public string ToRemoteStateMessage()
+    {
+        return JsonSerializer.Serialize(new
+        {
+            type = "state",
+            a = StrengthA,
+            b = StrengthB,
+            maxA = MaxA,
+            maxB = MaxB
+        });
     }
 
     /// <summary>
