@@ -272,6 +272,21 @@
 
                             <!-- Row 2: Bottom placeholder (layout TBD later) -->
                             <Border Grid.Row="2" Background="Transparent" />
+
+                            <!-- Blocked overlay — covers all rows on top -->
+                            <Border Grid.RowSpan="3"
+                                    Background="#4D1a1a1a"
+                                    IsVisible="{Binding ControlDeskViewModel.IsBlocked}"
+                                    PointerPressed="OnBlockedOverlayClick">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           TextAlignment="Center"
+                                           FontSize="15">
+                                    <Run Foreground="White" Text="Overridden by" />
+                                    <LineBreak />
+                                    <Run Foreground="#FFD700" Text="{Binding ControlDeskViewModel.ActiveRemoteName}" />
+                                </TextBlock>
+                            </Border>
                         </Grid>
 
                         <!-- Remotes Page -->

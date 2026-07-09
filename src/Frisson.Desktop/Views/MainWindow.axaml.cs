@@ -151,6 +151,12 @@ public partial class MainWindow : Window
         vm.CommitMaxB();
     }
 
+    private void OnBlockedOverlayClick(object? sender, PointerPressedEventArgs e)
+    {
+        // Eat the event — overlay blocks all interaction
+        e.Handled = true;
+    }
+
     private void OnMaxBKeyDown(object? sender, KeyEventArgs e)
     {
         var vm = (DataContext as MainWindowViewModel);

@@ -25,6 +25,8 @@ internal class AgentManager
 {
     private static readonly string AckJson = JsonSerializer.Serialize(new { type = "ack" });
     private static readonly string InactiveErrorJson = JsonSerializer.Serialize(new { type = "error", message = "Inactive" });
+    private static readonly string ActiveJson = JsonSerializer.Serialize(new { type = "activated" });
+    private static readonly string DeactiveJson = JsonSerializer.Serialize(new { type = "deactivated" });
 
     ControlDesk _desk;
     Action<Guid> _closeClient;
@@ -63,8 +65,8 @@ internal class AgentManager
         if (agent is RemoteAgent remote)
             remote.ForwardToControlDesk = scheme =>
             {
-                // 1. Only Active Remote may write; others get Inactive error
-                if (_activeRemote != null && _activeRemote != remote.Id)
+                // 1. Only the active Remote may write; all others get Inactive error
+                if (_activeRemote != remote.Id)
                 {
                     remote.SendFunc?.Invoke(InactiveErrorJson);
                     return;
@@ -101,9 +103,9 @@ internal class AgentManager
             if (_agents.TryGetValue(id, out var agent))
             {
                 AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
+                if (_activeRemote == id) ClearActiveRemote();
                 _agents.TryRemove(id, out _);
                 _activeActuators.Remove(id);
-                if (_activeRemote == id) ClearActiveRemote();
                 agent.Dispose();
                 _closeClient?.Invoke(id);
             }
@@ -130,19 +132,37 @@ internal class AgentManager
     {
         _activeRemote = id;
         _desk.SetBlocked(true);
+        SendToRemote(id, ActiveJson);
         RemoteActivated?.Invoke(id);
     }
 
     public void ClearActiveRemote()
     {
+        var prevId = _activeRemote;
         _activeRemote = null;
         _desk.SetBlocked(false);
+        if (prevId != null)
+            SendToRemote(prevId.Value, DeactiveJson);
         RemoteDeactivated?.Invoke();
+    }
+
+    private void SendToRemote(Guid id, string json)
+    {
+        if (_agents.TryGetValue(id, out var a) && a is RemoteAgent r)
+            r.SendFunc?.Invoke(json);
     }
 
     public Agent? GetAgent(Guid id)
     {
         _agents.TryGetValue(id, out var agent);
         return agent;
+    }
+
+    public string? GetActiveRemoteName()
+    {
+        if (_activeRemote == null) return null;
+        if (_agents.TryGetValue(_activeRemote.Value, out var a) && a is RemoteAgent r)
+            return r.Name;
+        return null;
     }
 }

@@ -63,6 +63,7 @@ class FrissonLink:
         self._thread = None
         self._connected = False
         self._bound = False
+        self.paused = True
 
     def start(self):
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -129,7 +130,17 @@ class FrissonLink:
 
             # Keep alive — read messages until ws closes
             async for raw in self._ws:
-                pass  # incoming messages are ignored
+                try:
+                    data = json.loads(raw)
+                    msg_type = data.get("type", "")
+                    if msg_type == "deactivated":
+                        self.paused = True
+                        print("[Frisson] Remote deactivated — game paused.")
+                    elif msg_type == "activated":
+                        self.paused = False
+                        print("[Frisson] Remote activated — game resumed.")
+                except (json.JSONDecodeError, KeyError):
+                    pass
 
         except Exception as e:
             print(f"[Frisson] Connection failed: {e}")
@@ -345,6 +356,12 @@ class Tetris:
         txt = small_font.render(status_text, True, status_color)
         surface.blit(txt, (sx, y))
 
+        # Pause overlay
+        if self.frisson.paused and not self.game_over:
+            pause_text = big_font.render("PAUSED", True, (255, 200, 0))
+            rect = pause_text.get_rect(center=(CELL * COLS // 2, CELL * ROWS // 2))
+            surface.blit(pause_text, rect)
+
         # Game over — text hint only, no overlay covering the board
         if self.game_over:
             go_text = big_font.render("GAME OVER", True, (255, 60, 60))
@@ -404,28 +421,34 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     game.restart()
-                elif event.key == pygame.K_LEFT:
-                    game.move(-1, 0)
-                    das_dir = -1
-                    das_timer = 0.0
-                    das_charged = False
-                elif event.key == pygame.K_RIGHT:
-                    game.move(1, 0)
-                    das_dir = 1
-                    das_timer = 0.0
-                    das_charged = False
-                elif event.key == pygame.K_DOWN:
-                    soft_drop = True
-                elif event.key == pygame.K_UP:
-                    game.rotate()
-                elif event.key == pygame.K_SPACE:
-                    game.hard_drop()
+                elif not frisson.paused:
+                    if event.key == pygame.K_LEFT:
+                        game.move(-1, 0)
+                        das_dir = -1
+                        das_timer = 0.0
+                        das_charged = False
+                    elif event.key == pygame.K_RIGHT:
+                        game.move(1, 0)
+                        das_dir = 1
+                        das_timer = 0.0
+                        das_charged = False
+                    elif event.key == pygame.K_DOWN:
+                        soft_drop = True
+                    elif event.key == pygame.K_UP:
+                        game.rotate()
+                    elif event.key == pygame.K_SPACE:
+                        game.hard_drop()
 
             elif event.type == pygame.KEYUP:
                 if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
                     das_dir = 0
                 if event.key == pygame.K_DOWN:
                     soft_drop = False
+
+        if frisson.paused:
+            game.draw(screen)
+            pygame.display.flip()
+            continue
 
         # DAS
         if das_dir != 0:

@@ -62,7 +62,12 @@ internal class ControlDesk
         return null;
     }
 
-    public void SetBlocked(bool blocked) => _blocked = blocked;
+    public void SetBlocked(bool blocked)
+    {
+        if (_blocked == blocked) return;
+        _blocked = blocked;
+        StateChanged?.Invoke();
+    }
     public bool IsBlocked => _blocked;
 
     /// <summary>

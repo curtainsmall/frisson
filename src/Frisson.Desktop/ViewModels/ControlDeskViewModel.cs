@@ -20,6 +20,12 @@ public partial class ControlDeskViewModel : ViewModelBase
     [ObservableProperty]
     private int _maxB;
 
+    [ObservableProperty]
+    private bool _isBlocked;
+
+    [ObservableProperty]
+    private string? _activeRemoteName;
+
     public ControlDeskViewModel()
     {
         AppCore.Instance.ControlDeskStateChanged += OnControlDeskStateChanged;
@@ -32,6 +38,8 @@ public partial class ControlDeskViewModel : ViewModelBase
         StrengthB = AppCore.Instance.GetControlDeskStrengthB();
         MaxA = AppCore.Instance.GetControlDeskMaxA();
         MaxB = AppCore.Instance.GetControlDeskMaxB();
+        IsBlocked = AppCore.Instance.GetControlDeskIsBlocked();
+        ActiveRemoteName = AppCore.Instance.GetActiveRemoteName();
     }
 
     private void OnControlDeskStateChanged()
