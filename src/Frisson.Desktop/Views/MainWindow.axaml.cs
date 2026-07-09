@@ -55,6 +55,12 @@ public partial class MainWindow : Window
         card.IsExpanded = !card.IsExpanded;
     }
 
+    private void OnActiveRemoteNamePointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            vm.NavigateToActiveRemoteCommand.Execute(null);
+    }
+
     private void OnAgentCardDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
@@ -149,12 +155,6 @@ public partial class MainWindow : Window
         var vm = (DataContext as MainWindowViewModel);
         if (vm == null) return;
         vm.CommitMaxB();
-    }
-
-    private void OnBlockedOverlayClick(object? sender, PointerPressedEventArgs e)
-    {
-        // Eat the event — overlay blocks all interaction
-        e.Handled = true;
     }
 
     private void OnMaxBKeyDown(object? sender, KeyEventArgs e)

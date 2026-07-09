@@ -165,4 +165,6 @@ internal class AgentManager
             return r.Name;
         return null;
     }
+
+    public Guid? GetActiveRemoteId() => _activeRemote;
 }

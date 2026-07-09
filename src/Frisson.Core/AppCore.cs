@@ -105,4 +105,5 @@ public class AppCore : IDisposable
     public void SetControlDeskMax(int a, int b) => _controlDesk.SetMax(a, b);
     public bool GetControlDeskIsBlocked() => _controlDesk.IsBlocked;
     public string? GetActiveRemoteName() => _agentManager.GetActiveRemoteName();
+    public Guid? GetActiveRemoteId() => _agentManager.GetActiveRemoteId();
 }

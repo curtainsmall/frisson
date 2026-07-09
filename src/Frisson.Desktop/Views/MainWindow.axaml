@@ -276,16 +276,21 @@
                             <!-- Blocked overlay — covers all rows on top -->
                             <Border Grid.RowSpan="3"
                                     Background="#4D1a1a1a"
-                                    IsVisible="{Binding ControlDeskViewModel.IsBlocked}"
-                                    PointerPressed="OnBlockedOverlayClick">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           FontSize="15">
-                                    <Run Foreground="White" Text="Overridden by" />
-                                    <LineBreak />
-                                    <Run Foreground="#FFD700" Text="{Binding ControlDeskViewModel.ActiveRemoteName}" />
-                                </TextBlock>
+                                    IsVisible="{Binding ControlDeskViewModel.IsBlocked}">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Overridden by"
+                                               Foreground="White"
+                                               FontSize="15"
+                                               TextAlignment="Center"
+                                               HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding ControlDeskViewModel.ActiveRemoteName}"
+                                               Foreground="#FFD700"
+                                               FontSize="15"
+                                               TextAlignment="Center"
+                                               Cursor="Hand"
+                                               PointerPressed="OnActiveRemoteNamePointerPressed" />
+                                </StackPanel>
                             </Border>
                         </Grid>
 

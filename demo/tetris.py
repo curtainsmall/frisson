@@ -445,6 +445,12 @@ def main():
                 if event.key == pygame.K_DOWN:
                     soft_drop = False
 
+        # Exit when Frisson disconnects
+        if not frisson._connected:
+            print("[Frisson] Connection lost — exiting.")
+            running = False
+            break
+
         if frisson.paused:
             game.draw(screen)
             pygame.display.flip()

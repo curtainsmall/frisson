@@ -236,6 +236,15 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void NavigateToActiveRemote()
+    {
+        CurrentPage = NavPage.Remotes;
+        var id = AppCore.Instance.GetActiveRemoteId();
+        if (id.HasValue)
+            SelectAgent(id.Value);
+    }
+
+    [RelayCommand]
     private async Task DisconnectAgent(Guid agentId)
     {
         var card = AgentCards.FirstOrDefault(c => c.AgentId == agentId);
