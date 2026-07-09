@@ -14,11 +14,9 @@
 !setup.iss
 !publish.py
 
-# Demo (only track these)
+# Demo 
 !demo/
-!demo/ctrl.py
-!demo/input.json
-!demo/output.json
+!demo/tetris.py
 
 # Build outputs (re-ignore)
 src/**/bin/

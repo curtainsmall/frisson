@@ -40,6 +40,10 @@ public class AppCore : IDisposable
         _wsServer = new WebSocketServer();
         _agentManager = new AgentManager(_controlDesk, id => _wsServer.TryRemove(id));
 
+        // Apply persisted settings (caller provides code defaults)
+        var s = SettingsService.Instance;
+        _controlDesk.SetMax(s.TryGet("maxA", out int ma) ? ma : 100, s.TryGet("maxB", out int mb) ? mb : 100);
+
         // WebSocketServer → AgentManager
         _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
         _wsServer.ClientDisconnected += id => _agentManager.RemoveAgent(id);

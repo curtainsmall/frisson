@@ -56,6 +56,7 @@ public partial class Desktop : Application
             desktop.Exit += (s, e) =>
             {
                 _appCore.Dispose();
+                SettingsService.Instance.Save();
 
                 var logDir = System.IO.Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

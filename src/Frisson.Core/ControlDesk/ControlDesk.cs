@@ -1,9 +1,7 @@
-using System;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
-using Frisson.Core.Agent.Actuator;
 using Frisson.Core.Scheme;
-using Frisson.Core.Scheme.Actuator;
 using Frisson.Core.Scheme.Remote;
 
 namespace Frisson.Core;
@@ -12,60 +10,56 @@ internal class ControlDesk
 {
     public int StrengthA { get; set; }
     public int StrengthB { get; set; }
-    public int MaxA { get; set; } = 200;
-    public int MaxB { get; set; } = 200;
+    public int MaxA { get; set; } = 100;
+    public int MaxB { get; set; } = 100;
 
     bool _blocked;
 
     public event Action? StateChanged;
 
     /// <summary>
-    /// Update control state from external Remote JSON message.
-    /// Supports SetScheme (absolute set) and VaryScheme (delta).
-    /// Fires StateChanged after updating.
-    /// Returns true if any strength value changed.
+    /// Apply a parsed Remote scheme. Returns a JsonNode reply (state message)
+    /// if state changed, or null if nothing changed. Fires StateChanged on change.
     /// </summary>
-    public bool ApplyFromRemote(string json)
+    public JsonNode? ApplyFromRemote(Scheme.Scheme scheme)
     {
-        var scheme = Scheme.Scheme.Parse(json);
-
-        bool changed = scheme switch
+        JsonNode? result = scheme switch
         {
             SetScheme setMsg => ApplySet(setMsg),
             VaryScheme varyMsg => ApplyVary(varyMsg),
-            _ => false
+            _ => null
         };
 
-        if (changed)
+        if (result != null)
             StateChanged?.Invoke();
 
-        return changed;
+        return result;
     }
 
-    private bool ApplySet(SetScheme msg)
+    private JsonNode? ApplySet(SetScheme msg)
     {
         var ch = char.ToUpperInvariant(msg.Channel.Length > 0 ? msg.Channel[0] : '\0');
-        if (ch != 'A' && ch != 'B') return false;
+        if (ch != 'A' && ch != 'B') return null;
 
         var clamped = Math.Clamp(msg.Value, 0, ch == 'A' ? MaxA : MaxB);
 
-        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return true; }
-        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return true; }
-        return false;
+        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return ToRemoteStateNode(); }
+        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return ToRemoteStateNode(); }
+        return null;
     }
 
-    private bool ApplyVary(VaryScheme msg)
+    private JsonNode? ApplyVary(VaryScheme msg)
     {
         var ch = char.ToUpperInvariant(msg.Channel.Length > 0 ? msg.Channel[0] : '\0');
-        if (ch != 'A' && ch != 'B') return false;
+        if (ch != 'A' && ch != 'B') return null;
 
         var current = ch == 'A' ? StrengthA : StrengthB;
         var max = ch == 'A' ? MaxA : MaxB;
         var clamped = Math.Clamp(current + msg.Value, 0, max);
 
-        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return true; }
-        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return true; }
-        return false;
+        if (ch == 'A' && StrengthA != clamped) { StrengthA = clamped; return ToRemoteStateNode(); }
+        if (ch == 'B' && StrengthB != clamped) { StrengthB = clamped; return ToRemoteStateNode(); }
+        return null;
     }
 
     public void SetBlocked(bool blocked) => _blocked = blocked;
@@ -117,18 +111,18 @@ internal class ControlDesk
     }
 
     /// <summary>
-    /// Serialize current strength state to a state message for Remote.
+    /// Build current strength state as a JsonNode for Remote replies.
     /// </summary>
-    public string ToRemoteStateMessage()
+    public JsonNode ToRemoteStateNode()
     {
-        return JsonSerializer.Serialize(new
+        return new JsonObject
         {
-            type = "state",
-            a = StrengthA,
-            b = StrengthB,
-            maxA = MaxA,
-            maxB = MaxB
-        });
+            ["type"] = "state",
+            ["a"] = StrengthA,
+            ["b"] = StrengthB,
+            ["maxA"] = MaxA,
+            ["maxB"] = MaxB
+        };
     }
 
     /// <summary>

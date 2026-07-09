@@ -22,7 +22,7 @@ internal class WebSocketServer : IDisposable
     public event Action<Guid>? ClientDisconnected;
     public event Action<Guid, string>? RemoteBindingRequested;
 
-    private record PendingBind(Guid ClientId, string SourceName, WebSocketClient Client);
+    private record PendingBind(Guid ClientId, string SourceName, bool AlwaysReply, WebSocketClient Client);
 
     public void Start(int port)
     {
@@ -68,7 +68,7 @@ internal class WebSocketServer : IDisposable
                     {
                         var scheme = Scheme.Remote.BindScheme.TryParse(msg);
                         if (scheme == null) { TryRemove(id); return; }
-                        _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, client));
+                        _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, scheme.AlwaysReply, client));
                         RemoteBindingRequested?.Invoke(id, scheme.Name);
                     }
                     else
@@ -104,8 +104,9 @@ internal class WebSocketServer : IDisposable
         if (!_pendingBinds.TryRemove(clientId, out var pending)) return;
         if (!_clients.TryGetValue(clientId, out var client)) return;
 
-        client.Send(new Scheme.Remote.BindScheme { Id = clientId, Name = pending.SourceName }.ToJson());
+        client.Send(new Scheme.Remote.BindScheme { Id = clientId, Name = pending.SourceName, AlwaysReply = pending.AlwaysReply }.ToJson());
         var agent = new RemoteAgent(clientId, pending.SourceName, () => TryRemove(clientId));
+        agent.AlwaysReply = pending.AlwaysReply;
         agent.SendFunc = client.Send;
         client.MessageHandler = json => agent.HandleMessage(json);
         client.IsBound = true;

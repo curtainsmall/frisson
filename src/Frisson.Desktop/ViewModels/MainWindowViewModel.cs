@@ -297,7 +297,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        var currentCulture = LocalizationService.Instance.CurrentCulture.Name;
+        // Use persisted language, or OS culture, or fallback to en-US
+        var savedLang = SettingsService.Instance.TryGet("language", out string lang) ? lang : null;
+        var currentCulture = savedLang ?? LocalizationService.Instance.CurrentCulture.Name;
         var defaultLang = AvailableLanguages.FirstOrDefault(l => l.Code == currentCulture)
                           ?? AvailableLanguages.First(l => l.Code == "en-US");
         _selectedLanguage = defaultLang;
@@ -446,16 +448,20 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedLanguageChanged(LanguageOption value)
     {
         if (value != null)
+        {
             LocalizationService.Instance.SetLanguage(value.Code);
+            SettingsService.Instance.Set("language", value.Code);
+            SettingsService.Instance.Save();
+        }
     }
 
     // === Max value editing (Settings page) ===
 
     [ObservableProperty]
-    private string _editMaxAValue = "200";
+    private string _editMaxAValue = AppCore.Instance.GetControlDeskMaxA().ToString();
 
     [ObservableProperty]
-    private string _editMaxBValue = "200";
+    private string _editMaxBValue = AppCore.Instance.GetControlDeskMaxB().ToString();
 
     public void CommitMaxA()
     {
@@ -463,6 +469,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ControlDeskViewModel.SetMaxA(v);
             EditMaxAValue = ControlDeskViewModel.MaxA.ToString();
+            SettingsService.Instance.Set("maxA", ControlDeskViewModel.MaxA);
+            SettingsService.Instance.Save();
         }
         else
         {
@@ -481,6 +489,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             ControlDeskViewModel.SetMaxB(v);
             EditMaxBValue = ControlDeskViewModel.MaxB.ToString();
+            SettingsService.Instance.Set("maxB", ControlDeskViewModel.MaxB);
+            SettingsService.Instance.Save();
         }
         else
         {

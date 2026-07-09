@@ -5,7 +5,7 @@ namespace Frisson.Core.Scheme.Remote;
 
 /// <summary>
 /// Control bind reply/confirm scheme.
-/// Format: { "type": "bind", "id": "...", "name": "..." }
+/// Format: { "type": "bind", "id": "...", "name": "...", "alwaysReply": true }
 /// </summary>
 public sealed class BindScheme : SchemeBase
 {
@@ -21,13 +21,21 @@ public sealed class BindScheme : SchemeBase
     /// </summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// When true, the server will always reply with an ack for every message,
+    /// even if the state did not change or the remote is not active.
+    /// When false or omitted, the server keeps silent when there is nothing to report.
+    /// </summary>
+    public bool AlwaysReply { get; set; }
+
     public override string ToJson()
     {
         return JsonSerializer.Serialize(new
         {
             type = Type,
             id = Id.ToString(),
-            name = Name
+            name = Name,
+            alwaysReply = AlwaysReply
         });
     }
 
@@ -47,10 +55,15 @@ public sealed class BindScheme : SchemeBase
 
         root.TryGetProperty("name", out var nameProp);
 
+        bool alwaysReply = false;
+        if (root.TryGetProperty("alwaysReply", out var arProp))
+            alwaysReply = arProp.GetBoolean();
+
         return new BindScheme
         {
             Id = id,
-            Name = nameProp.GetString() ?? string.Empty
+            Name = nameProp.GetString() ?? string.Empty,
+            AlwaysReply = alwaysReply
         };
     }
 

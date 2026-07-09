@@ -1,7 +1,11 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 using Frisson.Core.Agent.Remote;
 using Frisson.Core.Agent.Actuator;
+
+using Frisson.Core.Scheme;
 
 namespace Frisson.Core.Agent;
 
@@ -19,6 +23,9 @@ public sealed class AgentEventArgs : EventArgs
 
 internal class AgentManager
 {
+    private static readonly string AckJson = JsonSerializer.Serialize(new { type = "ack" });
+    private static readonly string InactiveErrorJson = JsonSerializer.Serialize(new { type = "error", message = "Inactive" });
+
     ControlDesk _desk;
     Action<Guid> _closeClient;
     HashSet<Guid> _removing = new();
@@ -54,17 +61,24 @@ internal class AgentManager
         _agents[agent.Id] = agent;
 
         if (agent is RemoteAgent remote)
-            remote.ForwardToControlDesk = json =>
+            remote.ForwardToControlDesk = scheme =>
             {
-                // 1. Only Active Remote may write
+                // 1. Only Active Remote may write; others get Inactive error
                 if (_activeRemote != null && _activeRemote != remote.Id)
-                    return;
-
-                // 2. Apply write; reply state if changed
-                if (_desk.ApplyFromRemote(json))
                 {
-                    var state = _desk.ToRemoteStateMessage();
-                    remote.SendFunc?.Invoke(state);
+                    remote.SendFunc?.Invoke(InactiveErrorJson);
+                    return;
+                }
+
+                // 2. Apply write; reply state if changed, ack if alwaysReply, else silence
+                var reply = _desk.ApplyFromRemote(scheme);
+                if (reply != null)
+                {
+                    remote.SendFunc?.Invoke(reply.ToJsonString());
+                }
+                else if (remote.AlwaysReply)
+                {
+                    remote.SendFunc?.Invoke(AckJson);
                 }
             };
 
