@@ -711,6 +711,25 @@
                                                     </TextBlock.Text>
                                                 </TextBlock>
                                             </Grid>
+                                            <!-- Disclaimer -->
+                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{loc:Loc DisclaimerTitle}"
+                                                           Foreground="{DynamicResource PrimaryText}"
+                                                           FontSize="14"
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Center" />
+                                                <Button Grid.Column="1"
+                                                        Content="{loc:Loc DisclaimerOpen}"
+                                                        Width="140"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        CornerRadius="10"
+                                                        Background="{DynamicResource SurfaceLight}"
+                                                        Foreground="{DynamicResource PrimaryText}"
+                                                        BorderBrush="{DynamicResource AccentMuted}"
+                                                        Command="{Binding ShowDisclaimerCommand}" />
+                                            </Grid>
                                             </StackPanel>
                                             </Border>
                                     </StackPanel>
@@ -771,7 +790,7 @@
                                                             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                                         </Style>
                                                     </Border.Styles>
-                                                    <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="4">
+                                                    <Grid RowDefinitions="Auto, Auto, *" RowSpacing="4">
                                                         <!-- Row 0: status dot + name + disconnect button -->
                                                         <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
                                                             <Border Grid.Column="0"
@@ -842,14 +861,8 @@
                                                                 </MultiBinding>
                                                             </TextBlock.Text>
                                                         </TextBlock>
-                                                        <!-- Row 2: Wave queue info -->
-                                                        <TextBlock Grid.Row="2"
-                                                                   Foreground="{DynamicResource SecondaryText}"
-                                                                   FontSize="11"
-                                                                   Margin="16,0,0,0"
-                                                                   Text="{Binding WaveQueueCount, StringFormat='Wave: {0} patterns'}" />
-                                                        <!-- Row 3: Expanded detail (fade animation) -->
-                                                        <Grid Grid.Row="3"
+                                                        <!-- Row 2: Expanded detail (fade animation) -->
+                                                        <Grid Grid.Row="2"
                                                               IsVisible="{Binding IsExpanded}"
                                                               RowDefinitions="Auto, Auto"
                                                               RowSpacing="6"

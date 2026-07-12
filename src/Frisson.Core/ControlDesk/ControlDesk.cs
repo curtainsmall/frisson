@@ -144,12 +144,4 @@ internal class ControlDesk
         });
     }
 
-    /// <summary>
-    /// Serialize current pulse/waveform state to a pulse message for devices.
-    /// </summary>
-    public string ToPulseMessage()
-    {
-        // TODO: implement waveform/pulse message generation
-        return string.Empty;
-    }
 }

@@ -47,11 +47,23 @@ public partial class Desktop : Application
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
+            var vm = new MainWindowViewModel();
             MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel()
+                DataContext = vm
             };
             desktop.MainWindow = MainWindow;
+
+            MainWindow.Opened += (_, _) =>
+            {
+                // Show disclaimer on first startup
+                if (!SettingsService.Instance.TryGet("disclaimerShown", out bool _))
+                {
+                    SettingsService.Instance.Set("disclaimerShown", true);
+                    SettingsService.Instance.Save();
+                    vm.ShowDisclaimerCommand.Execute(null);
+                }
+            };
 
             desktop.Exit += (s, e) =>
             {

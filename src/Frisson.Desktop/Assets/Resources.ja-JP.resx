@@ -194,4 +194,26 @@
   <data name="OverriddenBy" xml:space="preserve">
     <value>アクティブリモート</value>
   </data>
+  <!-- 免責事項 -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>免責事項</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frissonは、物理的な動きや刺激を伴う可能性のあるサードパーティ製ハードウェアデバイスと連携します。本ソフトウェアを使用することにより、以下のことを認め、同意するものとします：
+
+1. 本ソフトウェアの使用はすべて自己責任です。
+2. Frissonの開発者は、本ソフトウェアの使用に起因する一切の傷害、損害、または損失について責任を負いません。
+3. 機器が適切に設定され、安全な環境で使用されていることを常に確認してください。
+4. デバイス固有のサポートやドキュメントについては、アクチュエーター提供元を参照してください。
+5. サードパーティ製デバイスの取扱説明書および免責事項も併せてお読みください。</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>免責事項を表示</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>了解しました</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>関連情報</value>
+  </data>
 </root>

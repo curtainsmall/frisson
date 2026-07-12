@@ -137,13 +137,6 @@ public class ConnectedAgentCard : INotifyPropertyChanged
         set { if (_maxB != value) { _maxB = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxB))); } }
     }
 
-    private int _waveQueueCount;
-    public int WaveQueueCount
-    {
-        get => _waveQueueCount;
-        set { if (_waveQueueCount != value) { _waveQueueCount = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WaveQueueCount))); } }
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void NotifyLayoutChanged()
@@ -266,6 +259,21 @@ public partial class MainWindowViewModel : ViewModelBase
         var window = new Views.LogWindow();
         if (Desktop.MainWindow is not null)
             window.Show(Desktop.MainWindow);
+    }
+
+    [RelayCommand]
+    private void ShowDisclaimer()
+    {
+        var ls = LocalizationService.Instance;
+        var vm = new DisclaimerDialogViewModel
+        {
+            Title = ls["DisclaimerTitle"],
+            Body = ls["DisclaimerBody"],
+            CloseText = ls["DisclaimerClose"]
+        };
+        var dialog = new Views.DisclaimerDialog(vm);
+        if (Desktop.MainWindow is not null)
+            dialog.ShowDialog(Desktop.MainWindow);
     }
 
     [RelayCommand]

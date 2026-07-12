@@ -194,4 +194,26 @@
   <data name="OverriddenBy" xml:space="preserve">
     <value>遙控端活躍中</value>
   </data>
+  <!-- 免責聲明 -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>免責聲明</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frisson 與第三方硬體裝置互動，這些裝置可能涉及物理運動或刺激。使用本軟體即表示您承認並接受：
+
+1. 您完全自行承擔使用本軟體的風險。
+2. Frisson 的開發者不對因使用本軟體造成的任何傷害、損壞或損失負責。
+3. 請始終確保您的裝置配置正確並在安全環境中使用。
+4. 有關裝置特定的支援和文件，請參閱您的執行器提供商。
+5. 您還應當閱讀第三方裝置的說明和免責聲明。</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>檢視免責聲明</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>我已了解</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>另請參閱</value>
+  </data>
 </root>

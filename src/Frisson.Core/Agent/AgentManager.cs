@@ -85,7 +85,12 @@ internal class AgentManager
             };
 
         if (agent is ActuatorAgent da)
+        {
             da.StateUpdated += () => ActuatorStateUpdated?.Invoke(da.Id);
+            // Auto-activate: add to active set and sync current ControlDesk state
+            _activeActuators.Add(da.Id);
+            da.SendFunc?.Invoke(_desk.ToStrengthMessage());
+        }
 
         AgentConnected?.Invoke(this, new AgentEventArgs(agent.Id, agent.GetType()));
     }

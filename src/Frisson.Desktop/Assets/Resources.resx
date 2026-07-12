@@ -194,4 +194,26 @@
   <data name="OverriddenBy" xml:space="preserve">
     <value>Active Remote</value>
   </data>
+  <!-- Disclaimer -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>Disclaimer</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frisson interfaces with third-party hardware devices that may involve physical motion or stimulation. By using this software, you acknowledge and accept that:
+
+1. You use this software entirely at your own risk.
+2. The developers of Frisson are not responsible for any injury, damage, or loss resulting from its use.
+3. Always ensure your equipment is properly configured and used in a safe environment.
+4. Refer to your actuator provider for device-specific support and documentation.
+5. You should also read the instructions and disclaimers of the third-party devices.</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>View Disclaimer</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>I Understand</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>See also</value>
+  </data>
 </root>
