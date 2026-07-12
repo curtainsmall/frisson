@@ -190,4 +190,8 @@
   <data name="ChannelB" xml:space="preserve">
     <value>B</value>
   </data>
+  <!-- 控制台遮罩 -->
+  <data name="OverriddenBy" xml:space="preserve">
+    <value>遙控端活躍中</value>
+  </data>
 </root>

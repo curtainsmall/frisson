@@ -279,7 +279,7 @@
                                     IsVisible="{Binding ControlDeskViewModel.IsBlocked}">
                                 <StackPanel HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
-                                    <TextBlock Text="Overridden by"
+                                    <TextBlock Text="{loc:Loc OverriddenBy}"
                                                Foreground="White"
                                                FontSize="15"
                                                TextAlignment="Center"

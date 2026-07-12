@@ -190,4 +190,8 @@
   <data name="ChannelB" xml:space="preserve">
     <value>B</value>
   </data>
+  <!-- Control Desk Overlay -->
+  <data name="OverriddenBy" xml:space="preserve">
+    <value>アクティブリモート</value>
+  </data>
 </root>
