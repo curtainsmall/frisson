@@ -157,7 +157,7 @@
     <value>連線請求</value>
   </data>
   <data name="ConfirmConnectMsg" xml:space="preserve">
-    <value>是否允許此遠程端連線？</value>
+    <value>是否允許此遙控端連線？</value>
   </data>
   <data name="ConfirmConnectWarning" xml:space="preserve">
     <value>請僅接受來自可信來源的連線。</value>
