@@ -5,7 +5,9 @@
     <Build Type="Release" />
     <Project Project="src/Frisson.Desktop/Frisson.Desktop.csproj" />
     <Project Project="src/Frisson.Core/Frisson.Core.csproj" />
+    <Project Project="tests/Frisson.Core.Tests/Frisson.Core.Tests.csproj" />
   </Configurations>
   <Project Path="src/Frisson.Desktop/Frisson.Desktop.csproj" />
   <Project Path="src/Frisson.Core/Frisson.Core.csproj" />
+  <Project Path="tests/Frisson.Core.Tests/Frisson.Core.Tests.csproj" />
 </Solution>

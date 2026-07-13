@@ -38,7 +38,7 @@ public sealed class VaryScheme : SchemeBase
 
         return new VaryScheme
         {
-            Channel = channelProp.GetString() ?? string.Empty,
+            Channel = channelProp.ValueKind != JsonValueKind.Undefined ? (channelProp.GetString() ?? string.Empty) : string.Empty,
             Value = valueProp.ValueKind == JsonValueKind.Number ? valueProp.GetInt32() : 0
         };
     }

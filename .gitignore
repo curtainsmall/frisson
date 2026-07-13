@@ -18,6 +18,12 @@
 !demo/
 !demo/tetris.py
 
+# Tests
+!tests/
+!tests/**
+tests/**/bin/
+tests/**/obj/
+
 # Build outputs (re-ignore)
 src/**/bin/
 src/**/obj/
