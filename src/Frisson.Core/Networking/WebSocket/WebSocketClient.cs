@@ -13,19 +13,27 @@ internal class WebSocketClient
         _socket = socket;
     }
 
-    public Task<bool> Send(string message)
+    public async Task<bool> Send(string message)
     {
-        if (!_socket.IsAvailable) return Task.FromResult(false);
+        if (!_socket.IsAvailable)
+        {
+            LoggerService.Instance.Log($"[Server] Failed to send to {Id}: socket unavailable");
+            return false;
+        }
         try
         {
-            _socket.Send(message);
-            return Task.FromResult(true);
+            await _socket.Send(message);
+            LoggerService.Instance.Log($"[Server] Sent to {Id}: {message}");
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
-            return Task.FromResult(false);
+            LoggerService.Instance.Log($"[Server] Failed to send to {Id}: {ex.Message}");
+            return false;
         }
     }
+
+
 
     public void Close() => _socket.Close();
 

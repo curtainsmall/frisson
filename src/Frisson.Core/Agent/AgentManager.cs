@@ -34,6 +34,7 @@ internal class AgentManager
     ConcurrentDictionary<Guid, Agent> _agents = new();
     HashSet<Guid> _activeActuators = new();
     Guid? _activeRemote;
+    int _lastStrengthA, _lastStrengthB;
 
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
@@ -47,14 +48,28 @@ internal class AgentManager
     {
         _desk = desk;
         _closeClient = closeClient;
+        _lastStrengthA = desk.StrengthA;
+        _lastStrengthB = desk.StrengthB;
 
-        // Subscribe to ControlDesk state changes — broadcast to all active devices
         _desk.StateChanged += () =>
         {
-            var msg = _desk.ToStrengthMessage();
+            var changedA = _desk.StrengthA != _lastStrengthA;
+            var changedB = _desk.StrengthB != _lastStrengthB;
+
+            if (!changedA && !changedB)
+                return;
+
             foreach (var id in _activeActuators)
-                if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent)
-                    a.SendFunc?.Invoke(msg);
+            {
+                if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent actuator)
+                {
+                    if (changedA) actuator.SendFunc?.Invoke(_desk.StrengthMessage(id, 1, _desk.StrengthA));
+                    if (changedB) actuator.SendFunc?.Invoke(_desk.StrengthMessage(id, 2, _desk.StrengthB));
+                }
+            }
+
+            _lastStrengthA = _desk.StrengthA;
+            _lastStrengthB = _desk.StrengthB;
         };
     }
 
@@ -84,12 +99,15 @@ internal class AgentManager
                 }
             };
 
-        if (agent is ActuatorAgent da)
+        if (agent is ActuatorAgent actuatorAgent)
         {
-            da.StateUpdated += () => ActuatorStateUpdated?.Invoke(da.Id);
+            actuatorAgent.StateUpdated += () => ActuatorStateUpdated?.Invoke(actuatorAgent.Id);
             // Auto-activate: add to active set and sync current ControlDesk state
-            _activeActuators.Add(da.Id);
-            da.SendFunc?.Invoke(_desk.ToStrengthMessage());
+            _activeActuators.Add(actuatorAgent.Id);
+            actuatorAgent.SendFunc?.Invoke(_desk.StrengthMessage(actuatorAgent.Id, 1, _desk.StrengthA));
+            actuatorAgent.SendFunc?.Invoke(_desk.StrengthMessage(actuatorAgent.Id, 2, _desk.StrengthB));
+            _lastStrengthA = _desk.StrengthA;
+            _lastStrengthB = _desk.StrengthB;
         }
 
         AgentConnected?.Invoke(this, new AgentEventArgs(agent.Id, agent.GetType()));
@@ -123,7 +141,12 @@ internal class AgentManager
         _activeActuators.Add(id);
         // Immediately sync current ControlDesk state
         if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent da)
-            da.SendFunc?.Invoke(_desk.ToStrengthMessage());
+        {
+            da.SendFunc?.Invoke(_desk.StrengthMessage(da.Id, 1, _desk.StrengthA));
+            da.SendFunc?.Invoke(_desk.StrengthMessage(da.Id, 2, _desk.StrengthB));
+            _lastStrengthA = _desk.StrengthA;
+            _lastStrengthB = _desk.StrengthB;
+        }
         ActuatorActivated?.Invoke(id);
     }
 

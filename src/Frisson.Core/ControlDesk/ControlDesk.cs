@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -16,6 +17,11 @@ internal class ControlDesk
     bool _blocked;
 
     public event Action? StateChanged;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
 
     /// <summary>
     /// Apply a parsed Remote scheme. Returns a JsonNode reply (state message)
@@ -131,17 +137,19 @@ internal class ControlDesk
     }
 
     /// <summary>
-    /// Serialize current strength state to a strength-set message for devices.
+    /// Serialize a single-channel strength-set message for a specific device.
+    /// Format: strength-{channel}+2+{value} (mode 2 = set to value)
+    /// channel: 1 = A, 2 = B
     /// </summary>
-    public string ToStrengthMessage()
+    public string StrengthMessage(Guid targetId, int channel, int value)
     {
         return JsonSerializer.Serialize(new
         {
             type = "msg",
             clientId = AppCore.DummyFrontendId.ToString(),
-            targetId = "",
-            message = $"strength-1+2+{StrengthA}+2+2+{StrengthB}"
-        });
+            targetId = targetId.ToString(),
+            message = $"strength-{channel}+2+{value}"
+        }, JsonOptions);
     }
 
 }
