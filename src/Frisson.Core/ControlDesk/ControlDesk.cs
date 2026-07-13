@@ -11,8 +11,16 @@ internal class ControlDesk
 {
     public int StrengthA { get; set; }
     public int StrengthB { get; set; }
-    public int MaxA { get; set; } = 100;
-    public int MaxB { get; set; } = 100;
+
+    int _settingsMaxA = 100;
+    int _settingsMaxB = 100;
+    int _feedbackMaxA = 100;
+    int _feedbackMaxB = 100;
+    bool _useActuatorLimits;
+
+    public int MaxA => _useActuatorLimits ? _feedbackMaxA : _settingsMaxA;
+    public int MaxB => _useActuatorLimits ? _feedbackMaxB : _settingsMaxB;
+    public bool UseActuatorLimits => _useActuatorLimits;
 
     bool _blocked;
 
@@ -108,8 +116,11 @@ internal class ControlDesk
         b = Math.Clamp(b, 0, 200);
 
         bool changed = false;
-        if (MaxA != a) { MaxA = a; changed = true; }
-        if (MaxB != b) { MaxB = b; changed = true; }
+        if (_settingsMaxA != a) { _settingsMaxA = a; changed = true; }
+        if (_settingsMaxB != b) { _settingsMaxB = b; changed = true; }
+        // Sync feedback defaults so toggling before any actuator reports doesn't cause a jump
+        if (_feedbackMaxA != a) { _feedbackMaxA = a; changed = true; }
+        if (_feedbackMaxB != b) { _feedbackMaxB = b; changed = true; }
 
         // Clamp current strengths if they exceed new limits
         var clampedA = Math.Clamp(StrengthA, 0, MaxA);
@@ -119,6 +130,45 @@ internal class ControlDesk
 
         if (changed)
             StateChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Apply feedback limits reported by actuators. Takes the minimum across all connected
+    /// actuators. null resets to _settingsMaxA/B (e.g. when all actuators disconnect).
+    /// </summary>
+    public void ApplyFeedbackLimits(int? aMax, int? bMax)
+    {
+        var newA = aMax ?? _settingsMaxA;
+        var newB = bMax ?? _settingsMaxB;
+
+        bool changed = false;
+        if (_feedbackMaxA != newA) { _feedbackMaxA = newA; changed = true; }
+        if (_feedbackMaxB != newB) { _feedbackMaxB = newB; changed = true; }
+
+        if (changed && _useActuatorLimits)
+        {
+            var clampedA = Math.Clamp(StrengthA, 0, MaxA);
+            var clampedB = Math.Clamp(StrengthB, 0, MaxB);
+            if (StrengthA != clampedA) { StrengthA = clampedA; changed = true; }
+            if (StrengthB != clampedB) { StrengthB = clampedB; changed = true; }
+            StateChanged?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Enable or disable actuator-reported limits. When toggled on, clamps
+    /// current strengths to the feedback limits if needed.
+    /// </summary>
+    public void SetUseActuatorLimits(bool use)
+    {
+        if (_useActuatorLimits == use) return;
+        _useActuatorLimits = use;
+
+        var clampedA = Math.Clamp(StrengthA, 0, MaxA);
+        var clampedB = Math.Clamp(StrengthB, 0, MaxB);
+        if (StrengthA != clampedA) StrengthA = clampedA;
+        if (StrengthB != clampedB) StrengthB = clampedB;
+        StateChanged?.Invoke();
     }
 
     /// <summary>

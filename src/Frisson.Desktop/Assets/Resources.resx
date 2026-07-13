@@ -89,7 +89,7 @@
     <value>Log</value>
   </data>
   <data name="LogOpenDir" xml:space="preserve">
-    <value>Log Files</value>
+    <value>Log Directory</value>
   </data>
   <!-- Control Desk & Status -->
   <data name="SourceDetails" xml:space="preserve">
@@ -183,6 +183,9 @@
   </data>
   <data name="SettingsStrengthLimit" xml:space="preserve">
     <value>Strength Limit</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>Actuator Limits</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>

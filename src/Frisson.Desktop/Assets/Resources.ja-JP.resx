@@ -89,7 +89,7 @@
     <value>ログ</value>
   </data>
   <data name="LogOpenDir" xml:space="preserve">
-    <value>ログファイル</value>
+    <value>ログディレクトリ</value>
   </data>
   <!-- Control Desk & Status -->
   <data name="SourceDetails" xml:space="preserve">
@@ -182,7 +182,10 @@
     <value>情報</value>
   </data>
   <data name="SettingsStrengthLimit" xml:space="preserve">
-    <value>強度上限</value>
+    <value>強度制限</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>アクチュエーター制限</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>

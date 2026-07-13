@@ -536,7 +536,7 @@
 
                                 <!-- Right: Heading + Section Content -->
                                 <Grid Grid.Column="1" Margin="20,0,0,0">
-                                    <ScrollViewer x:Name="SettingsScrollViewer" MaxWidth="420" HorizontalAlignment="Center">
+                                    <ScrollViewer x:Name="SettingsScrollViewer" HorizontalAlignment="Stretch">
                                         <StackPanel Spacing="24">
                                             <!-- ===== General Section ===== -->
                                             <Border x:Name="GeneralSection" CornerRadius="8" Padding="8">
@@ -546,17 +546,14 @@
                                                            Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
                                             <!-- Language -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{loc:Loc Language}"
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{loc:Loc Language}"
                                                            Foreground="{DynamicResource PrimaryText}"
-                                                           FontSize="14"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center" />
-                                                <ComboBox Grid.Column="1"
-                                                          ItemsSource="{Binding AvailableLanguages}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold" />
+                                                <ComboBox ItemsSource="{Binding AvailableLanguages}"
                                                           SelectedItem="{Binding SelectedLanguage}"
-                                                          HorizontalAlignment="Stretch"
+                                                          Width="200"
                                                           Background="{DynamicResource SurfaceLight}"
                                                           Foreground="{DynamicResource PrimaryText}"
                                                           BorderBrush="{DynamicResource AccentMuted}"
@@ -568,7 +565,7 @@
                                                         </DataTemplate>
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
-                                            </Grid>
+                                            </StackPanel>
                                             </StackPanel>
                                             </Border>
 
@@ -580,16 +577,20 @@
                                                            Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
                                             <!-- Strength Limit -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{loc:Loc SettingsStrengthLimit}"
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{loc:Loc SettingsStrengthLimit}"
                                                            Foreground="{DynamicResource PrimaryText}"
-                                                           FontSize="14"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center" />
-                                                <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto" ColumnSpacing="12">
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold" />
+                                            <!-- Use Actuator Limits -->
+                                            <CheckBox IsChecked="{Binding UseActuatorLimits}"
+                                                      Content="{loc:Loc SettingsUseActuatorLimits}"
+                                                      Foreground="{DynamicResource PrimaryText}"
+                                                      FontSize="14" />
+                                                <Grid>
+                                                <StackPanel Orientation="Horizontal" Spacing="12">
                                                     <!-- Channel A -->
-                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                                         <TextBlock Text="{loc:Loc ChannelA}" FontSize="13"
                                                                    Foreground="{DynamicResource SecondaryText}"
                                                                    VerticalAlignment="Center" />
@@ -610,7 +611,7 @@
                                                                  KeyDown="OnMaxAKeyDown" />
                                                     </StackPanel>
                                                     <!-- Channel B -->
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                                         <TextBlock Text="{loc:Loc ChannelB}" FontSize="13"
                                                                    Foreground="{DynamicResource SecondaryText}"
                                                                    VerticalAlignment="Center" />
@@ -630,8 +631,11 @@
                                                                  LostFocus="OnMaxBLostFocus"
                                                                  KeyDown="OnMaxBKeyDown" />
                                                     </StackPanel>
+                                                </StackPanel>
+                                                    <Border Background="#4D1a1a1a"
+                                                            IsVisible="{Binding UseActuatorLimits}" />
                                                 </Grid>
-                                            </Grid>
+                                            </StackPanel>
                                             </StackPanel>
                                             </Border>
 
@@ -643,45 +647,41 @@
                                                            Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
                                             <!-- Log -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16"
-                                                  RowDefinitions="Auto, Auto, Auto" RowSpacing="8">
-                                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                                           Text="{loc:Loc LogLabel}"
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{loc:Loc LogLabel}"
                                                            Foreground="{DynamicResource PrimaryText}"
-                                                           FontSize="14"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center" />
-                                                <Button Grid.Row="0" Grid.Column="1"
-                                                        Content="{loc:Loc LogOpen}"
-                                                        Width="140"
-                                                        HorizontalContentAlignment="Center"
-                                                        VerticalContentAlignment="Center"
-                                                        CornerRadius="10"
-                                                        Background="{DynamicResource SurfaceLight}"
-                                                        Foreground="{DynamicResource PrimaryText}"
-                                                        BorderBrush="{DynamicResource AccentMuted}"
-                                                        Command="{Binding ShowLogWindowCommand}" />
-                                                <Button Grid.Row="1" Grid.Column="1"
-                                                        Content="{loc:Loc LogClearLogs}"
-                                                        Width="140"
-                                                        HorizontalContentAlignment="Center"
-                                                        VerticalContentAlignment="Center"
-                                                        CornerRadius="10"
-                                                        Background="{DynamicResource SurfaceLight}"
-                                                        Foreground="{DynamicResource PrimaryText}"
-                                                        BorderBrush="{DynamicResource AccentMuted}"
-                                                        Command="{Binding ClearLogsCommand}" />
-                                                <Button Grid.Row="2" Grid.Column="1"
-                                                        Content="{loc:Loc LogOpenDir}"
-                                                        Width="140"
-                                                        HorizontalContentAlignment="Center"
-                                                        VerticalContentAlignment="Center"
-                                                        CornerRadius="10"
-                                                        Background="{DynamicResource SurfaceLight}"
-                                                        Foreground="{DynamicResource PrimaryText}"
-                                                        BorderBrush="{DynamicResource AccentMuted}"
-                                                        Command="{Binding OpenLogDirCommand}" />
-                                            </Grid>
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold" />
+                                                <StackPanel Spacing="8">
+                                                    <Button Content="{loc:Loc LogOpen}"
+                                                            Width="140"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center"
+                                                            CornerRadius="10"
+                                                            Background="{DynamicResource SurfaceLight}"
+                                                            Foreground="{DynamicResource PrimaryText}"
+                                                            BorderBrush="{DynamicResource AccentMuted}"
+                                                            Command="{Binding ShowLogWindowCommand}" />
+                                                    <Button Content="{loc:Loc LogClearLogs}"
+                                                            Width="140"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center"
+                                                            CornerRadius="10"
+                                                            Background="{DynamicResource SurfaceLight}"
+                                                            Foreground="{DynamicResource PrimaryText}"
+                                                            BorderBrush="{DynamicResource AccentMuted}"
+                                                            Command="{Binding ClearLogsCommand}" />
+                                                    <Button Content="{loc:Loc LogOpenDir}"
+                                                            Width="140"
+                                                            HorizontalContentAlignment="Center"
+                                                            VerticalContentAlignment="Center"
+                                                            CornerRadius="10"
+                                                            Background="{DynamicResource SurfaceLight}"
+                                                            Foreground="{DynamicResource PrimaryText}"
+                                                            BorderBrush="{DynamicResource AccentMuted}"
+                                                            Command="{Binding OpenLogDirCommand}" />
+                                                </StackPanel>
+                                            </StackPanel>
                                             </StackPanel>
                                             </Border>
 
@@ -693,34 +693,27 @@
                                                            Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                                                 <Separator Background="{DynamicResource AccentMuted}" Height="1" Margin="0,0,0,4" />
                                             <!-- Version -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{loc:Loc Version}"
-                                                           Foreground="{DynamicResource SecondaryText}"
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{loc:Loc Version}"
+                                                           Foreground="{DynamicResource PrimaryText}"
                                                            FontSize="13"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center" />
-                                                <TextBlock Grid.Column="1"
-                                                           Foreground="{DynamicResource SecondaryText}"
-                                                           FontSize="13"
-                                                           VerticalAlignment="Center">
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Foreground="{DynamicResource SecondaryText}"
+                                                           FontSize="13">
                                                     <TextBlock.Text>
                                                         <Binding Source="{x:Static services:LocalizationService.Instance}"
                                                                  Path="CurrentCulture"
                                                                  Converter="{x:Static converters:VersionConverter.Instance}" />
                                                     </TextBlock.Text>
                                                 </TextBlock>
-                                            </Grid>
+                                            </StackPanel>
                                             <!-- Disclaimer -->
-                                            <Grid ColumnDefinitions="80, *" ColumnSpacing="16">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{loc:Loc DisclaimerTitle}"
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{loc:Loc DisclaimerTitle}"
                                                            Foreground="{DynamicResource PrimaryText}"
-                                                           FontSize="14"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center" />
-                                                <Button Grid.Column="1"
-                                                        Content="{loc:Loc DisclaimerOpen}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold" />
+                                                <Button Content="{loc:Loc DisclaimerOpen}"
                                                         Width="140"
                                                         HorizontalContentAlignment="Center"
                                                         VerticalContentAlignment="Center"
@@ -729,7 +722,7 @@
                                                         Foreground="{DynamicResource PrimaryText}"
                                                         BorderBrush="{DynamicResource AccentMuted}"
                                                         Command="{Binding ShowDisclaimerCommand}" />
-                                            </Grid>
+                                            </StackPanel>
                                             </StackPanel>
                                             </Border>
                                     </StackPanel>

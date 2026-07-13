@@ -43,6 +43,8 @@ public class AppCore : IDisposable
         // Apply persisted settings (caller provides code defaults)
         var s = SettingsService.Instance;
         _controlDesk.SetMax(s.TryGet("maxA", out int ma) ? ma : 100, s.TryGet("maxB", out int mb) ? mb : 100);
+        if (s.TryGet("useActuatorLimits", out bool ual) && ual)
+            _controlDesk.SetUseActuatorLimits(true);
 
         // WebSocketServer → AgentManager
         _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
@@ -104,6 +106,12 @@ public class AppCore : IDisposable
     public int GetControlDeskMaxB() => _controlDesk.MaxB;
     public void SetControlDeskMax(int a, int b) => _controlDesk.SetMax(a, b);
     public bool GetControlDeskIsBlocked() => _controlDesk.IsBlocked;
+    public bool GetControlDeskUseActuatorLimits() => _controlDesk.UseActuatorLimits;
+    public void SetControlDeskUseActuatorLimits(bool use)
+    {
+        _controlDesk.SetUseActuatorLimits(use);
+        SettingsService.Instance.Set("useActuatorLimits", use);
+    }
     public string? GetActiveRemoteName() => _agentManager.GetActiveRemoteName();
     public Guid? GetActiveRemoteId() => _agentManager.GetActiveRemoteId();
 }

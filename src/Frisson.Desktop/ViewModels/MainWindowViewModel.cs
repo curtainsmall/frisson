@@ -480,6 +480,17 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _editMaxBValue = AppCore.Instance.GetControlDeskMaxB().ToString();
 
+    [ObservableProperty]
+    private bool _useActuatorLimits = AppCore.Instance.GetControlDeskUseActuatorLimits();
+
+    partial void OnUseActuatorLimitsChanged(bool value)
+    {
+        AppCore.Instance.SetControlDeskUseActuatorLimits(value);
+        // Refresh edit values to reflect effective max, then revert back to settings values
+        // (the overlay prevents editing when useActuatorLimits is on)
+        OnPropertyChanged(nameof(UseActuatorLimits));
+    }
+
     public void CommitMaxA()
     {
         if (int.TryParse(EditMaxAValue, out var v))

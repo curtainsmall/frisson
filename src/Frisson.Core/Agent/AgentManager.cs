@@ -102,6 +102,7 @@ internal class AgentManager
         if (agent is ActuatorAgent actuatorAgent)
         {
             actuatorAgent.StateUpdated += () => ActuatorStateUpdated?.Invoke(actuatorAgent.Id);
+            actuatorAgent.StateUpdated += RecalculateFeedbackLimits;
             // Auto-activate: add to active set and sync current ControlDesk state
             _activeActuators.Add(actuatorAgent.Id);
             actuatorAgent.SendFunc?.Invoke(_desk.StrengthMessage(actuatorAgent.Id, 1, _desk.StrengthA));
@@ -131,6 +132,7 @@ internal class AgentManager
                 _activeActuators.Remove(id);
                 agent.Dispose();
                 _closeClient?.Invoke(id);
+                RecalculateFeedbackLimits();
             }
         }
         finally { _removing.Remove(id); }
@@ -154,6 +156,7 @@ internal class AgentManager
     {
         _activeActuators.Remove(id);
         ActuatorDeactivated?.Invoke(id);
+        RecalculateFeedbackLimits();
     }
 
     public void SetActiveRemote(Guid id)
@@ -178,6 +181,23 @@ internal class AgentManager
     {
         if (_agents.TryGetValue(id, out var a) && a is RemoteAgent r)
             r.SendFunc?.Invoke(json);
+    }
+
+    /// <summary>
+    /// Recompute the minimum MaxA/MaxB across all active actuators and apply to ControlDesk.
+    /// </summary>
+    private void RecalculateFeedbackLimits()
+    {
+        int? minA = null, minB = null;
+        foreach (var id in _activeActuators)
+        {
+            if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent actuator)
+            {
+                minA = minA.HasValue ? Math.Min(minA.Value, actuator.MaxA) : actuator.MaxA;
+                minB = minB.HasValue ? Math.Min(minB.Value, actuator.MaxB) : actuator.MaxB;
+            }
+        }
+        _desk.ApplyFeedbackLimits(minA, minB);
     }
 
     public Agent? GetAgent(Guid id)

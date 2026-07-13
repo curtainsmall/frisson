@@ -89,7 +89,7 @@
     <value>日志</value>
   </data>
   <data name="LogOpenDir" xml:space="preserve">
-    <value>日志文件</value>
+    <value>日志目录</value>
   </data>
   <!-- 控制台与状态 -->
   <data name="SourceDetails" xml:space="preserve">
@@ -182,7 +182,10 @@
     <value>关于</value>
   </data>
   <data name="SettingsStrengthLimit" xml:space="preserve">
-    <value>强度上限</value>
+    <value>强度限制</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>执行器限制</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>
