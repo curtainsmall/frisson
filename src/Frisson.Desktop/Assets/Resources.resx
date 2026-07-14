@@ -185,7 +185,7 @@
     <value>Strength Limit</value>
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
-    <value>Actuator Limits</value>
+    <value>Use Actuator Limits</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>

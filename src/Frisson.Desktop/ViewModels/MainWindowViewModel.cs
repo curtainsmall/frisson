@@ -152,8 +152,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         new LanguageOption { Code = "en-US", DisplayName = "English" },
         new LanguageOption { Code = "zh-CN", DisplayName = "简体中文" },
-        new LanguageOption { Code = "zh-TW", DisplayName = "繁體中文" },
-        new LanguageOption { Code = "ja-JP", DisplayName = "日本語" }
+        new LanguageOption { Code = "zh-TW", DisplayName = "繁體中文" }
     };
 
     /// <summary>All connected agents (for internal tracking).</summary>

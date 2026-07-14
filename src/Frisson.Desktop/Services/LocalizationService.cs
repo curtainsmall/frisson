@@ -55,7 +55,6 @@ public class LocalizationService : INotifyPropertyChanged
                     "en" => "en-US",
                     "zh_CN" => "zh-CN",
                     "zh_TW" => "zh-TW",
-                    "ja" => "ja-JP",
                     _ => null
                 };
             }
