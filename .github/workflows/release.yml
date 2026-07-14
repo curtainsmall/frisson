@@ -24,7 +24,8 @@ jobs:
         shell: pwsh
         run: |
           $installer = "$env:TEMP\innosetup.exe"
-          Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile $installer
+          curl.exe -L -o $installer "https://jrsoftware.org/download.php/is.exe" 2>$null
+          if (-not (Test-Path $installer)) { throw "Failed to download Inno Setup installer" }
           Start-Process -Wait -FilePath $installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS"
           $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe" |
                   Select-Object -First 1 -ExpandProperty FullName
