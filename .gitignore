@@ -1,11 +1,30 @@
-build/
-bin/
-packages/
-doc/
+# Ignore everything
+*
 
-.vs/
-.vsc/
-.idea/
+# Root project files
+!.editorconfig
+!.gitignore
+!Frisson.slnx
+!nuget.config
+!LICENSE
 
-*tmp*
-*log*
+# Source code
+!src/
+!src/**
+!setup.iss
+!publish.py
+
+# Demo 
+!demo/
+!demo/tetris.py
+
+# Tests
+!tests/
+!tests/**
+tests/**/bin/
+tests/**/obj/
+
+# Build outputs (re-ignore)
+src/**/bin/
+src/**/obj/
+src/**/publish/

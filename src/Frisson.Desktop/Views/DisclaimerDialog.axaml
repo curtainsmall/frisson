@@ -1,0 +1,87 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Frisson.Desktop.ViewModels"
+        xmlns:loc="using:Frisson.Desktop.MarkupExtensions"
+        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="420"
+        x:Class="Frisson.Desktop.Views.DisclaimerDialog"
+        x:DataType="vm:DisclaimerDialogViewModel"
+        Title="{CompiledBinding Title}"
+        Width="480" Height="420"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        ExtendClientAreaChromeHints="Default"
+        Background="{DynamicResource Black}">
+
+    <Border BorderThickness="1" BorderBrush="{DynamicResource AccentMuted}"
+            Background="Transparent" Padding="8,0,8,8">
+        <Grid RowDefinitions="Auto, *, Auto" Background="Transparent">
+            <!-- Title Bar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Black}"
+                    Padding="10,8,100,0"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="{CompiledBinding Title}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource PrimaryText}"
+                           FontWeight="SemiBold"
+                           FontSize="14"/>
+            </Border>
+
+            <!-- Body -->
+            <ScrollViewer Grid.Row="1" Margin="24,8,24,0">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="{CompiledBinding Body}"
+                               Foreground="{DynamicResource SecondaryText}"
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               LineHeight="20"/>
+
+                    <!-- Provider Link -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{loc:Loc DisclaimerSeeAlso}"
+                                   Foreground="{DynamicResource SecondaryText}"
+                                   FontSize="12" />
+                        <Button Content="https://dungeon-lab.com/help-support.html"
+                                FontSize="12"
+                                CornerRadius="0"
+                                Background="Transparent"
+                                Foreground="#4FC3F7"
+                                BorderThickness="0"
+                                HorizontalContentAlignment="Left"
+                                Padding="0"
+                                Cursor="Hand"
+                                Command="{Binding OpenProviderLinkCommand}">
+                            <Button.Styles>
+                                <Style Selector="Button:hover">
+                                    <Setter Property="Foreground" Value="#81D4FA" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Close Button -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,12,0,16">
+                <Button Content="{CompiledBinding CloseText}"
+                        Width="140" Height="34"
+                        CornerRadius="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="13"
+                        Background="{DynamicResource SurfaceLight}"
+                        Foreground="{DynamicResource PrimaryText}"
+                        BorderBrush="{DynamicResource AccentMuted}"
+                        Command="{Binding CloseCommand}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

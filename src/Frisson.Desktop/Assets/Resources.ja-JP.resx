@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Application Title -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Frisson</value>
+  </data>
+  <!-- Navigation -->
+  <data name="NavControlDesk" xml:space="preserve">
+    <value>コントロールデスク</value>
+  </data>
+  <data name="NavRemotes" xml:space="preserve">
+    <value>リモート</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>アクチュエーター</value>
+  </data>
+  <!-- Settings Page -->
+  <data name="Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="LogOpen" xml:space="preserve">
+    <value>ログコンソール</value>
+  </data>
+  <data name="LogClearLogs" xml:space="preserve">
+    <value>ログをクリア</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>ログディレクトリ</value>
+  </data>
+  <!-- Control Desk & Status -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>ソース詳細</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>コントロールデスク</value>
+  </data>
+  <data name="ControlDeskScrollTip" xml:space="preserve">
+    <value>スクロールで強度を調整</value>
+  </data>
+  <data name="AddActuator" xml:space="preserve">
+    <value>アクチュエーターを追加</value>
+  </data>
+  <data name="QrCodeTitle" xml:space="preserve">
+    <value>デバイスに接続</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>切断</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>バージョン</value>
+  </data>
+  <data name="VersionUnknown" xml:space="preserve">
+    <value>未指定</value>
+  </data>
+  <data name="RemoteName" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="RemoteId" xml:space="preserve">
+    <value>識別子</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="ConnectionStatusConnected" xml:space="preserve">
+    <value>接続済み</value>
+  </data>
+  <data name="ActionSetActive" xml:space="preserve">
+    <value>アクティブに設定</value>
+  </data>
+  <data name="ActionSetInactive" xml:space="preserve">
+    <value>非アクティブに設定</value>
+  </data>
+  <data name="NoSourceSelected" xml:space="preserve">
+    <value>詳細を表示するソースを選択</value>
+  </data>
+  <!-- Confirm Dialogs -->
+  <data name="ConfirmDisconnectTitle" xml:space="preserve">
+    <value>切断</value>
+  </data>
+  <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
+    <value>このアクチュエーターを切断しますか？</value>
+  </data>
+  <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
+    <value>このリモートを切断しますか？</value>
+  </data>
+  <data name="ConfirmConnectTitle" xml:space="preserve">
+    <value>接続リクエスト</value>
+  </data>
+  <data name="ConfirmConnectMsg" xml:space="preserve">
+    <value>このリモートの接続を許可しますか？</value>
+  </data>
+  <data name="ConfirmConnectWarning" xml:space="preserve">
+    <value>信頼できるソースからの接続のみ許可してください。</value>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="ConfirmNo" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <!-- Settings Sections -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>アクチュエーター</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>サポート</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>強度制限</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>アクチュエーター制限</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <!-- Control Desk Overlay -->
+  <data name="OverriddenBy" xml:space="preserve">
+    <value>アクティブリモート</value>
+  </data>
+  <!-- 免責事項 -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>免責事項</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frissonは、物理的な動きや刺激を伴う可能性のあるサードパーティ製ハードウェアデバイスと連携します。本ソフトウェアを使用することにより、以下のことを認め、同意するものとします：
+
+1. 本ソフトウェアの使用はすべて自己責任です。
+2. Frissonの開発者は、本ソフトウェアの使用に起因する一切の傷害、損害、または損失について責任を負いません。
+3. 機器が適切に設定され、安全な環境で使用されていることを常に確認してください。
+4. デバイス固有のサポートやドキュメントについては、アクチュエーター提供元を参照してください。
+5. サードパーティ製デバイスの取扱説明書および免責事項も併せてお読みください。</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>免責事項を表示</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>了解しました</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>関連情報</value>
+  </data>
+</root>

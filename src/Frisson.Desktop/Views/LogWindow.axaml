@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Frisson.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+        x:Class="Frisson.Desktop.Views.LogWindow"
+        x:DataType="vm:LogWindowViewModel"
+        Title="Log"
+        Width="600" Height="400"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Background="{DynamicResource Black}"
+        Foreground="{DynamicResource PrimaryText}"
+        WindowStartupLocation="CenterOwner">
+
+    <Border BorderThickness="1" BorderBrush="{DynamicResource AccentMuted}" Background="Transparent" Padding="8,0,8,8">
+        <Grid RowDefinitions="Auto, *" Background="Transparent">
+            <Border
+                Grid.Row="0"
+                Background="{DynamicResource Black}"
+                Padding="10,8,140,8"
+                PointerPressed="OnTitleBarPointerPressed">
+                <TextBlock Text="Log" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryText}" FontWeight="SemiBold" FontSize="14" />
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="{DynamicResource SurfaceDark}"
+                    CornerRadius="8"
+                    Padding="10"
+                    Margin="0,10,0,0">
+                <ScrollViewer Name="LogScrollViewer">
+                    <ItemsControl ItemsSource="{Binding LogEntries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Formatted}"
+                                           Foreground="{DynamicResource SecondaryText}"
+                                           FontSize="12"
+                                           FontFamily="Consolas, monospace"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

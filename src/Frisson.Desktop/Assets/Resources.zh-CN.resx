@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- 应用程序标题 -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Frisson</value>
+  </data>
+  <!-- 导航 -->
+  <data name="NavControlDesk" xml:space="preserve">
+    <value>控制台</value>
+  </data>
+  <data name="NavRemotes" xml:space="preserve">
+    <value>遥控端</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>执行端</value>
+  </data>
+  <!-- 设置页面 -->
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="LogOpen" xml:space="preserve">
+    <value>日志控制台</value>
+  </data>
+  <data name="LogClearLogs" xml:space="preserve">
+    <value>清除日志</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>日志目录</value>
+  </data>
+  <!-- 控制台与状态 -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>源详情</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>控制台</value>
+  </data>
+  <data name="ControlDeskScrollTip" xml:space="preserve">
+    <value>滚轮调节强度</value>
+  </data>
+  <data name="AddActuator" xml:space="preserve">
+    <value>添加执行端</value>
+  </data>
+  <data name="QrCodeTitle" xml:space="preserve">
+    <value>连接设备</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>断开连接</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="VersionUnknown" xml:space="preserve">
+    <value>未指定</value>
+  </data>
+  <data name="RemoteName" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="RemoteId" xml:space="preserve">
+    <value>标识符</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="ConnectionStatusConnected" xml:space="preserve">
+    <value>已连接</value>
+  </data>
+  <data name="ActionSetActive" xml:space="preserve">
+    <value>设为活跃</value>
+  </data>
+  <data name="ActionSetInactive" xml:space="preserve">
+    <value>取消活跃</value>
+  </data>
+  <data name="NoSourceSelected" xml:space="preserve">
+    <value>选择一个控制源查看详情</value>
+  </data>
+  <!-- 确认弹窗 -->
+  <data name="ConfirmDisconnectTitle" xml:space="preserve">
+    <value>断开连接</value>
+  </data>
+  <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
+    <value>确定要断开此执行端吗？</value>
+  </data>
+  <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
+    <value>确定要断开此遥控端吗？</value>
+  </data>
+  <data name="ConfirmConnectTitle" xml:space="preserve">
+    <value>连接请求</value>
+  </data>
+  <data name="ConfirmConnectMsg" xml:space="preserve">
+    <value>是否允许此遥控端连接？</value>
+  </data>
+  <data name="ConfirmConnectWarning" xml:space="preserve">
+    <value>请仅接受来自可信来源的连接。</value>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>确认</value>
+  </data>
+  <data name="ConfirmNo" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <!-- 设置分区 -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>执行端</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>支持</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>强度限制</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>执行器限制</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <!-- 控制台遮罩 -->
+  <data name="OverriddenBy" xml:space="preserve">
+    <value>遥控端活跃中</value>
+  </data>
+  <!-- 免责声明 -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>免责声明</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frisson 与第三方硬件设备交互，这些设备可能涉及物理运动或刺激。使用本软件即表示您承认并接受：
+
+1. 您完全自行承担使用本软件的风险。
+2. Frisson 的开发者不对因使用本软件造成的任何伤害、损坏或损失负责。
+3. 请始终确保您的设备配置正确并在安全环境中使用。
+4. 有关设备特定的支持和文档，请参阅您的执行器提供商。
+5. 您还应当阅读第三方设备的说明和免责声明。</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>查看免责声明</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>我已了解</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>另请参阅</value>
+  </data>
+</root>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Application Title -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Frisson</value>
+  </data>
+  <!-- Navigation -->
+  <data name="NavControlDesk" xml:space="preserve">
+    <value>Control Desk</value>
+  </data>
+  <data name="NavRemotes" xml:space="preserve">
+    <value>Remotes</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ActuatorsTitle" xml:space="preserve">
+    <value>Actuators</value>
+  </data>
+  <!-- Settings Page -->
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LogOpen" xml:space="preserve">
+    <value>Log Console</value>
+  </data>
+  <data name="LogClearLogs" xml:space="preserve">
+    <value>Clear Logs</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="LogOpenDir" xml:space="preserve">
+    <value>Log Directory</value>
+  </data>
+  <!-- Control Desk & Status -->
+  <data name="SourceDetails" xml:space="preserve">
+    <value>Source Details</value>
+  </data>
+  <data name="NoAgent" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="LocalControlPlaceholder" xml:space="preserve">
+    <value>Control Desk</value>
+  </data>
+  <data name="ControlDeskScrollTip" xml:space="preserve">
+    <value>Scroll to adjust strength</value>
+  </data>
+  <data name="AddActuator" xml:space="preserve">
+    <value>Add Actuator</value>
+  </data>
+  <data name="QrCodeTitle" xml:space="preserve">
+    <value>Connect Device</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="VersionUnknown" xml:space="preserve">
+    <value>Not Specified</value>
+  </data>
+  <data name="RemoteName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="RemoteId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConnectionStatus" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="ConnectionStatusConnected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="ActionSetActive" xml:space="preserve">
+    <value>Set Active</value>
+  </data>
+  <data name="ActionSetInactive" xml:space="preserve">
+    <value>Set Inactive</value>
+  </data>
+  <data name="NoSourceSelected" xml:space="preserve">
+    <value>Select a source to view details</value>
+  </data>
+  <!-- Confirm Dialogs -->
+  <data name="ConfirmDisconnectTitle" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="ConfirmDisconnectActuatorMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this actuator?</value>
+  </data>
+  <data name="ConfirmDisconnectRemoteMsg" xml:space="preserve">
+    <value>Are you sure you want to disconnect this remote?</value>
+  </data>
+  <data name="ConfirmConnectTitle" xml:space="preserve">
+    <value>Connection Request</value>
+  </data>
+  <data name="ConfirmConnectMsg" xml:space="preserve">
+    <value>Allow this remote to connect?</value>
+  </data>
+  <data name="ConfirmConnectWarning" xml:space="preserve">
+    <value>Only accept connections from sources you trust.</value>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ConfirmNo" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <!-- Settings Sections -->
+  <data name="SettingsSectionGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsSectionActuator" xml:space="preserve">
+    <value>Actuator</value>
+  </data>
+  <data name="SettingsSectionSupport" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="SettingsSectionAbout" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="SettingsStrengthLimit" xml:space="preserve">
+    <value>Strength Limit</value>
+  </data>
+  <data name="SettingsUseActuatorLimits" xml:space="preserve">
+    <value>Actuator Limits</value>
+  </data>
+  <data name="ChannelA" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="ChannelB" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <!-- Control Desk Overlay -->
+  <data name="OverriddenBy" xml:space="preserve">
+    <value>Active Remote</value>
+  </data>
+  <!-- Disclaimer -->
+  <data name="DisclaimerTitle" xml:space="preserve">
+    <value>Disclaimer</value>
+  </data>
+  <data name="DisclaimerBody" xml:space="preserve">
+    <value>Frisson interfaces with third-party hardware devices that may involve physical motion or stimulation. By using this software, you acknowledge and accept that:
+
+1. You use this software entirely at your own risk.
+2. The developers of Frisson are not responsible for any injury, damage, or loss resulting from its use.
+3. Always ensure your equipment is properly configured and used in a safe environment.
+4. Refer to your actuator provider for device-specific support and documentation.
+5. You should also read the instructions and disclaimers of the third-party devices.</value>
+  </data>
+  <data name="DisclaimerOpen" xml:space="preserve">
+    <value>View Disclaimer</value>
+  </data>
+  <data name="DisclaimerClose" xml:space="preserve">
+    <value>I Understand</value>
+  </data>
+  <data name="DisclaimerSeeAlso" xml:space="preserve">
+    <value>See also</value>
+  </data>
+</root>
