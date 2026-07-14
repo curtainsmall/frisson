@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Git tag to release (e.g. v0.1.0-beta)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+          fetch-depth: 0
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress --confirm
+
+      - name: Add ISCC to PATH
+        shell: pwsh
+        run: |
+          $iscc = Get-ChildItem "$env:ProgramFiles\Inno Setup*\ISCC.exe" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $iscc) { throw "ISCC.exe not found after Chocolatey install" }
+          echo "ISCC_DIR=$([System.IO.Path]::GetDirectoryName($iscc))" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build and pack
+        run: python publish.py
+
+      - name: Determine pre-release status
+        id: prerelease
+        shell: pwsh
+        run: |
+          $version = "${{ inputs.version }}"
+          $isPrerelease = $version.Contains('-')
+          echo "prerelease=$isPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          files: installer/Frisson-Setup-*.exe
+          prerelease: ${{ steps.prerelease.outputs.prerelease }}
+          generate_release_notes: true

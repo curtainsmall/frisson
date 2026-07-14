@@ -18,6 +18,10 @@
 !demo/
 !demo/tetris.py
 
+# GitHub Actions
+!.github/
+!.github/**
+
 # Tests
 !tests/
 !tests/**
