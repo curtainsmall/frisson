@@ -23,15 +23,26 @@ jobs:
       - name: Install Inno Setup
         shell: pwsh
         run: |
-          $installer = "$env:TEMP\innosetup.exe"
-          curl.exe -L -o $installer "https://jrsoftware.org/download.php/is.exe" 2>$null
-          if (-not (Test-Path $installer)) { throw "Failed to download Inno Setup installer" }
-          Start-Process -Wait -FilePath $installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS"
+          choco install innosetup --no-progress --confirm
           $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe" |
                   Select-Object -First 1 -ExpandProperty FullName
-          if (-not $iscc) { throw "ISCC.exe not found after Inno Setup install" }
+          if (-not $iscc) { throw "ISCC.exe not found after Chocolatey install" }
           $dir = Split-Path $iscc -Parent
           echo "$dir" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Download missing language files
+        shell: pwsh
+        run: |
+          $langDir = "${env:ProgramFiles(x86)}\Inno Setup 6\Languages"
+          $missing = @("ChineseSimplified.isl", "ChineseTraditional.isl", "Japanese.isl")
+          foreach ($file in $missing) {
+            $path = Join-Path $langDir $file
+            if (-not (Test-Path $path)) {
+              $url = "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/$file"
+              curl.exe -L -o $path $url 2>$null
+              if (-not (Test-Path $path)) { Write-Warning "Failed to download $file" }
+            }
+          }
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
