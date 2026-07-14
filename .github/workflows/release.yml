@@ -65,5 +65,5 @@ jobs:
         with:
           tag_name: ${{ inputs.version }}
           files: installer/Frisson-Setup-*.exe
-          prerelease: ${{ steps.prerelease.outputs.prerelease }}
+          prerelease: ${{ steps.prerelease.outputs.prerelease == 'True' }}
           generate_release_notes: true
