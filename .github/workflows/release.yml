@@ -21,15 +21,14 @@ jobs:
           fetch-depth: 0
 
       - name: Install Inno Setup
-        run: choco install innosetup --no-progress --confirm
-
-      - name: Add ISCC to PATH
         shell: pwsh
         run: |
-          $paths = @("$env:ProgramFiles", "${env:ProgramFiles(x86)}")
-          $iscc = Get-ChildItem $paths -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue |
+          $installer = "$env:TEMP\innosetup.exe"
+          Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile $installer
+          Start-Process -Wait -FilePath $installer -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS"
+          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe" |
                   Select-Object -First 1 -ExpandProperty FullName
-          if (-not $iscc) { throw "ISCC.exe not found after Chocolatey install" }
+          if (-not $iscc) { throw "ISCC.exe not found after Inno Setup install" }
           $dir = Split-Path $iscc -Parent
           echo "$dir" | Out-File -FilePath $env:GITHUB_PATH -Append
 
