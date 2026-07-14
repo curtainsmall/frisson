@@ -26,9 +26,12 @@ jobs:
       - name: Add ISCC to PATH
         shell: pwsh
         run: |
-          $iscc = Get-ChildItem "$env:ProgramFiles\Inno Setup*\ISCC.exe" | Select-Object -First 1 -ExpandProperty FullName
+          $paths = @("$env:ProgramFiles", "${env:ProgramFiles(x86)}")
+          $iscc = Get-ChildItem $paths -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue |
+                  Select-Object -First 1 -ExpandProperty FullName
           if (-not $iscc) { throw "ISCC.exe not found after Chocolatey install" }
-          echo "ISCC_DIR=$([System.IO.Path]::GetDirectoryName($iscc))" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $dir = Split-Path $iscc -Parent
+          echo "$dir" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
