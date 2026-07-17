@@ -161,7 +161,7 @@
                                 Command="{Binding SelectPageCommand}"
                                 CommandParameter="{x:Static vm:NavPage.Connections}"
                                 ToolTip.Tip="{loc:Loc NavConnections}">
-                            <i:Icon Value="fa-solid fa-laptop-code" FontSize="20" />
+                            <i:Icon Value="fa-solid fa-link" FontSize="20" />
                         </Button>
                     </StackPanel>
 

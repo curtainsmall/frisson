@@ -234,6 +234,8 @@ public partial class MainWindowViewModel : ViewModelBase
             SelectAgent(id.Value);
     }
 
+    private readonly HashSet<Guid> _intentionalDisconnects = new();
+
     [RelayCommand]
     private async Task DisconnectAgent(Guid agentId)
     {
@@ -247,7 +249,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var confirmed = await ShowConfirmDialogAsync(title, message);
         if (confirmed)
+        {
+            _intentionalDisconnects.Add(agentId);
             AppCore.Instance.DisconnectAgent(agentId);
+        }
     }
 
     [RelayCommand]
@@ -427,6 +432,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
+            var wasIntentional = _intentionalDisconnects.Remove(e.AgentId);
             var card = AgentCards.FirstOrDefault(c => c.AgentId == e.AgentId);
             if (card != null)
             {
@@ -434,7 +440,11 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (SelectedCard == card)
                     SelectedCard = null;
                 if (card.IsActuator)
+                {
                     ActuatorCard = null;
+                    if (!wasIntentional)
+                        ShowActuatorDisconnectedDialog();
+                }
             }
         });
     }
@@ -452,6 +462,20 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Desktop.MainWindow is not null)
             await dialog.ShowDialog<bool>(Desktop.MainWindow);
         return await vm.Completion.Task;
+    }
+
+    private void ShowActuatorDisconnectedDialog()
+    {
+        var ls = LocalizationService.Instance;
+        var vm = new InfoDialogViewModel
+        {
+            Title = ls["ActuatorDisconnectedTitle"],
+            Message = ls["ActuatorDisconnectedMsg"],
+            CloseText = ls["Ok"]
+        };
+        var dialog = new Views.InfoDialog(vm);
+        if (Desktop.MainWindow is not null)
+            dialog.ShowDialog(Desktop.MainWindow);
     }
 
     private void OnRemoteBindingRequested(Guid clientId, string name)

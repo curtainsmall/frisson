@@ -226,4 +226,13 @@
   <data name="DisclaimerSeeAlso" xml:space="preserve">
     <value>另请参阅</value>
   </data>
+  <data name="ActuatorDisconnectedTitle" xml:space="preserve">
+    <value>执行器已断开</value>
+  </data>
+  <data name="ActuatorDisconnectedMsg" xml:space="preserve">
+    <value>执行器意外断开连接。</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>确定</value>
+  </data>
 </root>
