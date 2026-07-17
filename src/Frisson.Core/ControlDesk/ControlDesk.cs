@@ -12,8 +12,8 @@ internal class ControlDesk
     public int StrengthA { get; set; }
     public int StrengthB { get; set; }
 
-    int _settingsMaxA = 100;
-    int _settingsMaxB = 100;
+    int _settingsMaxA = SettingsDefaults.MaxA;
+    int _settingsMaxB = SettingsDefaults.MaxB;
     int _feedbackMaxA = 100;
     int _feedbackMaxB = 100;
     bool _useActuatorLimits;

@@ -46,15 +46,6 @@ public partial class MainWindow : Window
             vm.SelectedCard = card;
     }
 
-    private void OnActuatorCardPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
-            return;
-
-        // Toggle expansion for actuator cards
-        card.IsExpanded = !card.IsExpanded;
-    }
-
     private void OnActiveRemoteNamePointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm)

@@ -17,6 +17,7 @@ internal class WebSocketServer : IDisposable
     private FleckServer? _server;
     private readonly ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
     private readonly ConcurrentDictionary<Guid, PendingBind> _pendingBinds = new();
+    private Guid? _actuatorClientId;
 
     public event Action<Agent.Agent>? AgentCreated;
     public event Action<Guid>? ClientDisconnected;
@@ -90,6 +91,12 @@ internal class WebSocketServer : IDisposable
     {
         var scheme = Scheme.Actuator.BindScheme.TryParseDeviceBind(msg);
         if (scheme == null) return null;
+
+        // DG-LAB allows only one device at a time — disconnect existing actuator if any
+        if (_actuatorClientId.HasValue)
+            TryRemove(_actuatorClientId.Value);
+        _actuatorClientId = id;
+
         client.Send(new Scheme.Actuator.BindScheme
         {
             ClientId = AppCore.DummyFrontendId,
@@ -130,6 +137,7 @@ internal class WebSocketServer : IDisposable
     {
         if (_clients.TryRemove(id, out var client))
         {
+            if (_actuatorClientId == id) _actuatorClientId = null;
             client.Close();
             ClientDisconnected?.Invoke(id);
         }

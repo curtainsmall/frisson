@@ -24,7 +24,7 @@ namespace Frisson.Desktop.ViewModels;
 public enum NavPage
 {
     ControlDesk,
-    Remotes,
+    Connections,
     Settings,
 }
 
@@ -158,11 +158,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>All connected agents (for internal tracking).</summary>
     public ObservableCollection<ConnectedAgentCard> AgentCards { get; } = new();
 
-    /// <summary>Only Actuator agents — shown in the global right panel.</summary>
-    public IEnumerable<ConnectedAgentCard> ActuatorCards => AgentCards.Where(c => c.IsActuator);
-
-    /// <summary>Only Remote agents — shown on the Remotes page.</summary>
+    /// <summary>Only Remote agents — shown on the Connections page.</summary>
     public IEnumerable<ConnectedAgentCard> RemoteCards => AgentCards.Where(c => c.IsRemote);
+    public bool HasNoRemoteCards => !AgentCards.Any(c => c.IsRemote);
 
     [ObservableProperty]
     private ConnectedAgentCard? _selectedCard;
@@ -190,18 +188,18 @@ public partial class MainWindowViewModel : ViewModelBase
     private Window? _qrCodeWindow;
 
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
-    public bool IsRemotesSelected => CurrentPage == NavPage.Remotes;
+    public bool IsConnectionsSelected => CurrentPage == NavPage.Connections;
     public bool IsSettingsSelected => CurrentPage == NavPage.Settings;
     public bool IsGeneralSelected => SelectedSettingsSection == SettingsSection.General;
     public bool IsActuatorSelected => SelectedSettingsSection == SettingsSection.Actuator;
     public bool IsSupportSelected => SelectedSettingsSection == SettingsSection.Support;
     public bool IsAboutSelected => SelectedSettingsSection == SettingsSection.About;
-    public bool HasAgents => AgentCards.Count > 0;
+    public bool HasActuator => ActuatorCard != null;
 
     partial void OnCurrentPageChanged(NavPage value)
     {
         OnPropertyChanged(nameof(IsControlDeskSelected));
-        OnPropertyChanged(nameof(IsRemotesSelected));
+        OnPropertyChanged(nameof(IsConnectionsSelected));
         OnPropertyChanged(nameof(IsSettingsSelected));
     }
 
@@ -230,7 +228,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void NavigateToActiveRemote()
     {
-        CurrentPage = NavPage.Remotes;
+        CurrentPage = NavPage.Connections;
         var id = AppCore.Instance.GetActiveRemoteId();
         if (id.HasValue)
             SelectAgent(id.Value);
@@ -330,10 +328,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
         AgentCards.CollectionChanged += (_, _) =>
         {
-            OnPropertyChanged(nameof(HasAgents));
-            OnPropertyChanged(nameof(ActuatorCards));
             OnPropertyChanged(nameof(RemoteCards));
+            OnPropertyChanged(nameof(HasNoRemoteCards));
         };
+    }
+
+    private ConnectedAgentCard? _actuatorCard;
+    public ConnectedAgentCard? ActuatorCard
+    {
+        get => _actuatorCard;
+        set
+        {
+            if (_actuatorCard != value)
+            {
+                _actuatorCard = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasActuator));
+            }
+        }
     }
 
     private Guid? _activeRemoteId;
@@ -398,7 +410,11 @@ public partial class MainWindowViewModel : ViewModelBase
             };
             AgentCards.Add(card);
 
-            // Auto-close QR window when an Actuator connects
+            // Track the single actuator card
+            if (card.IsActuator)
+                ActuatorCard = card;
+
+            // Auto-close QR window when a Remote connects
             if (e.AgentType == typeof(RemoteAgent) && _qrCodeWindow is not null)
             {
                 _qrCodeWindow.Close();
@@ -417,6 +433,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 AgentCards.Remove(card);
                 if (SelectedCard == card)
                     SelectedCard = null;
+                if (card.IsActuator)
+                    ActuatorCard = null;
             }
         });
     }
@@ -528,5 +546,18 @@ public partial class MainWindowViewModel : ViewModelBase
     public void CancelMaxB()
     {
         EditMaxBValue = ControlDeskViewModel.MaxB.ToString();
+    }
+
+    [RelayCommand]
+    private void ResetStrengthLimits()
+    {
+        ControlDeskViewModel.SetMaxA(SettingsDefaults.MaxA);
+        ControlDeskViewModel.SetMaxB(SettingsDefaults.MaxB);
+        EditMaxAValue = SettingsDefaults.MaxA.ToString();
+        EditMaxBValue = SettingsDefaults.MaxB.ToString();
+        UseActuatorLimits = SettingsDefaults.UseActuatorLimits;
+        SettingsService.Instance.Set("maxA", SettingsDefaults.MaxA);
+        SettingsService.Instance.Set("maxB", SettingsDefaults.MaxB);
+        SettingsService.Instance.Save();
     }
 }

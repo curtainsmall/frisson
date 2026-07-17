@@ -7,6 +7,7 @@ using Frisson.Core.Agent.Actuator;
 
 using Frisson.Core.Scheme;
 
+
 namespace Frisson.Core.Agent;
 
 public sealed class AgentEventArgs : EventArgs
@@ -32,14 +33,12 @@ internal class AgentManager
     Action<Guid> _closeClient;
     HashSet<Guid> _removing = new();
     ConcurrentDictionary<Guid, Agent> _agents = new();
-    HashSet<Guid> _activeActuators = new();
+    Guid? _actuatorId;
     Guid? _activeRemote;
     int _lastStrengthA, _lastStrengthB;
 
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
-    public event Action<Guid>? ActuatorActivated;
-    public event Action<Guid>? ActuatorDeactivated;
     public event Action<Guid>? RemoteActivated;
     public event Action? RemoteDeactivated;
     public event Action<Guid>? ActuatorStateUpdated;
@@ -59,13 +58,10 @@ internal class AgentManager
             if (!changedA && !changedB)
                 return;
 
-            foreach (var id in _activeActuators)
+            if (_actuatorId.HasValue && _agents.TryGetValue(_actuatorId.Value, out var a) && a is ActuatorAgent actuator)
             {
-                if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent actuator)
-                {
-                    if (changedA) actuator.SendFunc?.Invoke(_desk.StrengthMessage(id, 1, _desk.StrengthA));
-                    if (changedB) actuator.SendFunc?.Invoke(_desk.StrengthMessage(id, 2, _desk.StrengthB));
-                }
+                if (changedA) actuator.SendFunc?.Invoke(_desk.StrengthMessage(_actuatorId.Value, 1, _desk.StrengthA));
+                if (changedB) actuator.SendFunc?.Invoke(_desk.StrengthMessage(_actuatorId.Value, 2, _desk.StrengthB));
             }
 
             _lastStrengthA = _desk.StrengthA;
@@ -103,8 +99,8 @@ internal class AgentManager
         {
             actuatorAgent.StateUpdated += () => ActuatorStateUpdated?.Invoke(actuatorAgent.Id);
             actuatorAgent.StateUpdated += RecalculateFeedbackLimits;
-            // Auto-activate: add to active set and sync current ControlDesk state
-            _activeActuators.Add(actuatorAgent.Id);
+            // Single actuator: set ref and sync current ControlDesk state
+            _actuatorId = actuatorAgent.Id;
             actuatorAgent.SendFunc?.Invoke(_desk.StrengthMessage(actuatorAgent.Id, 1, _desk.StrengthA));
             actuatorAgent.SendFunc?.Invoke(_desk.StrengthMessage(actuatorAgent.Id, 2, _desk.StrengthB));
             _lastStrengthA = _desk.StrengthA;
@@ -128,35 +124,14 @@ internal class AgentManager
             {
                 AgentClosing?.Invoke(this, new AgentEventArgs(id, agent.GetType()));
                 if (_activeRemote == id) ClearActiveRemote();
+                if (_actuatorId == id) { _actuatorId = null; _lastStrengthA = _desk.StrengthA; _lastStrengthB = _desk.StrengthB; }
                 _agents.TryRemove(id, out _);
-                _activeActuators.Remove(id);
                 agent.Dispose();
                 _closeClient?.Invoke(id);
                 RecalculateFeedbackLimits();
             }
         }
         finally { _removing.Remove(id); }
-    }
-
-    public void ActivateActuator(Guid id)
-    {
-        _activeActuators.Add(id);
-        // Immediately sync current ControlDesk state
-        if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent da)
-        {
-            da.SendFunc?.Invoke(_desk.StrengthMessage(da.Id, 1, _desk.StrengthA));
-            da.SendFunc?.Invoke(_desk.StrengthMessage(da.Id, 2, _desk.StrengthB));
-            _lastStrengthA = _desk.StrengthA;
-            _lastStrengthB = _desk.StrengthB;
-        }
-        ActuatorActivated?.Invoke(id);
-    }
-
-    public void DeactivateActuator(Guid id)
-    {
-        _activeActuators.Remove(id);
-        ActuatorDeactivated?.Invoke(id);
-        RecalculateFeedbackLimits();
     }
 
     public void SetActiveRemote(Guid id)
@@ -184,20 +159,14 @@ internal class AgentManager
     }
 
     /// <summary>
-    /// Recompute the minimum MaxA/MaxB across all active actuators and apply to ControlDesk.
+    /// Apply the single actuator's MaxA/MaxB to ControlDesk.
     /// </summary>
     private void RecalculateFeedbackLimits()
     {
-        int? minA = null, minB = null;
-        foreach (var id in _activeActuators)
-        {
-            if (_agents.TryGetValue(id, out var a) && a is ActuatorAgent actuator)
-            {
-                minA = minA.HasValue ? Math.Min(minA.Value, actuator.MaxA) : actuator.MaxA;
-                minB = minB.HasValue ? Math.Min(minB.Value, actuator.MaxB) : actuator.MaxB;
-            }
-        }
-        _desk.ApplyFeedbackLimits(minA, minB);
+        if (_actuatorId.HasValue && _agents.TryGetValue(_actuatorId.Value, out var a) && a is ActuatorAgent actuator)
+            _desk.ApplyFeedbackLimits(actuator.MaxA, actuator.MaxB);
+        else
+            _desk.ApplyFeedbackLimits(null, null);
     }
 
     public Agent? GetAgent(Guid id)

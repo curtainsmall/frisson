@@ -66,15 +66,19 @@
   <data name="NavControlDesk" xml:space="preserve">
     <value>Control Desk</value>
   </data>
-  <data name="NavRemotes" xml:space="preserve">
+  <data name="NavConnections" xml:space="preserve">
+    <value>Connections</value>
+  </data>
+  <data name="RemoteList" xml:space="preserve">
     <value>Remotes</value>
+  </data>
+  <data name="NavActuator" xml:space="preserve">
+    <value>Actuator</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="ActuatorsTitle" xml:space="preserve">
-    <value>Actuators</value>
-  </data>
+
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
     <value>Language</value>
@@ -186,6 +190,9 @@
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
     <value>Use Actuator Limits</value>
+  </data>
+  <data name="ResetStrengthLimits" xml:space="preserve">
+    <value>Reset</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>

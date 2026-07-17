@@ -134,21 +134,7 @@ public class AgentManagerTest
         Assert.False(desk.IsBlocked);
     }
 
-    // -- ActivateActuator / DeactivateActuator --
-
-    [Fact]
-    public void DeactivateActuator_FiresEvent()
-    {
-        var (mgr, _, _) = CreateFixture();
-        var agent = CreateActuatorSpy(new List<string>());
-        mgr.AddAgent(agent);
-
-        Guid? deactivatedId = null;
-        mgr.ActuatorDeactivated += id => deactivatedId = id;
-
-        mgr.DeactivateActuator(agent.Id);
-        Assert.Equal(agent.Id, deactivatedId);
-    }
+    // -- StateChanged broadcasts --
 
     // -- SetActiveRemote / ClearActiveRemote --
 
@@ -252,14 +238,14 @@ public class AgentManagerTest
     }
 
     [Fact]
-    public void StateChanged_OnlySendsToActiveActuators()
+    public void StateChanged_NotSentAfterRemove()
     {
         var (mgr, desk, sent) = CreateFixture();
         var agent = CreateActuatorSpy(sent);
         mgr.AddAgent(agent);
 
-        // Deactivate, then change state
-        mgr.DeactivateActuator(agent.Id);
+        // Remove actuator, then change state
+        mgr.RemoveAgent(agent.Id);
         sent.Clear();
         desk.SetLocalStrength(50, 50);
 
@@ -291,32 +277,23 @@ public class AgentManagerTest
     // -- Feedback limits recalculation --
 
     [Fact]
-    public void RecalculateFeedbackLimits_TakesMinimumAcrossActuators()
+    public void RecalculateFeedbackLimits_AppliesActuatorLimits()
     {
         var (mgr, desk, _) = CreateFixture();
         desk.SetUseActuatorLimits(true);
 
-        var agent1 = new ActuatorAgent(Guid.NewGuid())
+        var agent = new ActuatorAgent(Guid.NewGuid())
         {
-            MaxA = 100, MaxB = 80,
+            MaxA = 50, MaxB = 80,
             SendFunc = _ => Task.FromResult(true)
         };
-        var agent2 = new ActuatorAgent(Guid.NewGuid())
-        {
-            MaxA = 50, MaxB = 120,
-            SendFunc = _ => Task.FromResult(true)
-        };
-        mgr.AddAgent(agent1);
-        mgr.AddAgent(agent2);
+        mgr.AddAgent(agent);
 
-        // Trigger state updates to fire RecalculateFeedbackLimits
-        var status1 = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-10+20+100+80"}""";
-        var status2 = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-0+0+50+120"}""";
-        agent1.HandleMessage(status1);
-        agent2.HandleMessage(status2);
+        // Trigger state update to fire RecalculateFeedbackLimits
+        var status = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-10+20+50+80"}""";
+        agent.HandleMessage(status);
 
-        // After both agents report, RecalculateFeedbackLimits should have been called
-        // with min(100,50) = 50, min(80,120) = 80
+        // Single actuator limits should be applied directly
         Assert.Equal(50, desk.MaxA);
         Assert.Equal(80, desk.MaxB);
     }
@@ -327,30 +304,22 @@ public class AgentManagerTest
         var (mgr, desk, _) = CreateFixture();
         desk.SetUseActuatorLimits(true);
 
-        var agent1 = new ActuatorAgent(Guid.NewGuid())
-        {
-            MaxA = 100, MaxB = 100,
-            SendFunc = _ => Task.FromResult(true)
-        };
-        var agent2 = new ActuatorAgent(Guid.NewGuid())
+        var agent = new ActuatorAgent(Guid.NewGuid())
         {
             MaxA = 50, MaxB = 50,
             SendFunc = _ => Task.FromResult(true)
         };
-        mgr.AddAgent(agent1);
-        mgr.AddAgent(agent2);
+        mgr.AddAgent(agent);
 
-        // Trigger state updates to fire RecalculateFeedbackLimits
-        var status1 = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-10+20+100+100"}""";
-        var status2 = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-10+20+50+50"}""";
-        agent1.HandleMessage(status1);
-        agent2.HandleMessage(status2);
+        // Trigger state update to fire RecalculateFeedbackLimits
+        var status = """{"type":"msg","clientId":"c","targetId":"t","message":"strength-10+20+50+50"}""";
+        agent.HandleMessage(status);
 
         Assert.Equal(50, desk.MaxA);
         Assert.Equal(50, desk.MaxB);
 
-        // Remove the limiting actuator
-        mgr.DeactivateActuator(agent2.Id);
+        // Remove the actuator, limits should reset
+        mgr.RemoveAgent(agent.Id);
         Assert.Equal(100, desk.MaxA);
         Assert.Equal(100, desk.MaxB);
     }

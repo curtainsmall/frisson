@@ -23,8 +23,6 @@ public class AppCore : IDisposable
     // Forwarded from AgentManager
     public event EventHandler<AgentEventArgs>? AgentConnected;
     public event EventHandler<AgentEventArgs>? AgentClosing;
-    public event Action<Guid>? ActuatorActivated;
-    public event Action<Guid>? ActuatorDeactivated;
     public event Action<Guid>? RemoteActivated;
     public event Action? RemoteDeactivated;
     public event Action<Guid>? ActuatorStateUpdated;
@@ -42,9 +40,8 @@ public class AppCore : IDisposable
 
         // Apply persisted settings (caller provides code defaults)
         var s = SettingsService.Instance;
-        _controlDesk.SetMax(s.TryGet("maxA", out int ma) ? ma : 100, s.TryGet("maxB", out int mb) ? mb : 100);
-        if (s.TryGet("useActuatorLimits", out bool ual) && ual)
-            _controlDesk.SetUseActuatorLimits(true);
+        _controlDesk.SetMax(s.TryGet("maxA", out int ma) ? ma : SettingsDefaults.MaxA, s.TryGet("maxB", out int mb) ? mb : SettingsDefaults.MaxB);
+        _controlDesk.SetUseActuatorLimits(s.TryGet("useActuatorLimits", out bool ual) ? ual : SettingsDefaults.UseActuatorLimits);
 
         // WebSocketServer → AgentManager
         _wsServer.AgentCreated += agent => _agentManager.AddAgent(agent);
@@ -57,8 +54,6 @@ public class AppCore : IDisposable
         // Forward AgentManager events to AppCore consumers
         _agentManager.AgentConnected += (_, e) => AgentConnected?.Invoke(this, e);
         _agentManager.AgentClosing += (_, e) => AgentClosing?.Invoke(this, e);
-        _agentManager.ActuatorActivated += id => ActuatorActivated?.Invoke(id);
-        _agentManager.ActuatorDeactivated += id => ActuatorDeactivated?.Invoke(id);
         _agentManager.RemoteActivated += id => RemoteActivated?.Invoke(id);
         _agentManager.RemoteDeactivated += () => RemoteDeactivated?.Invoke();
         _agentManager.ActuatorStateUpdated += id => ActuatorStateUpdated?.Invoke(id);
@@ -90,8 +85,6 @@ public class AppCore : IDisposable
         _wsServer.TryRemove(agentId);
     }
 
-    public void ActivateActuator(Guid id) => _agentManager.ActivateActuator(id);
-    public void DeactivateActuator(Guid id) => _agentManager.DeactivateActuator(id);
     public void AcceptRemote(Guid clientId) => _wsServer.AcceptRemote(clientId);
     public void RejectRemote(Guid clientId) => _wsServer.RejectRemote(clientId);
 

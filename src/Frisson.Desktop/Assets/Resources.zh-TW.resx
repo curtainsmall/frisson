@@ -66,15 +66,19 @@
   <data name="NavControlDesk" xml:space="preserve">
     <value>控制台</value>
   </data>
-  <data name="NavRemotes" xml:space="preserve">
+  <data name="NavConnections" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="RemoteList" xml:space="preserve">
     <value>遙控端</value>
+  </data>
+  <data name="NavActuator" xml:space="preserve">
+    <value>執行端</value>
   </data>
   <data name="NavSettings" xml:space="preserve">
     <value>設定</value>
   </data>
-  <data name="ActuatorsTitle" xml:space="preserve">
-    <value>執行端</value>
-  </data>
+
   <!-- Settings Page -->
   <data name="Language" xml:space="preserve">
     <value>語言</value>
@@ -186,6 +190,9 @@
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
     <value>使用執行器上限</value>
+  </data>
+  <data name="ResetStrengthLimits" xml:space="preserve">
+    <value>重設</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>
