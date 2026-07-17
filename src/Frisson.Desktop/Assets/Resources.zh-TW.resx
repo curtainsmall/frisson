@@ -182,10 +182,10 @@
     <value>關於</value>
   </data>
   <data name="SettingsStrengthLimit" xml:space="preserve">
-    <value>強度限制</value>
+    <value>強度上限</value>
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
-    <value>執行器限制</value>
+    <value>使用執行器上限</value>
   </data>
   <data name="ChannelA" xml:space="preserve">
     <value>A</value>

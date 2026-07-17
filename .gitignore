@@ -8,6 +8,8 @@
 !nuget.config
 !LICENSE
 !README.md
+!doc/
+!doc/**
 
 # Source code
 !src/
