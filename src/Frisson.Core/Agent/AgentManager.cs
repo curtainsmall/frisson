@@ -138,6 +138,8 @@ internal class AgentManager
     {
         _activeRemote = id;
         _desk.SetBlocked(true);
+        if (_agents.TryGetValue(id, out var a) && a is RemoteAgent ra)
+            ra.IsActive = true;
         SendToRemote(id, ActiveJson);
         RemoteActivated?.Invoke(id);
     }
@@ -148,7 +150,11 @@ internal class AgentManager
         _activeRemote = null;
         _desk.SetBlocked(false);
         if (prevId != null)
+        {
+            if (_agents.TryGetValue(prevId.Value, out var a) && a is RemoteAgent ra)
+                ra.IsActive = false;
             SendToRemote(prevId.Value, DeactiveJson);
+        }
         RemoteDeactivated?.Invoke();
     }
 

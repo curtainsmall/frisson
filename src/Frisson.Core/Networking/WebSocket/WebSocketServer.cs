@@ -23,7 +23,7 @@ internal class WebSocketServer : IDisposable
     public event Action<Guid>? ClientDisconnected;
     public event Action<Guid, string>? RemoteBindingRequested;
 
-    private record PendingBind(Guid ClientId, string SourceName, bool AlwaysReply, WebSocketClient Client);
+    private record PendingBind(Guid ClientId, string SourceName, bool AlwaysReply, List<Scheme.Remote.UiItem>? Ui, WebSocketClient Client);
 
     public void Start(int port)
     {
@@ -69,7 +69,24 @@ internal class WebSocketServer : IDisposable
                     {
                         var scheme = Scheme.Remote.BindScheme.TryParse(msg);
                         if (scheme == null) { TryRemove(id); return; }
-                        _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, scheme.AlwaysReply, client));
+
+                        // Validate UI declaration if present
+                        if (scheme.Ui != null)
+                        {
+                            var uiError = Scheme.Remote.UiItem.Validate(scheme.Ui);
+                            if (uiError != null)
+                            {
+                                client.Send(JsonSerializer.Serialize(new
+                                {
+                                    type = "error",
+                                    message = "InvalidUI"
+                                }));
+                                TryRemove(id);
+                                return;
+                            }
+                        }
+
+                        _pendingBinds.TryAdd(id, new PendingBind(id, scheme.Name, scheme.AlwaysReply, scheme.Ui, client));
                         RemoteBindingRequested?.Invoke(id, scheme.Name);
                     }
                     else
@@ -112,7 +129,10 @@ internal class WebSocketServer : IDisposable
         if (!_clients.TryGetValue(clientId, out var client)) return;
 
         client.Send(new Scheme.Remote.BindScheme { Id = clientId, Name = pending.SourceName, AlwaysReply = pending.AlwaysReply }.ToJson());
-        var agent = new RemoteAgent(clientId, pending.SourceName, () => TryRemove(clientId));
+        var agent = new RemoteAgent(clientId, pending.SourceName, () => TryRemove(clientId))
+        {
+            Ui = pending.Ui
+        };
         agent.AlwaysReply = pending.AlwaysReply;
         agent.SendFunc = client.Send;
         client.MessageHandler = json => agent.HandleMessage(json);

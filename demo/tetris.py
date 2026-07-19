@@ -1,6 +1,6 @@
 """
 Tetris — connects to Frisson as a Remote (Control Source).
-When the game is lost, strength is set to 50 on channel A for 5 seconds, then back to 0.
+When the game is lost, strength is set to the Remote UI preset value for 5 seconds, then back to 0.
 
 Requirements:
     pip install pygame websockets
@@ -64,6 +64,9 @@ class FrissonLink:
         self._connected = False
         self._bound = False
         self.paused = True
+        # Strength values pre-configured via Remote UI; used on game over
+        self.strength_a = GAME_OVER_STRENGTH
+        self.strength_b = GAME_OVER_STRENGTH
 
     def start(self):
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -113,6 +116,10 @@ class FrissonLink:
                 "type": "bind",
                 "name": REMOTE_NAME,
                 "alwaysReply": True,
+                "ui": [
+                    {"type": "number", "key": "strengthA", "label": "Strength A", "min": 0, "max": 100, "step": 1},
+                    {"type": "number", "key": "strengthB", "label": "Strength B", "min": 0, "max": 100, "step": 1},
+                ],
             })
             await self._ws.send(bind_msg)
             print(f"[Frisson] Sent bind as '{REMOTE_NAME}', waiting for confirmation...")
@@ -139,6 +146,16 @@ class FrissonLink:
                     elif msg_type == "activated":
                         self.paused = False
                         print("[Frisson] Remote activated — game resumed.")
+                    elif msg_type == "ui":
+                        key = data.get("key")
+                        value = data.get("value")
+                        if isinstance(value, (int, float)):
+                            if key == "strengthA":
+                                self.strength_a = int(value)
+                                print(f"[Frisson] Strength A preset → {self.strength_a}")
+                            elif key == "strengthB":
+                                self.strength_b = int(value)
+                                print(f"[Frisson] Strength B preset → {self.strength_b}")
                 except (json.JSONDecodeError, KeyError):
                     pass
 
@@ -236,14 +253,14 @@ class Tetris:
     def _on_game_over(self):
         self.game_over = True
         print(f"[Tetris] Game Over! Score: {self.score}")
-        # Set both channels to strength
-        for ch in ("A", "B"):
-            self.frisson.send_set(ch, GAME_OVER_STRENGTH)
+        # Set both channels to last-preset strength values from Remote UI
+        self.frisson.send_set("A", self.frisson.strength_a)
+        self.frisson.send_set("B", self.frisson.strength_b)
         # Reset both to 0 after 5 seconds
         def _reset():
             time.sleep(GAME_OVER_DURATION)
-            for ch in ("A", "B"):
-                self.frisson.send_set(ch, 0)
+            self.frisson.send_set("A", 0)
+            self.frisson.send_set("B", 0)
             print("[Frisson] Both channels reset to 0.")
         threading.Thread(target=_reset, daemon=True).start()
 

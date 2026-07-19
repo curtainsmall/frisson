@@ -1,0 +1,150 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Frisson.Desktop.ViewModels"
+        xmlns:loc="using:Frisson.Desktop.MarkupExtensions"
+        xmlns:converters="using:Frisson.Desktop.Converters"
+        x:Class="Frisson.Desktop.Views.RemoteUiWindow"
+        x:DataType="vm:ConnectedAgentCard"
+        Title="{Binding DisplayName}"
+        Width="400" Height="500"
+        MinWidth="300" MinHeight="300"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Background="{DynamicResource Black}">
+
+    <Window.Styles>
+        <Style Selector="Button.close-btn">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="Button.close-btn:pointerover">
+            <Setter Property="Background" Value="#E53935" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </Window.Styles>
+
+    <Window.Resources>
+        <converters:RemoteUiItemTemplateSelector x:Key="FloatUiItemSelector">
+            <converters:RemoteUiItemTemplateSelector.NumberTemplate>
+                <DataTemplate x:DataType="vm:RemoteUiItemViewModel">
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="4" Margin="0,4,0,0">
+                        <TextBlock Grid.Row="0" Text="{Binding Label}"
+                                   Foreground="{DynamicResource SecondaryText}" FontSize="12"
+                                   IsVisible="{Binding Label, Converter={x:Static converters:IsNotNullConverter.Instance}}" />
+                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Slider Grid.Column="0"
+                                    Minimum="{Binding Min}" Maximum="{Binding Max}"
+                                    Value="{Binding NumericValue, Mode=TwoWay}"
+                                    TickFrequency="{Binding Step}"
+                                    IsSnapToTickEnabled="True"
+                                    IsEnabled="{Binding IsEnabled}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding NumericValue}"
+                                       Foreground="{DynamicResource PrimaryText}"
+                                       VerticalAlignment="Center"
+                                       Width="40"
+                                       TextAlignment="Right" />
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </converters:RemoteUiItemTemplateSelector.NumberTemplate>
+            <converters:RemoteUiItemTemplateSelector.SwitchTemplate>
+                <DataTemplate x:DataType="vm:RemoteUiItemViewModel">
+                    <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                              Content="{Binding Label}"
+                              IsEnabled="{Binding IsEnabled}"
+                              Foreground="{DynamicResource PrimaryText}"
+                              Margin="0,4,0,0" />
+                </DataTemplate>
+            </converters:RemoteUiItemTemplateSelector.SwitchTemplate>
+            <converters:RemoteUiItemTemplateSelector.SelectTemplate>
+                <DataTemplate x:DataType="vm:RemoteUiItemViewModel">
+                    <StackPanel Spacing="4" Margin="0,4,0,0">
+                        <TextBlock Text="{Binding Label}"
+                                   Foreground="{DynamicResource SecondaryText}" FontSize="12"
+                                   IsVisible="{Binding Label, Converter={x:Static converters:IsNotNullConverter.Instance}}" />
+                        <ComboBox ItemsSource="{Binding Options}"
+                                  SelectedItem="{Binding StringValue, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsEnabled}"
+                                  Background="{DynamicResource SurfaceLight}"
+                                  Foreground="{DynamicResource PrimaryText}"
+                                  BorderBrush="{DynamicResource AccentMuted}"
+                                  CornerRadius="4"
+                                  Padding="8,4" />
+                    </StackPanel>
+                </DataTemplate>
+            </converters:RemoteUiItemTemplateSelector.SelectTemplate>
+            <converters:RemoteUiItemTemplateSelector.TextTemplate>
+                <DataTemplate x:DataType="vm:RemoteUiItemViewModel">
+                    <TextBlock Text="{Binding StringValue}"
+                               Foreground="{DynamicResource PrimaryText}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+                </DataTemplate>
+            </converters:RemoteUiItemTemplateSelector.TextTemplate>
+        </converters:RemoteUiItemTemplateSelector>
+    </Window.Resources>
+
+    <Border BorderThickness="1" BorderBrush="{DynamicResource AccentMuted}"
+            Background="Transparent" Padding="8,0,8,8">
+        <Grid RowDefinitions="Auto,*" Background="Transparent">
+            <!-- Title Bar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Black}"
+                    Padding="10,8,8,8"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding DisplayName}"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryText}"
+                               FontWeight="SemiBold"
+                               FontSize="14"
+                               TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="1"
+                            Classes="close-btn"
+                            Click="OnCloseClick"
+                            Content="×" />
+                </Grid>
+            </Border>
+
+            <!-- Remote UI Content -->
+            <ScrollViewer Grid.Row="1" Margin="12,8,12,12">
+                <ItemsControl ItemsSource="{Binding RemoteUiSections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RemoteUiSectionViewModel">
+                            <Border CornerRadius="8"
+                                    BorderBrush="{DynamicResource AccentMuted}"
+                                    BorderThickness="1"
+                                    Padding="12"
+                                    Margin="0,4,0,0">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding Title}"
+                                               IsVisible="{Binding IsGroup}"
+                                               FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AccentBrush}" />
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:RemoteUiItemViewModel">
+                                                <ContentControl Content="{Binding}"
+                                                                ContentTemplate="{StaticResource FloatUiItemSelector}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window>

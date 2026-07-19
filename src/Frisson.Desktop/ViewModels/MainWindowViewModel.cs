@@ -137,6 +137,23 @@ public class ConnectedAgentCard : INotifyPropertyChanged
         set { if (_maxB != value) { _maxB = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxB))); } }
     }
 
+    /// <summary>
+    /// Remote UI grouped sections (null if Remote has no UI declaration).
+    /// </summary>
+    private ObservableCollection<RemoteUiSectionViewModel>? _remoteUiSections;
+    public ObservableCollection<RemoteUiSectionViewModel>? RemoteUiSections
+    {
+        get => _remoteUiSections;
+        set
+        {
+            if (_remoteUiSections != value)
+            {
+                _remoteUiSections = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RemoteUiSections)));
+            }
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void NotifyLayoutChanged()
@@ -168,10 +185,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasSelectedCard => SelectedCard != null;
     public bool HasNoSelectedCard => SelectedCard == null;
 
+    /// <summary>Show inline Remote UI when the selected Remote has UI and floating mode is off.</summary>
+    public bool ShowInlineRemoteUi => SelectedCard?.RemoteUiSections?.Count > 0 && !UseFloatingRemoteUi;
+
     partial void OnSelectedCardChanged(ConnectedAgentCard? value)
     {
         OnPropertyChanged(nameof(HasSelectedCard));
         OnPropertyChanged(nameof(HasNoSelectedCard));
+        OnPropertyChanged(nameof(ShowInlineRemoteUi));
     }
 
     [ObservableProperty]
@@ -186,6 +207,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public ControlDeskViewModel ControlDeskViewModel { get; } = new();
 
     private Window? _qrCodeWindow;
+    private Window? _remoteUiWindow;
 
     public bool IsControlDeskSelected => CurrentPage == NavPage.ControlDesk;
     public bool IsConnectionsSelected => CurrentPage == NavPage.Connections;
@@ -379,14 +401,21 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _activeRemoteId = agentId;
         foreach (var card in AgentCards)
-            card.IsActiveRemote = card.AgentId == agentId;
+        {
+            var isActive = card.AgentId == agentId;
+            card.IsActiveRemote = isActive;
+            SetCardUiEnabled(card, isActive);
+        }
     }
 
     private void OnRemoteDeactivated()
     {
         _activeRemoteId = null;
         foreach (var card in AgentCards)
+        {
             card.IsActiveRemote = false;
+            SetCardUiEnabled(card, false);
+        }
     }
 
     private void OnActuatorStateUpdated(Guid agentId)
@@ -433,6 +462,40 @@ public partial class MainWindowViewModel : ViewModelBase
                               ?? (agent as ActuatorAgent)?.Id.ToString("N")[..8].ToUpper()
                               ?? e.AgentId.ToString()
             };
+
+            // Wire up Remote UI items
+            if (agent is RemoteAgent ra && ra.Ui != null)
+            {
+                var sections = BuildUiSections(ra.Ui, (key, val) => ra.SendUiValue(key, val));
+                card.RemoteUiSections = sections;
+                // New Remotes start inactive — disable their UI
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => SetCardUiEnabled(card, false));
+
+                // Subscribe to value updates from the Remote
+                ra.UiValueChanged += (key, rawValue) =>
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        foreach (var section in sections)
+                        {
+                            var target = section.Items.FirstOrDefault(ivm => ivm.Key == key);
+                            if (target != null)
+                            {
+                                target.UpdateFromRemote(rawValue);
+                                break;
+                            }
+                        }
+                    });
+                };
+
+                // Auto-open floating window if setting is already on
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    if (UseFloatingRemoteUi)
+                        OpenRemoteUiFloatingWindow();
+                });
+            }
+
             AgentCards.Add(card);
 
             // Track the single actuator card
@@ -465,6 +528,13 @@ public partial class MainWindowViewModel : ViewModelBase
                     if (!wasIntentional)
                         ShowActuatorDisconnectedDialog();
                 }
+            }
+
+            // Close floating window if the disconnected agent was being shown
+            if (_remoteUiWindow != null && card != null && card.RemoteUiSections != null)
+            {
+                _remoteUiWindow.Close();
+                _remoteUiWindow = null;
             }
         });
     }
@@ -544,12 +614,55 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _useActuatorLimits = AppCore.Instance.GetControlDeskUseActuatorLimits();
 
+    [ObservableProperty]
+    private bool _useFloatingRemoteUi = SettingsService.Instance.TryGet("useFloatingRemoteUi", out bool floatingVal) ? floatingVal : false;
+
     partial void OnUseActuatorLimitsChanged(bool value)
     {
         AppCore.Instance.SetControlDeskUseActuatorLimits(value);
         // Refresh edit values to reflect effective max, then revert back to settings values
         // (the overlay prevents editing when useActuatorLimits is on)
         OnPropertyChanged(nameof(UseActuatorLimits));
+    }
+
+    partial void OnUseFloatingRemoteUiChanged(bool value)
+    {
+        SettingsService.Instance.Set("useFloatingRemoteUi", value);
+        SettingsService.Instance.Save();
+        OnPropertyChanged(nameof(ShowInlineRemoteUi));
+
+        if (value)
+            OpenRemoteUiFloatingWindow();
+        else
+            CloseRemoteUiFloatingWindow();
+    }
+
+    private static void SetCardUiEnabled(ConnectedAgentCard card, bool enabled)
+    {
+        if (card.RemoteUiSections == null) return;
+        foreach (var section in card.RemoteUiSections)
+            foreach (var item in section.Items)
+                item.IsEnabled = enabled;
+    }
+
+    private void OpenRemoteUiFloatingWindow()
+    {
+        if (_remoteUiWindow != null) return;
+        if (SelectedCard?.RemoteUiSections == null) return;
+        if (Desktop.MainWindow is null) return;
+
+        _remoteUiWindow = new Views.RemoteUiWindow(SelectedCard);
+        _remoteUiWindow.Closed += (_, _) => _remoteUiWindow = null;
+        _remoteUiWindow.Show(Desktop.MainWindow);
+    }
+
+    private void CloseRemoteUiFloatingWindow()
+    {
+        if (_remoteUiWindow != null)
+        {
+            _remoteUiWindow.Close();
+            _remoteUiWindow = null;
+        }
     }
 
     public void CommitMaxA()
@@ -603,5 +716,40 @@ public partial class MainWindowViewModel : ViewModelBase
         SettingsService.Instance.Set("maxA", SettingsDefaults.MaxA);
         SettingsService.Instance.Set("maxB", SettingsDefaults.MaxB);
         SettingsService.Instance.Save();
+    }
+
+    /// <summary>
+    /// Processes a flat list of UiItems into grouped sections.
+    /// Items after a "group" declaration belong to that group until the next group or end.
+    /// Items before any group get a null-title section (rendered without border).
+    /// </summary>
+    private static ObservableCollection<RemoteUiSectionViewModel> BuildUiSections(
+        List<Core.Scheme.Remote.UiItem> uiItems,
+        Action<string, object?> sendValue)
+    {
+        var sections = new ObservableCollection<RemoteUiSectionViewModel>();
+        RemoteUiSectionViewModel? currentSection = null;
+
+        foreach (var item in uiItems)
+        {
+            if (item.Type == "group")
+            {
+                currentSection = new RemoteUiSectionViewModel { Title = item.Title, Key = item.Key };
+                sections.Add(currentSection);
+            }
+            else
+            {
+                if (currentSection == null)
+                {
+                    currentSection = new RemoteUiSectionViewModel();
+                    sections.Add(currentSection);
+                }
+                var vm = new RemoteUiItemViewModel(item);
+                vm.SendValue = sendValue;
+                currentSection.Items.Add(vm);
+            }
+        }
+
+        return sections;
     }
 }

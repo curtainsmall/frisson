@@ -28,6 +28,12 @@ public sealed class BindScheme : SchemeBase
     /// </summary>
     public bool AlwaysReply { get; set; }
 
+    /// <summary>
+    /// Optional UI declaration array sent by the Remote.
+    /// Null if the Remote did not declare any UI.
+    /// </summary>
+    public List<UiItem>? Ui { get; set; }
+
     public override string ToJson()
     {
         return JsonSerializer.Serialize(new
@@ -59,11 +65,25 @@ public sealed class BindScheme : SchemeBase
         if (root.TryGetProperty("alwaysReply", out var arProp))
             alwaysReply = arProp.GetBoolean();
 
+        List<UiItem>? ui = null;
+        if (root.TryGetProperty("ui", out var uiProp) && uiProp.ValueKind == JsonValueKind.Array)
+        {
+            ui = new List<UiItem>();
+            foreach (var el in uiProp.EnumerateArray())
+            {
+                var item = UiItem.FromJson(el);
+                if (item == null)
+                    return null; // malformed UI item → reject entire bind
+                ui.Add(item);
+            }
+        }
+
         return new BindScheme
         {
             Id = id,
             Name = nameProp.GetString() ?? string.Empty,
-            AlwaysReply = alwaysReply
+            AlwaysReply = alwaysReply,
+            Ui = ui
         };
     }
 
