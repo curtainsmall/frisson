@@ -41,9 +41,8 @@ public partial class MainWindow : Window
         if (sender is not Border border || border.DataContext is not ConnectedAgentCard card)
             return;
 
-        // Update selection
         if (DataContext is MainWindowViewModel vm)
-            vm.SelectedCard = card;
+            vm.SelectAgentAndNavigateCommand.Execute(card.AgentId);
     }
 
     private void OnActiveRemoteNamePointerPressed(object? sender, PointerPressedEventArgs e)

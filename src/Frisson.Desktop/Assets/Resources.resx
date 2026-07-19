@@ -95,6 +95,12 @@
   <data name="LogOpenDir" xml:space="preserve">
     <value>Log Directory</value>
   </data>
+  <data name="LogClearLogsKeepRecent" xml:space="preserve">
+    <value>Keep Latest 10</value>
+  </data>
+  <data name="LogClearAll" xml:space="preserve">
+    <value>Clear All</value>
+  </data>
   <!-- Control Desk & Status -->
   <data name="SourceDetails" xml:space="preserve">
     <value>Source Details</value>
@@ -145,7 +151,7 @@
     <value>Set Inactive</value>
   </data>
   <data name="NoSourceSelected" xml:space="preserve">
-    <value>Select a source to view details</value>
+    <value>Select a remote to view details</value>
   </data>
   <!-- Confirm Dialogs -->
   <data name="ConfirmDisconnectTitle" xml:space="preserve">
@@ -172,6 +178,15 @@
   <data name="ConfirmNo" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="ConfirmClearLogsTitle" xml:space="preserve">
+    <value>Clear Logs</value>
+  </data>
+  <data name="ConfirmClearLogsMsg" xml:space="preserve">
+    <value>Are you sure you want to clear all logs?</value>
+  </data>
+  <data name="ConfirmClearLogsKeepRecentMsg" xml:space="preserve">
+    <value>Keep only the latest 10 logs and remove the rest?</value>
+  </data>
   <!-- Settings Sections -->
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>General</value>
@@ -189,7 +204,13 @@
     <value>Strength Limit</value>
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
-    <value>Use Actuator Limits</value>
+    <value>Sync Limits</value>
+  </data>
+  <data name="SettingsSyncLimitsTip" xml:space="preserve">
+    <value>Sync strength limits with the connected device</value>
+  </data>
+  <data name="SettingsLimitRangeTip" xml:space="preserve">
+    <value>Valid range: 0–200</value>
   </data>
   <data name="ResetStrengthLimits" xml:space="preserve">
     <value>Reset</value>

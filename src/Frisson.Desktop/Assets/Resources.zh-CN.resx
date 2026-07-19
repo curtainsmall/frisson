@@ -95,6 +95,12 @@
   <data name="LogOpenDir" xml:space="preserve">
     <value>日志目录</value>
   </data>
+  <data name="LogClearLogsKeepRecent" xml:space="preserve">
+    <value>保留最近10条</value>
+  </data>
+  <data name="LogClearAll" xml:space="preserve">
+    <value>全部清理</value>
+  </data>
   <!-- 控制台与状态 -->
   <data name="SourceDetails" xml:space="preserve">
     <value>源详情</value>
@@ -145,7 +151,7 @@
     <value>取消活跃</value>
   </data>
   <data name="NoSourceSelected" xml:space="preserve">
-    <value>选择一个控制源查看详情</value>
+    <value>选择一个遥控端查看详情</value>
   </data>
   <!-- 确认弹窗 -->
   <data name="ConfirmDisconnectTitle" xml:space="preserve">
@@ -172,6 +178,15 @@
   <data name="ConfirmNo" xml:space="preserve">
     <value>取消</value>
   </data>
+  <data name="ConfirmClearLogsTitle" xml:space="preserve">
+    <value>清理日志</value>
+  </data>
+  <data name="ConfirmClearLogsMsg" xml:space="preserve">
+    <value>确定要清理所有日志吗？</value>
+  </data>
+  <data name="ConfirmClearLogsKeepRecentMsg" xml:space="preserve">
+    <value>仅保留最近10条日志，删除其他日志？</value>
+  </data>
   <!-- 设置分区 -->
   <data name="SettingsSectionGeneral" xml:space="preserve">
     <value>通用</value>
@@ -189,7 +204,13 @@
     <value>强度上限</value>
   </data>
   <data name="SettingsUseActuatorLimits" xml:space="preserve">
-    <value>使用执行器上限</value>
+    <value>同步上限</value>
+  </data>
+  <data name="SettingsSyncLimitsTip" xml:space="preserve">
+    <value>与已连接设备同步强度上限</value>
+  </data>
+  <data name="SettingsLimitRangeTip" xml:space="preserve">
+    <value>有效范围：0–200</value>
   </data>
   <data name="ResetStrengthLimits" xml:space="preserve">
     <value>重置</value>

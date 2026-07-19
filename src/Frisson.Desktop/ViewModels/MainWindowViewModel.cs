@@ -226,6 +226,14 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void SelectAgentAndNavigate(Guid agentId)
+    {
+        SelectAgent(agentId);
+        if (CurrentPage == NavPage.ControlDesk)
+            CurrentPage = NavPage.Connections;
+    }
+
+    [RelayCommand]
     private void NavigateToActiveRemote()
     {
         CurrentPage = NavPage.Connections;
@@ -279,7 +287,19 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ClearLogs() => LoggerService.Instance.Clear();
+    private async Task ClearLogs()
+    {
+        var vm = new ClearLogsDialogViewModel();
+        var dialog = new Views.ClearLogsDialog(vm);
+        if (Desktop.MainWindow is not null)
+            await dialog.ShowDialog<ClearLogsAction>(Desktop.MainWindow);
+        var action = await vm.Completion.Task;
+
+        if (action == ClearLogsAction.ClearAll)
+            LoggerService.Instance.Clear();
+        else if (action == ClearLogsAction.KeepRecent)
+            LoggerService.Instance.KeepRecent(10);
+    }
 
     [RelayCommand]
     private void OpenLogDir()

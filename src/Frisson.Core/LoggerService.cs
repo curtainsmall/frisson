@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Frisson.Core;
 
@@ -48,6 +49,37 @@ public sealed class LoggerService
         catch (Exception ex)
         {
             Log($"[Logger] Failed to clear log files: {ex.Message}");
+        }
+    }
+
+    public void KeepRecent(int count)
+    {
+        // Keep only the latest 'count' entries in memory
+        while (Entries.Count > count)
+            Entries.RemoveAt(0);
+        
+        // Keep only the latest 'count' log files on disk
+        try
+        {
+            var logDir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Frisson", "logs");
+
+            if (System.IO.Directory.Exists(logDir))
+            {
+                var logFiles = System.IO.Directory.GetFiles(logDir, "*.log")
+                    .OrderByDescending(f => System.IO.File.GetLastWriteTime(f))
+                    .Skip(count)
+                    .ToArray();
+                foreach (var file in logFiles)
+                {
+                    System.IO.File.Delete(file);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[Logger] Failed to trim log files: {ex.Message}");
         }
     }
 
