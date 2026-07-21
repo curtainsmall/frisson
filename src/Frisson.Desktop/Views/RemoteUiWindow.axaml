@@ -3,6 +3,7 @@
         xmlns:vm="using:Frisson.Desktop.ViewModels"
         xmlns:loc="using:Frisson.Desktop.MarkupExtensions"
         xmlns:converters="using:Frisson.Desktop.Converters"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
         x:Class="Frisson.Desktop.Views.RemoteUiWindow"
         x:DataType="vm:ConnectedAgentCard"
         Title="{Binding DisplayName}"
@@ -12,24 +13,6 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         Background="{DynamicResource Black}">
-
-    <Window.Styles>
-        <Style Selector="Button.close-btn">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
-            <Setter Property="FontSize" Value="18" />
-            <Setter Property="Width" Value="36" />
-            <Setter Property="Height" Value="36" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="CornerRadius" Value="4" />
-        </Style>
-        <Style Selector="Button.close-btn:pointerover">
-            <Setter Property="Background" Value="#E53935" />
-            <Setter Property="Foreground" Value="White" />
-        </Style>
-    </Window.Styles>
 
     <Window.Resources>
         <converters:RemoteUiItemTemplateSelector x:Key="FloatUiItemSelector">
@@ -93,15 +76,35 @@
         </converters:RemoteUiItemTemplateSelector>
     </Window.Resources>
 
+    <Window.Styles>
+        <Style Selector="Button.caption-btn">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Arrow" />
+            <Style Selector="^:pointerover">
+                <Setter Property="Background" Value="{DynamicResource CaptionButtonBackground}" />
+            </Style>
+            <Style Selector="^:pressed">
+                <Setter Property="Background" Value="#33FFFFFF" />
+            </Style>
+        </Style>
+    </Window.Styles>
+
     <Border BorderThickness="1" BorderBrush="{DynamicResource AccentMuted}"
             Background="Transparent" Padding="8,0,8,8">
         <Grid RowDefinitions="Auto,*" Background="Transparent">
             <!-- Title Bar -->
             <Border Grid.Row="0"
+                    MinHeight="32"
                     Background="{DynamicResource Black}"
-                    Padding="10,8,8,8"
+                    Padding="10,0,8,0"
                     PointerPressed="OnTitleBarPointerPressed">
-                <Grid ColumnDefinitions="*,Auto">
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                     <TextBlock Grid.Column="0"
                                Text="{Binding DisplayName}"
                                VerticalAlignment="Center"
@@ -110,9 +113,13 @@
                                FontSize="14"
                                TextTrimming="CharacterEllipsis" />
                     <Button Grid.Column="1"
-                            Classes="close-btn"
-                            Click="OnCloseClick"
-                            Content="×" />
+                            x:Name="PinButton"
+                            Classes="caption-btn"
+                            Click="OnPinToggle"
+                            Margin="8,0,140,0"
+                            ToolTip.Tip="Toggle always on top">
+                        <i:Icon x:Name="PinIcon" Value="fa-solid fa-thumbtack" FontSize="11" Foreground="{DynamicResource PrimaryText}" />
+                    </Button>
                 </Grid>
             </Border>
 

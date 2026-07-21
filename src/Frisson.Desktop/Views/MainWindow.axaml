@@ -479,11 +479,20 @@
                                                 </Style>
                                             </Button.Styles>
                                         </Button>
-                                        <!-- Remote UI (inline, hidden when floating mode is on) -->
-                                        <ScrollViewer Grid.Row="5"
-                                                      IsVisible="{Binding ShowInlineRemoteUi}"
-                                                      MaxHeight="300">
-                                            <ItemsControl ItemsSource="{Binding SelectedCard.RemoteUiSections}">
+                                        <!-- Remote UI (inline) -->
+                                        <StackPanel Grid.Row="5" IsVisible="{Binding HasRemoteUi}">
+                                            <Button Command="{Binding ShowRemoteUiWindowCommand}"
+                                                    HorizontalAlignment="Right"
+                                                    Padding="4"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="{DynamicResource SecondaryText}"
+                                                    FontSize="14"
+                                                    ToolTip.Tip="Floating window">
+                                                <i:Icon Value="fa-solid fa-up-right-from-square" FontSize="14" />
+                                            </Button>
+                                            <ScrollViewer MaxHeight="300">
+                                                <ItemsControl ItemsSource="{Binding SelectedCard.RemoteUiSections}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border CornerRadius="8"
@@ -512,6 +521,7 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
                                         </ScrollViewer>
+                                        </StackPanel>
                                     </Grid>
                                 </Panel>
                             </Border>
@@ -574,11 +584,7 @@
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
                                             </StackPanel>
-                                            <!-- Floating Remote UI -->
-                                            <CheckBox IsChecked="{Binding UseFloatingRemoteUi}"
-                                                      Content="{loc:Loc SettingsFloatingRemoteUi}"
-                                                      Foreground="{DynamicResource PrimaryText}"
-                                                      FontSize="14" />
+
                                             </StackPanel>
                                             </Border>
 

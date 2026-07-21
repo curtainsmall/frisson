@@ -83,9 +83,6 @@
   <data name="Language" xml:space="preserve">
     <value>语言</value>
   </data>
-  <data name="SettingsFloatingRemoteUi" xml:space="preserve">
-    <value>浮动远程控制界面</value>
-  </data>
   <data name="LogOpen" xml:space="preserve">
     <value>日志控制台</value>
   </data>

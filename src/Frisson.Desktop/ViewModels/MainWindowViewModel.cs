@@ -185,14 +185,13 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasSelectedCard => SelectedCard != null;
     public bool HasNoSelectedCard => SelectedCard == null;
 
-    /// <summary>Show inline Remote UI when the selected Remote has UI and floating mode is off.</summary>
-    public bool ShowInlineRemoteUi => SelectedCard?.RemoteUiSections?.Count > 0 && !UseFloatingRemoteUi;
+    public bool HasRemoteUi => SelectedCard?.RemoteUiSections?.Count > 0;
 
     partial void OnSelectedCardChanged(ConnectedAgentCard? value)
     {
         OnPropertyChanged(nameof(HasSelectedCard));
         OnPropertyChanged(nameof(HasNoSelectedCard));
-        OnPropertyChanged(nameof(ShowInlineRemoteUi));
+        OnPropertyChanged(nameof(HasRemoteUi));
     }
 
     [ObservableProperty]
@@ -488,12 +487,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     });
                 };
 
-                // Auto-open floating window if setting is already on
-                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                {
-                    if (UseFloatingRemoteUi)
-                        OpenRemoteUiFloatingWindow();
-                });
+
             }
 
             AgentCards.Add(card);
@@ -614,27 +608,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _useActuatorLimits = AppCore.Instance.GetControlDeskUseActuatorLimits();
 
-    [ObservableProperty]
-    private bool _useFloatingRemoteUi = SettingsService.Instance.TryGet("useFloatingRemoteUi", out bool floatingVal) ? floatingVal : false;
-
     partial void OnUseActuatorLimitsChanged(bool value)
     {
         AppCore.Instance.SetControlDeskUseActuatorLimits(value);
         // Refresh edit values to reflect effective max, then revert back to settings values
         // (the overlay prevents editing when useActuatorLimits is on)
         OnPropertyChanged(nameof(UseActuatorLimits));
-    }
-
-    partial void OnUseFloatingRemoteUiChanged(bool value)
-    {
-        SettingsService.Instance.Set("useFloatingRemoteUi", value);
-        SettingsService.Instance.Save();
-        OnPropertyChanged(nameof(ShowInlineRemoteUi));
-
-        if (value)
-            OpenRemoteUiFloatingWindow();
-        else
-            CloseRemoteUiFloatingWindow();
     }
 
     private static void SetCardUiEnabled(ConnectedAgentCard card, bool enabled)
@@ -645,6 +624,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 item.IsEnabled = enabled;
     }
 
+    [RelayCommand]
+    private void ShowRemoteUiWindow() => OpenRemoteUiFloatingWindow();
+
     private void OpenRemoteUiFloatingWindow()
     {
         if (_remoteUiWindow != null) return;
@@ -653,7 +635,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _remoteUiWindow = new Views.RemoteUiWindow(SelectedCard);
         _remoteUiWindow.Closed += (_, _) => _remoteUiWindow = null;
-        _remoteUiWindow.Show(Desktop.MainWindow);
+        _remoteUiWindow.Show();
     }
 
     private void CloseRemoteUiFloatingWindow()
